@@ -192,9 +192,9 @@ jobs:
            source ../workflow_repo/.github/workflows/scripts/enable_colors.sh
            echo -e "CI1: ${CI}"
            echo -e "CI2: '${CI}'"
-           echo -e "CI2: '${#CI}'"
+           echo -e "${CI}" == "null"
            conn=""
-           if [ ! -z "${CI}" ]; then 
+           if [ "${CI}" == "null" ]; then 
               conn=" --ci '$CI'"
            fi
 
