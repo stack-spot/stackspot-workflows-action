@@ -1,0 +1,50 @@
+name: 'Clone external repository'
+description: 'Clone external GitHub repository'
+inputs:
+  app_name:
+    description: App name
+    required: true
+  github_org:
+    description: GitHub Organization slug
+    required: true
+  path:
+    description: Path to clone repository
+    required: true
+  token:
+    description: 'A Github token (pat or jwt)'
+    required: true
+  github_url:
+    description: GitHub URL if exists repository
+    required: false
+
+outputs:
+  repo:
+    description: repo in format organization/repository_name
+    value: ${{ steps.new_repo.outputs.REPO }}${{ steps.existing_repo.outputs.REPO }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: new_repo
+      name: New repo url value
+      shell: bash
+      if: inputs.github_url == ''
+      run: |
+        echo "REPO=${{ inputs.github_org }}/${{inputs.app_name }}" >> $GITHUB_ENV
+        echo "REPO=${{ inputs.github_org }}/${{inputs.app_name }}" >> $GITHUB_OUTPUT
+    - id: existing_repo 
+      name: Existing url value
+      shell: bash
+      if: inputs.github_url != ''
+      run: |
+        url=$(echo -n "${{inputs.github_url }}" | sed 's/.*github.com\///')
+        echo "REPO=$url"  >> $GITHUB_ENV
+        echo "REPO=$url"  >> $GITHUB_OUTPUT
+    - name: Clone repo
+      uses: actions/checkout@v3
+      with:
+        path: ${{ inputs.path}}
+        repository: ${{ env.REPO }}
+        token: ${{ inputs.token }}
+        persist-credentials: true
+        fetch-depth: 0
