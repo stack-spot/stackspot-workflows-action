@@ -191,15 +191,14 @@ jobs:
         run: |
            source ../workflow_repo/.github/workflows/scripts/enable_colors.sh
            conn=""
-
            if [[ ${CI} -gt 2 ]]; then 
-              conn="--ci '$CI'"
+              conn=" --ci '$CI'"
            fi
 
            echo -e "\n${green}⚡ Running create app: ${u_cyan}$NAME"
-           echo -e "$STK create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $INPUTS\n" 
+           echo -e "$STK create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }}$conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $INPUTS\n" 
 
-           ${{ env.STK }} create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" $INPUTS
+           ${{ env.STK }} create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }}$conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" $INPUTS
       - name: Commit and Push.
         working-directory: user_repo
         run: |
