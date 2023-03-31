@@ -1,0 +1,279 @@
+name: Create app/infra
+run-name: ${{ inputs.correlation_id }}
+on: 
+  workflow_dispatch:
+    inputs:
+      correlation_id:
+        description: Correlation id
+        required: true
+      secrets:
+        description: Secrets info (json)
+        required: true
+      cli_login:
+        description: CLI login info (json)
+        required: true
+      app:
+        description: App info (json)
+        required: true
+      workspace_slug:
+        description: Workspace name
+        required: true
+      actions:
+        description: Actions (json)
+        required: false
+
+env:
+  GITHUB_ORG: guedes-spot
+  RUNNER: stackspot-stacks-qa
+  STK: stk-alpha
+
+jobs:
+
+  validate-inputs:
+    name: Validate JSON Inputs
+    runs-on: [self-hosted, linux, stackspot-stacks-qa]
+    steps:
+      - name: Masking secrets inputs
+        run: |
+          SECRET_LOGIN_TOKEN=$(cat $GITHUB_EVENT_PATH | jq -r '.inputs.secrets' | jq -r '.cli_token' )
+          echo "::add-mask::$SECRET_LOGIN_TOKEN"
+          SECRET_LOGIN_TOKEN=$(cat $GITHUB_EVENT_PATH | jq -r '.inputs.secrets' | jq -r '.scm_token' )
+          echo "::add-mask::$SECRET_LOGIN_TOKEN"
+          SECRET_LOGIN_TOKEN=$(cat $GITHUB_EVENT_PATH | jq -r '.inputs.secrets' )
+          echo "::add-mask::$SECRET_LOGIN_TOKEN"
+      - name: "Validate Input: 'app.name'"
+        if: fromJson(github.event.inputs.app).name == ''
+        run: |
+         echo "ERROR: 'name' field not found in json for 'app' input"
+         exit 1
+      - name: "Validate Input: 'app.description'"
+        if: fromJson(github.event.inputs.app).description == ''
+        run: |
+         echo "ERROR: 'description' field not found in json for 'app' input"
+         exit 1
+      - name: "Validate Input: 'app.starter'"
+        if: fromJson(github.event.inputs.app).starter == ''
+        run: |
+         echo "ERROR: 'starter' field not found in json for 'app' input"
+         exit 1
+      - name: "Validate Input: 'cli_login.realm'"
+        if: fromJson(github.event.inputs.cli_login).realm == ''
+        run: |
+         echo "ERROR: 'realm' field not found in json for 'cli_login' input"
+         exit 1
+      - name: "Validate Input: 'cli_login.email'"
+        if: fromJson(github.event.inputs.cli_login).email == ''
+        run: |
+         echo "ERROR: 'email' field not found in json for 'cli_login' input"
+         exit 1
+      - name: "Validate Input: 'secrets.cli_token'"
+        if: fromJson(github.event.inputs.secrets).cli_token == ''
+        run: |
+         echo "ERROR: 'cli_token' field not found in json for 'secrets' input"
+      - name: "Validate Input: 'secrets.cli_token'"
+        if: fromJson(github.event.inputs.secrets).scm_token == ''
+        run: |
+         echo "ERROR: 'scm_token' field not found in json for 'secrets' input"
+         exit 1
+
+  use-workspace:
+    name: Use Workspace
+    runs-on: [self-hosted, linux, stackspot-stacks-qa]
+    needs: validate-inputs
+    steps:
+      - name: Checkout workflows repo
+        uses: actions/checkout@v3
+      - name: Cache
+        uses: ./github-actions/restore-stk-cache
+        with: 
+          stk: ${{ env.STK }}
+      - name: Install STK
+        uses: ./github-actions/install-stk-cli
+        with: 
+          stk: ${{ env.STK }}
+      - name: Login STK
+        uses: ./github-actions/login-stk
+        with: 
+          stk: ${{ env.STK }}
+          email: ${{ fromJson(github.event.inputs.cli_login).email }}
+          pat: ${{ fromJson(github.event.inputs.secrets).cli_token }}
+          realm: ${{ fromJson(github.event.inputs.cli_login).realm }}
+      - name: Use Workspace
+        run: |
+          $STK use workspace ${{ github.event.inputs.workspace_slug }}
+      - name: Show Error Log
+        if: failure()
+        run: |
+          cat ~/.$STK/logs/*
+
+  run-before-actions:
+    name: Run before actions
+    runs-on: [self-hosted, linux, stackspot-stacks-qa]
+    needs: use-workspace
+    if: fromJson(github.event.inputs.actions).before != ''
+    steps:
+      - name: Checkout workflows repo
+        uses: actions/checkout@v3
+      - name: Restore STK Cache
+        uses: ./github-actions/restore-stk-cache 
+        with: 
+          stk: ${{ env.STK }}
+      - name: Run actions
+        run: |
+          source .github/workflows/scripts/enable_colors.sh
+          i=0
+          echo -e "\n"
+          for row in $(echo '${{ github.event.inputs.actions }}' | jq '.before' | jq -r '.[] | @base64'); do
+              i=$((i+1))
+              _jq() {
+                echo "${row}" | base64 --decode | jq ${1} "${2}"
+              }
+
+              name=$(_jq -r '.name')
+              inputs=$(_jq -c '.inputs')
+              createRepo=$(_jq -r '.createRepo')
+
+              if $createRepo
+              then
+                inputsRepo=$(echo "{\"org\":\"$GITHUB_ORG\",\"is_jwt\":\"${{ fromJson(github.event.inputs.secrets).is_jwt }}\",\"token\":\"${{ fromJson(github.event.inputs.secrets).scm_token }}\",\"name\":\"${{ fromJson(github.event.inputs.app).name }}\",\"description\":\"${{ fromJson(github.event.inputs.app).description }}\",\"auto_init\":\"true\",\"private\":true}")
+                inputs=$(echo "$inputsRepo" "$inputs" | jq -cs add)
+              fi
+
+              echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"
+              echo -e "$STK run action $name --inputs-json '$(echo "$inputs" | jq)' --non-interactive\n" 
+              $STK run action "$name" --inputs-json "$inputs" --non-interactive
+          done
+      - name: Show Error Log
+        if: failure()
+        run: |
+          cat ~/.$STK/logs/*
+
+  create:
+    name: Create
+    runs-on: [self-hosted, linux, stackspot-stacks-qa]
+    needs: run-before-actions
+    steps:
+      - name: Checkout workflows repo
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          path: workflow_repo
+      - name: Checkout the user repo
+        id: checkout_user_repo
+        uses:  ./workflow_repo/github-actions/clone-external-repo
+        with:
+          github_org: ${{ env.GITHUB_ORG }}
+          app_name: ${{ fromJson(github.event.inputs.app).name }}
+          path: user_repo
+          token: ${{ fromJson(github.event.inputs.secrets).scm_token }}
+          github_url: ${{ fromJson(github.event.inputs.app).repo }}
+      - name: Restore STK Cache
+        uses: ./workflow_repo/github-actions/restore-stk-cache 
+        with: 
+          stk: ${{ env.STK }}
+      - name: Set git username
+        run: |
+          git config --global user.email "${{ fromJson(github.event.inputs.cli_login).email }}"
+          git config --global user.name "${{ fromJson(github.event.inputs.cli_login).email }}"
+      - name: Format inputs
+        if: fromJson(github.event.inputs.app).inputs != ''
+        id: formatinputs 
+        run: |
+           INPUTS=$(cat $GITHUB_EVENT_PATH | jq -r '.inputs.app' | jq -r '.inputs' )
+           python3 workflow_repo/.github/workflows/scripts/format_inputs.py "$INPUTS" >> $GITHUB_OUTPUT
+      - name: Create
+        env: 
+          NAME: ${{ fromJson(github.event.inputs.app).name }}
+          INPUTS: ${{ steps.formatinputs.outputs.starter_inputs }}
+          CI: ${{ toJson(fromJson(github.event.inputs.app).connection_interfaces) }}
+          DESCRIPTION: ${{ fromJson(github.event.inputs.app).description }}
+        working-directory: user_repo
+        run: |
+           source ../workflow_repo/.github/workflows/scripts/enable_colors.sh
+           conn=""
+           if [[ ${#CI} -gt 2 ]]; then 
+              conn="--ci \"$CI\""
+           fi
+
+           echo -e "\n${green}⚡ Running create app: ${u_cyan}$NAME"
+           echo -e "$STK create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $INPUTS\n" 
+
+           ${{ env.STK }} create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" $INPUTS
+      - name: Commit and Push.
+        working-directory: user_repo
+        run: |
+         if [[ `git status --porcelain` ]]; then
+            rm -rf ${{ fromJson(github.event.inputs.app).name }}/.git
+            cp -r ${{ fromJson(github.event.inputs.app).name }}/. .
+            rm -fr ${{ fromJson(github.event.inputs.app).name }}
+            git add -A
+            git commit -am "stackspot initial commit"
+            git push
+         fi
+      - name: Register app
+        working-directory: user_repo
+        run: |
+         ${{ env.STK }} register app
+      - name: Show Error Log
+        if: failure()
+        run: |
+          cat ~/.$STK/logs/*
+
+  run-after-actions:
+    name: Run after actions
+    runs-on: [self-hosted, linux, stackspot-stacks-qa]
+    needs: create
+    if: fromJson(github.event.inputs.actions).after != ''
+    steps:
+      - name: Checkout workflows repo
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          path: workflow_repo
+      - name: Checkout the user repo
+        id: checkout_user_repo
+        uses:  ./workflow_repo/github-actions/clone-external-repo
+        with:
+          github_org: ${{ env.GITHUB_ORG }}
+          app_name: ${{ fromJson(github.event.inputs.app).name }}
+          path: user_repo
+          token: ${{ fromJson(github.event.inputs.secrets).scm_token }}
+          github_url: ${{ fromJson(github.event.inputs.app).repo }}
+      - name: Restore STK Cache
+        uses: ./workflow_repo/github-actions/restore-stk-cache 
+        with: 
+          stk: ${{ env.STK }}
+      - name: Run actions
+        working-directory: user_repo
+        run: |
+          source ../workflow_repo/.github/workflows/scripts/enable_colors.sh
+          git config --global user.email "${{ fromJson(github.event.inputs.cli_login).email }}"
+          git config --global user.name "${{ fromJson(github.event.inputs.cli_login).email }}"
+          i=0
+          echo -e "\n"
+          for row in $(echo '${{ github.event.inputs.actions }}' | jq '.after' | jq -r '.[] | @base64'); do
+              i=$((i+1))
+              _jq() {
+                echo "${row}" | base64 --decode | jq ${1} "${2}"
+              }
+
+              name=$(_jq -r '.name')
+              inputs=$(_jq -c '.inputs')
+
+              echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"
+              echo -e "$STK run action $name --inputs-json '$(echo "$inputs" | jq)' --non-interactive\n" 
+              $STK run action "$name" --inputs-json "$inputs" --non-interactive
+          done
+      - name: Commit and Push.
+        working-directory: user_repo
+        run: |
+         if [[ `git status --porcelain` ]]; then
+            git add -A
+            git commit -am "stackspot commit after actions"
+            git push
+         fi
+
+      - name: Show Error Log
+        if: failure()
+        run: |
+          cat ~/.$STK/logs/*
