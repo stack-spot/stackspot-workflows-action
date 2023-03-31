@@ -185,7 +185,7 @@ jobs:
         env: 
           NAME: ${{ fromJson(github.event.inputs.app).name }}
           INPUTS: ${{ steps.formatinputs.outputs.starter_inputs }}
-          CI: ${{ toJson(fromJson(github.event.inputs.app).connectors) }}
+          CI: ${{ toJson(fromJson(github.event.inputs.app).connection_interfaces) }}
           DESCRIPTION: ${{ fromJson(github.event.inputs.app).description }}
         working-directory: user_repo
         run: |
