@@ -194,7 +194,7 @@ jobs:
            echo -e "CI2: '${CI}'"
            echo -e "CI2: '${#CI}'"
            conn=""
-           if [ ! -z "${line}" ]; then 
+           if [ ! -z "${CI}" ]; then 
               conn=" --ci '$CI'"
            fi
 
