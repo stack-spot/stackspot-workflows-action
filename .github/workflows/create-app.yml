@@ -190,8 +190,11 @@ jobs:
         working-directory: user_repo
         run: |
            source ../workflow_repo/.github/workflows/scripts/enable_colors.sh
+           echo -e "CI1: ${CI}""
+           echo -e "CI2: '${CI}'"
+           echo -e "CI2: '${#CI}'"
            conn=""
-           if [ "${#CI}" != "null" ]; then 
+           if [ "${#CI}" != null ]; then 
               conn=" --ci '$CI'"
            fi
 

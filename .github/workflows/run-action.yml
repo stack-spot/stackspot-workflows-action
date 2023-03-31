@@ -86,7 +86,7 @@ jobs:
         run: |
           source .github/workflows/scripts/enable_colors.sh
           conn=""
-          if [ "${#CI}" != "null" ]; then 
+          if [ "${#CI}" != null ]; then 
             conn=" --ci '$CI'"
           fi
 
