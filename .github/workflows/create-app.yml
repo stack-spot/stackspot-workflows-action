@@ -185,13 +185,11 @@ jobs:
         env: 
           NAME: ${{ fromJson(github.event.inputs.app).name }}
           INPUTS: ${{ steps.formatinputs.outputs.starter_inputs }}
-          CI: ${{ toJson(fromJson(github.event.inputs.app).connection_interfaces) }}
+          CI: ${{ toJson(fromJson(github.event.inputs.app).connectors) }}
           DESCRIPTION: ${{ fromJson(github.event.inputs.app).description }}
         working-directory: user_repo
         run: |
            source ../workflow_repo/.github/workflows/scripts/enable_colors.sh
-           echo -e "CI1: ${CI}"
-           echo -e "CI2: '${CI}'"
            conn=""
            if [ "${CI}" != "null" ]; then 
               conn=" --ci '$CI'"
