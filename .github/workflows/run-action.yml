@@ -97,13 +97,10 @@ jobs:
              conn=" --ci $CI"
           fi
 
-          echo '$INPUTS'
-          echo '$INPUTS' | sed 's/\\"/"/g'
-          echo '$INPUTS2'
-          echo '$INPUTS2' | sed 's/\\"/"/g'
-          in=$(echo '${{ github.event.inputs.action }}' | sed 's/\\"/" /g' | jq -c '.inputs' ) 
-
-          echo "in: $in"
+          echo -e "$INPUTS"
+          echo -e "$INPUTS" | sed 's/\\"/"/g'
+          echo -e "$INPUTS2"
+          echo -e "$INPUTS2" | sed 's/\\"/"/g'
 
           echo -e "\n${green}⚡ Running Action: ${u_cyan}$NAME"
           echo -e "$STK run action $NAME --inputs-json '"$in"'$conn --non-interactive\n" 
