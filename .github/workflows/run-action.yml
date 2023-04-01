@@ -98,9 +98,10 @@ jobs:
 
           in=$(echo '${{ github.event.inputs.action }}' | jq -c '.inputs') 
           echo -e "\n${green}⚡ Running Action: ${u_cyan}$NAME"
+          run=$(echo -e "$STK run action $NAME --inputs-json "$in"$conn --non-interactive\n" )
           echo -e "$STK run action $NAME --inputs-json "$in"$conn --non-interactive\n" 
 
-          $STK run action "$NAME" --inputs-json "$in"$conn --non-interactive
+          $run
       - name: Show Error Log
         if: failure()
         run: |
