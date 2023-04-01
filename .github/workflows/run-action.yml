@@ -99,7 +99,7 @@ jobs:
           echo -e "\n${green}⚡ Running Action: ${u_cyan}$NAME"
           echo -e "$STK run action $NAME --inputs-json $(echo "$INPUTS" | jq .)$conn --non-interactive\n" 
 
-          $STK run action "$NAME" --inputs-json "$INPUTS"$conn --non-interactive
+          $STK run action "$NAME" --inputs-json $(echo "$INPUTS" | jq .)$conn --non-interactive
       - name: Show Error Log
         if: failure()
         run: |
