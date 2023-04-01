@@ -87,7 +87,8 @@ jobs:
       - name: Run action
         env:
           NAME: ${{ fromJson(github.event.inputs.action).name }}
-          INPUTS: ${{ fromJson(github.event.inputs.action).inputs }}
+          INPUTS: ${{ toJson(fromJson(github.event.inputs.action).inputs) }}
+          INPUTS2: ${{ fromJson(github.event.inputs.action).inputs }}
           CI: ${{ toJson(fromJson(github.event.inputs.action).connectors) }}
         run: |
           source .github/workflows/scripts/enable_colors.sh
@@ -98,7 +99,8 @@ jobs:
 
           echo '$INPUTS'
           echo '$INPUTS' | sed 's/\\"/"/g'
-          echo '$INPUTS' | sed 's/\\"/"/g' | jq -c '.inputs'
+          echo '$INPUTS2'
+          echo '$INPUTS2' | sed 's/\\"/"/g'
           in=$(echo '${{ github.event.inputs.action }}' | sed 's/\\"/" /g' | jq -c '.inputs' ) 
 
           echo "in: $in"
