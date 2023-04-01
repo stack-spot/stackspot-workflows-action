@@ -96,10 +96,7 @@ jobs:
              conn=" --ci $CI"
           fi
 
-          echo "$INPUTS"
-          echo "$INPUTS" | jq -c .
-          in=$(echo "$INPUTS" | jq -c .) 
-          echo "$in"
+          in=$(echo '${{ github.event.inputs.actions }}' | jq -c '.inputs') 
           echo -e "\n${green}⚡ Running Action: ${u_cyan}$NAME"
           echo -e "$STK run action $NAME --inputs-json "$in"$conn --non-interactive\n" 
 
