@@ -96,6 +96,9 @@ jobs:
              conn=" --ci $CI"
           fi
 
+          echo '${{ github.event.inputs.action }}'
+          echo '${{ github.event.inputs.action }}' | sed 's/\\"/" /g'
+          echo '${{ github.event.inputs.action }}' | sed 's/\\"/" /g' | jq -c '.inputs'
           in=$(echo '${{ github.event.inputs.action }}' | sed 's/\\"/" /g' | jq -c '.inputs' ) 
 
           echo "in: $in"
