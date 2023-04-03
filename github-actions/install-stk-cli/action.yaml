@@ -27,6 +27,7 @@ runs:
       if: inputs.stk == 'stk-alpha'
       shell: bash
       run: |
-        echo '{"metrics_url":"https://data-platform-stackspot-public.qa.stackspot.com/channel/events/channel/commands_events/{schema_name}/{schema_version}/micro-batch","device_url":"https://accounts-admin.qa.stackspot.com/v1/authentication/device-code","idm_base_url":"https://idm.qa.stackspot.com","actions_base_url":"https://actions-api.qa.stackspot.com/actions/v1","registry_base_url":"https://plugin-api.qa.stackspot.com","content_base_url":"https://content-api.qa.stackspot.com","download_server":"https://stk-dev.stackspot.com","workspace_base_url":"https://workspace.qa.stackspot.com","workspace_manager_url":"https://workspace-manager.qa.stackspot.com","portal_base_url":"https://portal.qa.stackspot.com","wrapper_stable_name":"wrapper-stable.txt"}' > ~/.stk-alpha/.env
+        wget https://stk-dev.stackspot.com/env/alpha-qa.env 
+        mv alpha-qa.env ~/.stk-alpha/.env
         echo "STK_CLI_TEST=true" >> $GITHUB_ENV
         
