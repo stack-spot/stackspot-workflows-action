@@ -167,6 +167,10 @@ jobs:
           path: user_repo
           token: ${{ fromJson(github.event.inputs.secrets).scm_token }}
           github_url: ${{ fromJson(github.event.inputs.app).repo }}
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
       - name: Restore STK Cache
         uses: ./workflow_repo/github-actions/restore-stk-cache 
         with: 
