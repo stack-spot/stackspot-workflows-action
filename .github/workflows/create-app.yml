@@ -131,7 +131,7 @@ jobs:
 
               name=$(_jq -r '.name')
               inputs=$(_jq -c '.inputs')
-              createRepo=$(_jq -r '.createRepo')
+              createRepo=$(_jq -r '.create_repo')
 
               if $createRepo
               then
@@ -169,6 +169,8 @@ jobs:
           github_url: ${{ fromJson(github.event.inputs.app).repo }}
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
+        env:
+          DOTNET_INSTALL_DIR: ${{ GITHUB_WORKSPACE }}/dotnet
         with:
           dotnet-version: '6.0.x'
       - name: Restore STK Cache
