@@ -167,10 +167,12 @@ jobs:
           path: user_repo
           token: ${{ fromJson(github.event.inputs.secrets).scm_token }}
           github_url: ${{ fromJson(github.event.inputs.app).repo }}
+      - name: test github.workspace
+        run: echo ${{ github.workspace }}
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
         env:
-          DOTNET_INSTALL_DIR: ${{ GITHUB_WORKSPACE }}/dotnet
+          DOTNET_INSTALL_DIR: ${{ github.workspace }}/dotnet
         with:
           dotnet-version: '6.0.x'
       - name: Restore STK Cache
