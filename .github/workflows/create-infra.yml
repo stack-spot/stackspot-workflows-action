@@ -41,6 +41,13 @@ jobs:
           echo "::add-mask::$SECRET_LOGIN_TOKEN"
           SECRET_LOGIN_TOKEN=$(cat $GITHUB_EVENT_PATH | jq -r '.inputs.secrets' )
           echo "::add-mask::$SECRET_LOGIN_TOKEN"
+      - name: Debug inputs
+        if: env.DEBUG
+        run: |
+          echo "infra: ${{ github.event.inputs.infra }}"
+          echo "cli_login: ${{ github.event.inputs.cli_login }}"
+          echo "workspace_slug: ${{ github.event.inputs.workspace_slug }}"
+          echo "action: ${{ github.event.inputs.actions }}"
       - name: "Validate Input: 'infra.name'"
         if: fromJson(github.event.inputs.infra).name == ''
         run: |
