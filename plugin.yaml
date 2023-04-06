@@ -1,0 +1,54 @@
+schema-version: v1
+kind: plugin
+metadata:
+  name: setup-runner
+  display-name: setup-runner
+  description: Plugin to setup workflow to run actions
+  version: 0.0.1
+  picture: plugin.png
+spec:
+  type: app
+  compatibility:
+    - python
+  about: docs/about.md
+  implementation: docs/implementation.md
+  release-notes: docs/release-notes-0.0.1.md
+  requirements: docs/requirements.md
+  repository: https://github.com/stack-spot/stackspot-workflows-action
+  technologies: # Ref: https://docs.stackspot.com/docs/create-stacks/yaml-files/yaml/#technologies
+    - Api
+  inputs:
+    - label: Choose your SCM provider
+      name: provider
+      type: text
+      items:
+        - Github
+        - Gitlab
+        - Bitbucket
+      default: Github
+      required: true
+  hooks:
+    - type: run
+      trigger: after-render
+      commands:
+        - cp -r {{component_path}}/.github .github
+      condition:
+        variable: provider
+        operator: ==
+        value: Github
+    - type: run
+      trigger: after-render
+      commands:
+        - echo Not implemented.
+      condition:
+        variable: provider
+        operator: ==
+        value: Gitlab
+    - type: run
+      trigger: after-render
+      commands:
+        - echo Not implemented.
+      condition:
+        variable: provider
+        operator: ==
+        value: Bitbucket
