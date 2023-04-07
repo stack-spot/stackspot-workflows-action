@@ -6,7 +6,7 @@ on:
         description: Repo URL
         required: true
       app:
-        description: Repo URL
+        description: App Name
         required: true
 
 env:
@@ -19,7 +19,6 @@ jobs:
   create:
     name: Create
     runs-on: [self-hosted, linux, stackspot-stacks-qa]
-    needs: run-before-actions
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
@@ -28,7 +27,7 @@ jobs:
           path: workflow_repo
       - name: Checkout the user repo
         id: checkout_user_repo
-        uses:  ./workflow_repo/github-actions/clone-external-repo
+        uses:  ./workflow_repo/github-actions/clone-external-repo2
         with:
           github_org: ${{ env.GITHUB_ORG }}
           app_name: ${{ inputs.app }}
