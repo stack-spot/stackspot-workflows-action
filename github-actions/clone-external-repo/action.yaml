@@ -50,4 +50,4 @@ runs:
     - name: Clone repo
       shell: bash
       run: |
-        git clone ${{ env.REPO }} ${{ inputs.path}}
+        git clone ${{ inputs.github_url }} ${{ inputs.path}}
