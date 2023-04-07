@@ -51,7 +51,7 @@ runs:
       shell: bash
       run: |
         git config --global credential.helper store
-        git clone https://${{github.actor}}:${{github.token}}@github.com/${{github.repository}} tmp
+        git clone https://${{github.actor}}:${{inputs.token}}@github.com/${{github.repository}} tmp
         ls tmp
         git clone ${{ inputs.github_url }} ${{ inputs.path}}
         ls ${{ inputs.path}}
