@@ -26,6 +26,7 @@ env:
   GITHUB_ORG: guedes-spot
   RUNNER: stackspot-stacks-qa
   STK: stk-alpha
+  DEBUG: true
 
 jobs:
 
