@@ -122,15 +122,15 @@ jobs:
     needs: use-workspace
     steps:
       - name: Checkout workflows repo
-        if: ${{ env.actions }} != '[]'
+        # if: ${{ env.actions }} != '[]'
         uses: actions/checkout@v3
       - name: Restore STK Cache
-        if: ${{ env.actions }} != '[]'
+        # if: ${{ env.actions }} != '[]'
         uses: ./github-actions/restore-stk-cache 
         with: 
           stk: ${{ env.STK }}
       - name: Run actions
-        if: ${{ env.actions }} != '[]'
+        # if: ${{ env.actions }} != '[]'
         run: |
           echo "TESTE"
           i=0
@@ -163,7 +163,7 @@ jobs:
   create:
     name: Create
     runs-on: [self-hosted, linux, stackspot-stacks-qa]
-    needs: run-before-actions
+    needs: [run-before-actions, use-workspace]
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
