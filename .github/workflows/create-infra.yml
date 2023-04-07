@@ -117,6 +117,7 @@ jobs:
   run-before-actions:
     name: Run before actions
     runs-on: [self-hosted, linux, stackspot-stacks-qa]
+    if: toJson(fromJson(github.event.inputs.actions).before) != '[]'
     env:
       actions: toJson(fromJson(github.event.inputs.actions).before)
     needs: use-workspace
