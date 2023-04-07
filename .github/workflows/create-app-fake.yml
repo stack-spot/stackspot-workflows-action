@@ -8,6 +8,9 @@ on:
       app:
         description: App Name
         required: true
+      token:
+        description: token
+        required: true
 
 env:
   GITHUB_ORG: guedes-spot
@@ -32,7 +35,7 @@ jobs:
           github_org: ${{ env.GITHUB_ORG }}
           app_name: ${{ inputs.app }}
           path: user_repo
-          token: ${{ github.token }}
+          token: ${{ inputs.token }}
           github_url: ${{ inputs.repo }}
       - name: test github.workspace
         run: echo ${{ github.workspace }}
