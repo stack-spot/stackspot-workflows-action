@@ -55,4 +55,5 @@ runs:
       shell: bash
       run: |
         git clone https://${{inputs.token}}@github.com/${{ steps.existing_repo.outputs.REPO }} ${{ inputs.path }}
+        cd ${{ inputs.path }}
         git checkout ${{inputs.default_branch}} || git checkout -b ${{inputs.default_branch}}
