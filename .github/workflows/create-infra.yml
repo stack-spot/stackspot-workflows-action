@@ -117,21 +117,19 @@ jobs:
   run-before-actions:
     name: Run before actions
     runs-on: [self-hosted, linux, stackspot-stacks-qa]
-    env:
-      run: toJson(fromJson(github.event.inputs.actions).before) != '[]'
     needs: use-workspace
     steps:
       - name: Checkout workflows repo
-        if: ${{ env.run }}
+        if: toJson(fromJson(github.event.inputs.actions).before)
         uses: actions/checkout@v3
 
       - name: Restore STK Cache
-        if: ${{ env.run }}
+        if: toJson(fromJson(github.event.inputs.actions).before)
         uses: ./github-actions/restore-stk-cache 
         with: 
           stk: ${{ env.STK }}
       - name: Run actions
-        if: ${{ env.run }}
+        if: toJson(fromJson(github.event.inputs.actions).before)
         run: |
           source .github/workflows/scripts/enable_colors.sh
           i=0
