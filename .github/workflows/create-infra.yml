@@ -126,6 +126,10 @@ jobs:
         uses: ./github-actions/restore-stk-cache 
         with: 
           stk: ${{ env.STK }}
+      - name: DEBUG 
+        run: |
+          echo ${{ fromJson(github.event.inputs.actions) }}
+          echo ${{ fromJson(github.event.inputs.actions).before }}
       - name: Run actions
         run: |
           source .github/workflows/scripts/enable_colors.sh
