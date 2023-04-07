@@ -5,6 +5,9 @@ on:
       repo:
         description: Repo URL
         required: true
+      app:
+        description: Repo URL
+        required: true
 
 env:
   GITHUB_ORG: guedes-spot
@@ -28,9 +31,9 @@ jobs:
         uses:  ./workflow_repo/github-actions/clone-external-repo
         with:
           github_org: ${{ env.GITHUB_ORG }}
-          app_name: ${{ fromJson(github.event.inputs.app).name }}
+          app_name: ${{ inputs.app }}
           path: user_repo
-          token: ${{ fromJson(github.event.inputs.secrets).scm_token }}
-          github_url: ${{ fromJson(github.event.inputs.app).repo }}
+          token: ${{ github.token }}
+          github_url: ${{ inputs.repo }}
       - name: test github.workspace
         run: echo ${{ github.workspace }}
