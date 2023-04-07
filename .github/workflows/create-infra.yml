@@ -117,21 +117,22 @@ jobs:
   run-before-actions:
     name: Run before actions
     runs-on: [self-hosted, linux, stackspot-stacks-qa]
+    env:
+      run: toJson(fromJson(github.event.inputs.actions).before) != '[]'
     needs: use-workspace
     steps:
       - name: Checkout workflows repo
-        if: toJson(fromJson(github.event.inputs.actions).before)
+        if: toJson(fromJson(github.event.inputs.actions).before) != '[]'
         uses: actions/checkout@v3
-
       - name: Restore STK Cache
-        if: toJson(fromJson(github.event.inputs.actions).before)
+        if: toJson(fromJson(github.event.inputs.actions).before) != '[]'
         uses: ./github-actions/restore-stk-cache 
         with: 
           stk: ${{ env.STK }}
       - name: Run actions
-        if: toJson(fromJson(github.event.inputs.actions).before)
+        if: toJson(fromJson(github.event.inputs.actions).before) != '[]'
         run: |
-          source .github/workflows/scripts/enable_colors.sh
+          echo "TESTE"
           i=0
           echo -e "\n"
           for row in $(echo '${{ github.event.inputs.actions }}' | jq '.before' | jq -r '.[] | @base64'); do
