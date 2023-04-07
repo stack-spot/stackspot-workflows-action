@@ -277,6 +277,7 @@ jobs:
               }
 
               name=$(_jq -r '.name')
+              name=$(echo $name | sed "s/@.*//g")
               inputs=$(_jq -c '.inputs')
 
               echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"
