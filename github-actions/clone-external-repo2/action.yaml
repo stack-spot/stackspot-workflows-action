@@ -40,20 +40,7 @@ runs:
         url=$(echo -n "${{inputs.github_url }}" | sed 's/.*github.com\///')
         echo "REPO=$url"  >> $GITHUB_ENV
         echo "REPO=$url"  >> $GITHUB_OUTPUT
-#    - name: Clone repo Checkout
-#      uses: actions/checkout@v3
-#      with:
-#        path: tmp/${{ inputs.path}}
-#        token: ${{ inputs.token }}
-#        persist-credentials: true
-#        fetch-depth: 0
     - name: Clone repo
       shell: bash
       run: |
-        git config --global credential.helper store
-        git clone https://${{github.actor}}:${{inputs.token}}@github.com/${{github.repository}} tmp
-        ls tmp
-        git clone ${{ inputs.github_url }} ${{ inputs.path}}
-        ls ${{ inputs.path}}
-        cd ${{ inputs.path}}
-        ls
+        git clone https://${{inputs.token}}@github.com/${{ steps.existing_repo.outputs.REPO }} ${{ inputs.path}}
