@@ -24,6 +24,7 @@ on:
 
 env:
   GITHUB_ORG: guedes-spot
+  DEFAULT_BRANCH: main
   RUNNER: stackspot-stacks-qa
   STK: stk-alpha
   DEBUG: true
@@ -171,6 +172,7 @@ jobs:
         uses:  ./workflow_repo/github-actions/clone-external-repo
         with:
           github_org: ${{ env.GITHUB_ORG }}
+          default_branch: ${{ env.DEFAULT_BRANCH }}
           app_name: ${{ fromJson(github.event.inputs.app).name }}
           path: user_repo
           token: ${{ fromJson(github.event.inputs.secrets).scm_token }}
