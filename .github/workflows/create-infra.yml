@@ -118,7 +118,7 @@ jobs:
     name: Run before actions
     runs-on: [self-hosted, linux, stackspot-stacks-qa]
     needs: use-workspace
-    if: fromJson(github.event.inputs.actions).before != '' && fromJson(github.event.inputs.actions).before != '[]'
+    if: toJson(fromJson(github.event.inputs.actions).before) != '[]'
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
@@ -128,11 +128,13 @@ jobs:
           stk: ${{ env.STK }}
       - name: DEBUG 
         run: |
-          echo ${{ fromJson(github.event.inputs.actions) }}
-          echo ${{ fromJson(github.event.inputs.actions).before }}
+          echo '${{ toJson(fromJson(github.event.inputs.actions)) }}'
+          echo '${{ toJson(fromJson(github.event.inputs.actions).before) }}'
+          echo ${{ toJson(fromJson(github.event.inputs.actions)) }}
+          echo ${{ toJson(fromJson(github.event.inputs.actions).before) }}
       - name: Run actions
         run: |
-          source .github/workflows/scripts/enable_colors.sh
+          echo "TESTE"
           i=0
           echo -e "\n"
           for row in $(echo '${{ github.event.inputs.actions }}' | jq '.before' | jq -r '.[] | @base64'); do
