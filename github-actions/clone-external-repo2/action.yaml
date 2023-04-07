@@ -40,11 +40,14 @@ runs:
         url=$(echo -n "${{inputs.github_url }}" | sed 's/.*github.com\///')
         echo "REPO=$url"  >> $GITHUB_ENV
         echo "REPO=$url"  >> $GITHUB_OUTPUT
-    - name: Clone repo
+    - name: Clone repo Checkout
       uses: actions/checkout@v3
       with:
-        path: ${{ inputs.path}}
-        repository: ${{ env.REPO }}
+        path: tmp/${{ inputs.path}}
         token: ${{ inputs.token }}
         persist-credentials: true
         fetch-depth: 0
+    - name: Clone repo
+      shell: bash
+      run: |
+        git clone ${{ inputs.github_url }} ${{ inputs.path}}

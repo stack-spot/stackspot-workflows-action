@@ -27,7 +27,7 @@ jobs:
           path: workflow_repo
       - name: Checkout the user repo
         id: checkout_user_repo
-        uses:  ./workflow_repo/github-actions/clone-external-repo
+        uses:  ./workflow_repo/github-actions/clone-external-repo2
         with:
           github_org: ${{ env.GITHUB_ORG }}
           app_name: ${{ inputs.app }}
