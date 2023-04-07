@@ -164,7 +164,11 @@ jobs:
   create:
     name: Create
     runs-on: [self-hosted, linux, stackspot-stacks-qa]
-    needs: [run-before-actions, use-workspace]
+    needs: [use-workspace, run-before-actions, validate-inputs]
+    if: |
+      always() &&
+      needs.use-workspace.result == 'success' &&
+      (needs.run-before-actions.result == 'success' || needs.run-before-actions.result == 'skipped')
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
