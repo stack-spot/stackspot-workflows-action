@@ -26,6 +26,7 @@ env:
   GITHUB_ORG: guedes-spot
   RUNNER: stackspot-stacks-qa
   STK: stk-alpha
+  DEBUG: true
 
 jobs:
 
@@ -117,7 +118,7 @@ jobs:
     name: Run before actions
     runs-on: [self-hosted, linux, stackspot-stacks-qa]
     needs: use-workspace
-    if: fromJson(github.event.inputs.actions).before != ''
+    if: fromJson(github.event.inputs.actions).before != '' && fromJson(github.event.inputs.actions).before != '[]'
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
