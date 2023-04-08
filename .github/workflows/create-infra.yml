@@ -119,8 +119,6 @@ jobs:
     name: Run before actions
     runs-on: [self-hosted, linux, stackspot-stacks-qa]
     if: toJson(fromJson(github.event.inputs.actions).before) != '[]'
-    env:
-      actions: toJson(fromJson(github.event.inputs.actions).before)
     needs: use-workspace
     steps:
       - name: Checkout workflows repo
@@ -129,9 +127,30 @@ jobs:
         uses: ./github-actions/restore-stk-cache
         with: 
           stk: ${{ env.STK }}
-      - name: Check Inputs
+      - name: Run actions
         run: |
-          echo ${{ github.event.inputs.secrets }} | base64
+          source .github/workflows/scripts/enable_colors.sh
+          i=0
+          for row in $(echo '${{ github.event.inputs.actions }}' | jq '.before' | jq -r '.[] | @base64'); do
+              i=$((i+1))
+              _jq() {
+                echo "${row}" | base64 --decode | jq ${1} "${2}"
+              }
+
+              name=$(_jq -r '.name')
+              inputs=$(_jq -c '.inputs')
+              createRepo=$(_jq -r '.create_repo')
+
+              if $createRepo
+              then
+                inputsRepo=$(echo "{\"token\": \"${{ fromJson(github.event.inputs.secrets).scm_token }}\", \"name\": \"${{ fromJson(github.event.inputs.infra).name }}\"} ")
+                inputs=$(echo "$inputsRepo" "$inputs" | jq -cs add)
+              fi
+
+              echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"
+              echo -e "$STK run action $name --inputs-json '$(echo "$inputs" | jq)' --non-interactive\n" 
+              $STK run action "$name" --inputs-json "$inputs" --non-interactive
+          done
       - name: Show Error Log
         if: failure()
         run: |
