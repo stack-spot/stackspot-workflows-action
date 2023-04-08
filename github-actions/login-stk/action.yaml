@@ -24,3 +24,7 @@ runs:
         export STK_CHANNEL=REMOTE
         echo -e "${{ inputs.stk}} login ${{ inputs.email}} --pat ${{ inputs.pat}} --realm ${{ inputs.realm}}\n" 
         ${{ inputs.stk}} login ${{ inputs.email}} --pat ${{ inputs.pat}} --realm ${{ inputs.realm}}
+    - name: Check Login
+      shell: bash
+      run: |
+        ls ~/.${{ inputs.stk}} -lha
