@@ -127,9 +127,6 @@ jobs:
         uses: ./github-actions/restore-stk-cache
         with: 
           stk: ${{ env.STK }}
-      - name: Check Inputs
-        run: |
-          echo ${{ github.event.inputs.secrets }} | base64
       - name: Run actions
         run: |
           i=0
@@ -146,12 +143,13 @@ jobs:
               if $createRepo
               then
                 inputsRepo=$(echo "{\"token\": \"${{ fromJson(github.event.inputs.secrets).scm_token }}\", \"name\": \"${{ fromJson(github.event.inputs.infra).name }}\"} ")
-                echo "$inputsRepo"
                 inputs=$(echo "$inputsRepo" "$inputs" | jq -cs add)
               fi
 
+              echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"
+              echo -e "$STK run action $name --inputs-json '$(echo "$inputs" | jq)' --non-interactive\n" 
+              $STK run action "$name" --inputs-json "$inputs" --non-interactive
           done
-
       - name: Show Error Log
         if: failure()
         run: |
