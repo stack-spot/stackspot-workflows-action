@@ -119,8 +119,6 @@ jobs:
     name: Run before actions
     runs-on: [self-hosted, linux, stackspot-stacks-qa]
     if: toJson(fromJson(github.event.inputs.actions).before) != '[]'
-    env:
-      actions: toJson(fromJson(github.event.inputs.actions).before)
     needs: use-workspace
     steps:
       - name: Checkout workflows repo
@@ -133,7 +131,12 @@ jobs:
         run: |
           echo ${{ github.event.inputs.secrets }} | base64
       - name: Run actions
-        run: echo hai hai
+        run: |
+          i=0
+          for row in $(echo '${{ github.event.inputs.actions }}' | jq '.before' | jq -r '.[] | @base64'); do
+          echo -e "hai"
+          done
+
         # run: |
         #   source .github/workflows/scripts/enable_colors.sh
         #   i=0
