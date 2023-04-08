@@ -118,13 +118,13 @@ jobs:
   run-before-actions:
     name: Run before actions
     runs-on: [self-hosted, linux, stackspot-stacks-qa]
+    if: toJson(fromJson(github.event.inputs.actions).before) != '[]'
     needs: use-workspace
-    if: fromJson(github.event.inputs.actions).before != '' && fromJson(github.event.inputs.actions).before != '[]'
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
       - name: Restore STK Cache
-        uses: ./github-actions/restore-stk-cache 
+        uses: ./github-actions/restore-stk-cache
         with: 
           stk: ${{ env.STK }}
       - name: Run actions
@@ -144,7 +144,7 @@ jobs:
 
               if $createRepo
               then
-                inputsRepo=$(echo "{\"org\":\"$GITHUB_ORG\",\"is_jwt\":\"${{ fromJson(github.event.inputs.secrets).is_jwt }}\",\"token\":\"${{ fromJson(github.event.inputs.secrets).scm_token }}\",\"name\":\"${{ fromJson(github.event.inputs.app).name }}\",\"description\":\"${{ fromJson(github.event.inputs.app).description }}\",\"auto_init\":\"true\",\"private\":true}")
+                inputsRepo=$(echo "{\"token\": \"${{ fromJson(github.event.inputs.secrets).scm_token }}\", \"name\": \"${{ fromJson(github.event.inputs.infra).name }}\"} ")
                 inputs=$(echo "$inputsRepo" "$inputs" | jq -cs add)
               fi
 
@@ -160,7 +160,11 @@ jobs:
   create:
     name: Create
     runs-on: [self-hosted, linux, stackspot-stacks-qa]
-    needs: run-before-actions
+    needs: [use-workspace, run-before-actions, validate-inputs]
+    if: |
+      always() &&
+      needs.use-workspace.result == 'success' &&
+      (needs.run-before-actions.result == 'success' || needs.run-before-actions.result == 'skipped')
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
@@ -177,8 +181,6 @@ jobs:
           path: user_repo
           token: ${{ fromJson(github.event.inputs.secrets).scm_token }}
           github_url: ${{ fromJson(github.event.inputs.app).repo }}
-      - name: test github.workspace
-        run: echo ${{ github.workspace }}
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
         env:
@@ -210,13 +212,13 @@ jobs:
            source ../workflow_repo/.github/workflows/scripts/enable_colors.sh
            conn=""
            if [ "${CI}" != "null" ]; then 
-              conn=" -ci '$CI'"
+              conn=" -ci $(echo $CI | jq . -c)"
            fi
 
            echo -e "\n${green}⚡ Running create app: ${u_cyan}$NAME"
-           echo -e "$STK create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }}$conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $INPUTS\n" 
+           echo -e "$STK create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $INPUTS\n" 
 
-           ${{ env.STK }} create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }}$conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" $INPUTS
+           ${{ env.STK }} create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" $INPUTS
       - name: Commit and Push.
         working-directory: user_repo
         run: |
