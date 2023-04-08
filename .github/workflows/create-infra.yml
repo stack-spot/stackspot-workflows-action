@@ -142,23 +142,23 @@ jobs:
           echo -e "\n"
           for row in $(echo '${{ github.event.inputs.actions }}' | jq '.before' | jq -r '.[] | @base64'); do
               i=$((i+1))
-              _jq() {
-                echo "${row}" | base64 --decode | jq ${1} "${2}"
-              }
-
-              name=$(_jq -r '.name')
-              inputs=$(_jq -c '.inputs')
-              createRepo=$(_jq -r '.create_repo')
-
-              if $createRepo
-              then
-                inputsRepo=$(echo "{\"org\":\"$GITHUB_ORG\",\"is_jwt\":\"${{ fromJson(github.event.inputs.secrets).is_jwt }}\",\"token\":\"${{ fromJson(github.event.inputs.secrets).scm_token }}\",\"name\":\"${{ fromJson(github.event.inputs.app).name }}\",\"description\":\"${{ fromJson(github.event.inputs.app).description }}\",\"auto_init\":\"true\",\"private\":true}")
-                inputs=$(echo "$inputsRepo" "$inputs" | jq -cs add)
-              fi
-
-              echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"
-              echo -e "$STK run action $name --inputs-json '$(echo "$inputs" | jq)' --non-interactive\n" 
-              $STK run action "$name" --inputs-json "$inputs" --non-interactive
+          #              _jq() {
+          #                echo "${row}" | base64 --decode | jq ${1} "${2}"
+          #              }
+          #
+          #              name=$(_jq -r '.name')
+          #              inputs=$(_jq -c '.inputs')
+          #              createRepo=$(_jq -r '.create_repo')
+          #
+          #              if $createRepo
+          #              then
+          #                inputsRepo=$(echo "{\"org\":\"$GITHUB_ORG\",\"is_jwt\":\"${{ fromJson(github.event.inputs.secrets).is_jwt }}\",\"token\":\"${{ fromJson(github.event.inputs.secrets).scm_token }}\",\"name\":\"${{ fromJson(github.event.inputs.app).name }}\",\"description\":\"${{ fromJson(github.event.inputs.app).description }}\",\"auto_init\":\"true\",\"private\":true}")
+          #                inputs=$(echo "$inputsRepo" "$inputs" | jq -cs add)
+          #              fi
+          #
+          #              echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"
+          #              echo -e "$STK run action $name --inputs-json '$(echo "$inputs" | jq)' --non-interactive\n"
+          #              $STK run action "$name" --inputs-json "$inputs" --non-interactive
           done
       - name: Show Error Log
         if: failure()
