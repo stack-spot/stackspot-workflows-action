@@ -131,6 +131,7 @@ jobs:
         run: |
           source .github/workflows/scripts/enable_colors.sh
           i=0
+          echo -e "\n"
           for row in $(echo '${{ github.event.inputs.actions }}' | jq '.before' | jq -r '.[] | @base64'); do
               i=$((i+1))
               _jq() {
