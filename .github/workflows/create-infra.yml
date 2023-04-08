@@ -124,24 +124,21 @@ jobs:
     needs: use-workspace
     steps:
       - name: Checkout workflows repo
-        # if: ${{ env.actions }} != '[]'
         uses: actions/checkout@v3
       - name: Restore STK Cache
-        # if: ${{ env.actions }} != '[]'
-        uses: ./github-actions/restore-stk-cache 
+        uses: ./github-actions/restore-stk-cache
         with: 
           stk: ${{ env.STK }}
       - name: Check Inputs
         run: |
           echo ${{ github.event.inputs.secrets }} | base64
       - name: Run actions
-        # if: ${{ env.actions }} != '[]'
         run: |
           echo "TESTE"
-          i=0
-          echo -e "\n"
-          for row in $(echo '${{ github.event.inputs.actions }}' | jq '.before' | jq -r '.[] | @base64'); do
-              i=$((i+1))
+          #          i=0
+          #          echo -e "\n"
+          #          for row in $(echo '${{ github.event.inputs.actions }}' | jq '.before' | jq -r '.[] | @base64'); do
+          #              i=$((i+1))
           #              _jq() {
           #                echo "${row}" | base64 --decode | jq ${1} "${2}"
           #              }
@@ -159,7 +156,7 @@ jobs:
           #              echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"
           #              echo -e "$STK run action $name --inputs-json '$(echo "$inputs" | jq)' --non-interactive\n"
           #              $STK run action "$name" --inputs-json "$inputs" --non-interactive
-          done
+          #          done
       - name: Show Error Log
         if: failure()
         run: |
