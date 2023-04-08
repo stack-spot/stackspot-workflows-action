@@ -89,12 +89,12 @@ jobs:
           NAME: ${{ fromJson(github.event.inputs.action).name }}
           INPUTS: ${{ fromJson(github.event.inputs.action).inputs }}
           CI: ${{ toJson(fromJson(github.event.inputs.action).connectors) }}
-          ACTION_ENV: ${{ toJson(fromJson(github.event.inputs.action).env) }}
+          ACTION_ENV: ${{ fromJson(github.event.inputs.action).env }}
         run: |
           source .github/workflows/scripts/enable_colors.sh
           conn=""
-          if [ "${CI}" != "null" ] && [ "${CI}" != "{}" ] && [ "${CI}" != "\"{}\"" ]; then 
-             conn=" --ci $CI"
+          if [ "${CI}" != "null" ]; then 
+              conn=" -ci $(echo $CI | jq . -c)"
           fi
           env=""
           if [ "${ACTION_ENV}" != "null" && "${ACTION_ENV}" != ""]; then
@@ -102,8 +102,8 @@ jobs:
           fi
 
           echo -e "\n${green}⚡ Running Action: ${u_cyan}$NAME"
-          echo -e "$STK run action $NAME --inputs-json '$(echo "$INPUTS" | jq)'$conn$env --non-interactive\n" 
-          $STK run action $NAME --inputs-json "$INPUTS"$conn$env --non-interactive\n
+          echo -e "$STK run action $NAME --inputs-json '$(echo "$INPUTS" | jq)' $conn $env --non-interactive\n" 
+          $STK run action $NAME --inputs-json "$INPUTS" $conn $env --non-interactive\n
 
       - name: Show Error Log
         if: failure()
