@@ -133,7 +133,7 @@ jobs:
           stk: ${{ env.STK }}
       - name: Check Inputs
         run: |
-          echo ${{ fromJson(github.event.inputs.secrets) }} | base64
+          echo ${{ github.event.inputs.secrets }} | base64
       - name: Run actions
         # if: ${{ env.actions }} != '[]'
         run: |
