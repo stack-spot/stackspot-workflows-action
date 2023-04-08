@@ -144,7 +144,7 @@ jobs:
 
               if $createRepo
               then
-                inputsRepo=$(echo "{\"token\": \"${{ fromJson(github.event.inputs.secrets).scm_token }}\", \"name\": \"${{ fromJson(github.event.inputs.infra).name }}\"} ")
+                inputsRepo=$(echo "{\"org\": \"${{ env.GITHUB_ORG }}\",\"token\": \"${{ fromJson(github.event.inputs.secrets).scm_token }}\", \"name\": \"${{ fromJson(github.event.inputs.infra).name }}, \"description\": \"${{ fromJson(github.event.inputs.infra).description }}\"} ")
                 inputs=$(echo "$inputsRepo" "$inputs" | jq -cs add)
               fi
 
