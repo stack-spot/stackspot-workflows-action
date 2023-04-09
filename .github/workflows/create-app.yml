@@ -28,6 +28,7 @@ env:
   RUNNER: stackspot-stacks-qa
   STK: stk-alpha
   DEBUG: true
+  LANG: en_US.UTF-8
 
 jobs:
 
