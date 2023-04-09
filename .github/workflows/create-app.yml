@@ -213,7 +213,7 @@ jobs:
            conn=""
            connPrint=""
            if [ "${CI}" != "null" ]; then 
-              conn=" -ci '$(echo $CI | jq . -c)'"
+              conn=" -ci $(echo $CI | jq . -c)"
               connPrint=" -ci '$(echo $CI | jq . -c)'" 
            fi
 
