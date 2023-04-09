@@ -211,12 +211,14 @@ jobs:
         run: |
            source ../workflow_repo/.github/workflows/scripts/enable_colors.sh
            conn=""
+           connPrint=""
            if [ "${CI}" != "null" ]; then 
               conn=" -ci $(echo $CI | jq . -c)"
+              connPrint=" -ci '$(echo $CI | jq . -c)'" 
            fi
 
            echo -e "\n${green}⚡ Running create app: ${u_cyan}$NAME"
-           echo -e "$STK create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $INPUTS\n" 
+           echo -e "$STK create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $connPrint -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $INPUTS\n" 
 
            ${{ env.STK }} create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" $INPUTS
       - name: Commit and Push.
