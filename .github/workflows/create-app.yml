@@ -182,6 +182,9 @@ jobs:
           path: user_repo
           token: ${{ fromJson(github.event.inputs.secrets).scm_token }}
           github_url: ${{ fromJson(github.event.inputs.app).repo }}
+      - name: Print locale information
+        run: |
+          locale
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
         env:
