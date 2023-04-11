@@ -275,6 +275,9 @@ jobs:
 
               name=$(_jq -r '.name')
               inputs=$(_jq -c '.inputs')
+          
+              export APPLY_PLUGIN_ENABLE_DEBUG=true
+              export COMMAND_ARGS_ENABLE_DEBUG=true
 
               echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"
               echo -e "$STK run action $name --inputs-json '$(echo "$inputs" | jq)' --non-interactive\n" 

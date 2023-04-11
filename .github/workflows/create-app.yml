@@ -220,6 +220,9 @@ jobs:
               conn=" -ci $(echo $CI | jq . -c)"
               connPrint=" -ci '$(echo $CI | jq . -c)'" 
            fi
+          
+           export APPLY_PLUGIN_ENABLE_DEBUG=true
+           export COMMAND_ARGS_ENABLE_DEBUG=true
 
            echo -e "\n${green}⚡ Running create app: ${u_cyan}$NAME"
            echo -e "$STK create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $connPrint -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $INPUTS\n" 
