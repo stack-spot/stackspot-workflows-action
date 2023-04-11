@@ -205,8 +205,9 @@ jobs:
         if: fromJson(github.event.inputs.app).inputs != ''
         id: formatinputs 
         run: |
-           INPUTS=$(cat $GITHUB_EVENT_PATH | jq -r '.inputs.app' | jq -r '.inputs' )
-           python3 workflow_repo/.github/workflows/scripts/format_inputs.py "$INPUTS" >> $GITHUB_OUTPUT
+          cat $GITHUB_EVENT_PAT
+          INPUTS=$(cat $GITHUB_EVENT_PATH | jq -r '.inputs.app' | jq -r '.inputs' )
+          python3 workflow_repo/.github/workflows/scripts/format_inputs.py "$INPUTS" >> $GITHUB_OUTPUT
       - name: Create
         env: 
           NAME: ${{ fromJson(github.event.inputs.app).name }}
