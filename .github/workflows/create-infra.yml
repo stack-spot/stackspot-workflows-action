@@ -147,6 +147,8 @@ jobs:
                 inputsRepo=$(echo "{\"org\": \"${{ env.GITHUB_ORG }}\",\"token\": \"${{ fromJson(github.event.inputs.secrets).scm_token }}\", \"name\": \"${{ fromJson(github.event.inputs.infra).name }}\", \"description\": \"${{ fromJson(github.event.inputs.infra).description }}\"} ")
                 inputs=$(echo "$inputsRepo" "$inputs" | jq -cs add)
               fi
+          
+              export COMMAND_ARGS_ENABLE_DEBUG=true
 
               echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"
               echo -e "$STK run action $name --inputs-json '$(echo "$inputs" | jq)' --non-interactive\n" 
@@ -210,7 +212,10 @@ jobs:
               conn=" -ci $(echo $CI | jq . -c)"
               connPrint=" -ci '$(echo $CI | jq . -c)'" 
            fi
-
+          
+           export APPLY_PLUGIN_ENABLE_DEBUG=true
+           export COMMAND_ARGS_ENABLE_DEBUG=true
+           
            echo -e "\n${green}⚡ Running create infra: ${u_cyan}$NAME"
            echo -e "$STK create infra $NAME -S ${{ fromJson(github.event.inputs.infra).stack }} $connPrint -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $INPUTS\n" 
 
@@ -276,7 +281,6 @@ jobs:
               name=$(_jq -r '.name')
               inputs=$(_jq -c '.inputs')
           
-              export APPLY_PLUGIN_ENABLE_DEBUG=true
               export COMMAND_ARGS_ENABLE_DEBUG=true
 
               echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"

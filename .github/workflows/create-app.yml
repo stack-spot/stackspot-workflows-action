@@ -148,6 +148,8 @@ jobs:
                 inputsRepo=$(echo "{\"org\": \"${{ env.GITHUB_ORG }}\",\"token\": \"${{ fromJson(github.event.inputs.secrets).scm_token }}\", \"name\": \"${{ fromJson(github.event.inputs.app).name }}\", \"description\": \"${{ fromJson(github.event.inputs.app).description }}\"} ")
                 inputs=$(echo "$inputsRepo" "$inputs" | jq -cs add)
               fi
+          
+              export COMMAND_ARGS_ENABLE_DEBUG=true
 
               echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"
               echo -e "$STK run action $name --inputs-json '$(echo "$inputs" | jq)' --non-interactive\n" 
@@ -289,6 +291,8 @@ jobs:
               name=$(_jq -r '.name')
               inputs=$(_jq -c '.inputs')
 
+              export COMMAND_ARGS_ENABLE_DEBUG=true
+          
               echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"
               echo -e "$STK run action $name --inputs-json '$(echo "$inputs" | jq)' --non-interactive\n" 
               $STK run action "$name" --inputs-json "$inputs" --non-interactive
