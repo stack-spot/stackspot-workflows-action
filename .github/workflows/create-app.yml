@@ -214,7 +214,7 @@ jobs:
       - name: Create
         env: 
           NAME: ${{ fromJson(github.event.inputs.app).name }}
-          INPUTS: ${{ steps.formatinputs.outputs.starter_inputs }}
+          INPUTS: ${{ steps.formatinputs.outputs.stk_inputs }}
           CI: ${{ toJson(fromJson(github.event.inputs.app).connectors) }}
           DESCRIPTION: ${{ fromJson(github.event.inputs.app).description }}
         working-directory: user_repo
@@ -233,7 +233,7 @@ jobs:
           echo -e "\n${green}⚡ Running create app: ${u_cyan}$NAME"
           echo -e "$STK create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $connPrint -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $INPUTS\n" 
 
-          ${{ env.STK }} create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" $( echo $INPUTS | xargs)
+          ${{ env.STK }} create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" $INPUTS
       - name: Commit and Push.
         working-directory: user_repo
         run: |

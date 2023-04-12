@@ -6,6 +6,7 @@ params = json.loads(json_str)
 out = ''
 
 for key in params.keys():
-    out += f' --{key} "{params[key]}"'
+    val = params[key].replace('"','\\"').replace(" ", "\\ ")
+    out += f' --{key} {val}'
 
-print(f'starter_inputs={out}')
+print(f'stk_inputs={out}')
