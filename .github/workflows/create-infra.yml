@@ -200,7 +200,7 @@ jobs:
       - name: Create infra
         env: 
           NAME: ${{ fromJson(github.event.inputs.infra).name }}
-          INPUTS: fromJson(github.event.inputs.infra).inputs
+          INPUTS: ${{ steps.formatinputs.outputs.starter_inputs }}
           CI: ${{ toJson(fromJson(github.event.inputs.infra).connectors) }}
           DESCRIPTION: ${{ fromJson(github.event.inputs.infra).description }}
         working-directory: user_repo
