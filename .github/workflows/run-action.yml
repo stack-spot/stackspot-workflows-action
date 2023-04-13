@@ -107,8 +107,8 @@ jobs:
           fi
 
           echo -e "\n${green}⚡ Running Action: ${u_cyan}$NAME"
-          echo -e "$STK run action $NAME --inputs-json '$(echo "$INPUTS" | jq)' $conn $env --non-interactive\n" 
-          $STK run action $NAME --inputs-json $inputs_short $conn $env --non-interactive\n
+          echo -e "$STK run action $NAME --inputs-json '$(echo "$INPUTS" | jq)' $conn $env \n" 
+          $STK run action $NAME --inputs-json $inputs_short $conn $env
 
       - name: Show Error Log
         if: failure()
