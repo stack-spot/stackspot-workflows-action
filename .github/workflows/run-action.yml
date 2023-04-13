@@ -97,7 +97,9 @@ jobs:
               conn=" -ci $(echo $CI | jq . -c)"
           fi
           env=""
-          if [ "${ACTION_ENV}" != "null" && "${ACTION_ENV}" != ""]; then
+
+          echo "env=${ACTION_ENV}"
+          if [ "${ACTION_ENV}" != "null" ]; then
             env=" --env $ACTION_ENV"
           fi
 
