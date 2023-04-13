@@ -197,13 +197,15 @@ jobs:
         uses: ./workflow_repo/github-actions/restore-stk-cache 
         with: 
           stk: ${{ env.STK }}
+      - name: Debug inputs
+        if: env.DEBUG
+        run: |
+          export APPLY_PLUGIN_ENABLE_DEBUG=true
+          export COMMAND_ARGS_ENABLE_DEBUG=true
       - name: Set git username
         run: |
           git config --global user.email "${{ fromJson(github.event.inputs.cli_login).email }}"
           git config --global user.name "${{ fromJson(github.event.inputs.cli_login).email }}"
-      - name: Debug github event
-        run: |
-          cat $GITHUB_EVENT_PATH 
       - name: Format inputs
         if: fromJson(github.event.inputs.app).inputs != ''
         id: formatinputs 
@@ -226,9 +228,6 @@ jobs:
              conn=" -ci $(echo $CI | jq . -c)"
              connPrint=" -ci '$(echo $CI | jq . -c)'" 
           fi
-          
-          export APPLY_PLUGIN_ENABLE_DEBUG=true
-          export COMMAND_ARGS_ENABLE_DEBUG=true
 
           echo -e "\n${green}⚡ Running create app: ${u_cyan}$NAME"
           echo -e "$STK create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $connPrint -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $INPUTS\n" 

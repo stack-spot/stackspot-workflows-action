@@ -46,10 +46,14 @@ jobs:
       - name: Debug inputs
         if: env.DEBUG
         run: |
-          echo "infra: ${{ github.event.inputs.infra }}"
-          echo "cli_login: ${{ github.event.inputs.cli_login }}"
+          echo "infra:"
+          echo "${{ github.event.inputs.infra }}" | jq
+          echo "cli_login:"
+          echo "${{ github.event.inputs.cli_login }}" | jq
+          echo "action:"
+          echo "${{ github.event.inputs.actions }}"  | jq
           echo "workspace_slug: ${{ github.event.inputs.workspace_slug }}"
-          echo "action: ${{ github.event.inputs.actions }}"
+
       - name: "Validate Input: 'infra.name'"
         if: fromJson(github.event.inputs.infra).name == ''
         run: |
@@ -187,6 +191,11 @@ jobs:
         uses: ./workflow_repo/github-actions/restore-stk-cache 
         with: 
           stk: ${{ env.STK }}
+      - name: Debug inputs
+        if: env.DEBUG
+        run: |
+          export APPLY_PLUGIN_ENABLE_DEBUG=true
+          export COMMAND_ARGS_ENABLE_DEBUG=true
       - name: Set git username
         run: |
           git config --global user.email "${{ fromJson(github.event.inputs.cli_login).email }}"
@@ -217,10 +226,6 @@ jobs:
            inptus_params="($inptus_params)"
            inputs_values=$(echo $INPUTS | jq '.[]' | tr "\n" " " | sed 's/\(.*\) /\1/')
            inputs_values="($inputs_values)"
-
-          
-           export APPLY_PLUGIN_ENABLE_DEBUG=true
-           export COMMAND_ARGS_ENABLE_DEBUG=true
            
            echo -e "\n${green}⚡ Running create infra: ${u_cyan}$NAME"
            echo -e "$STK create infra $NAME -S ${{ fromJson(github.event.inputs.infra).stack }} $connPrint -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $INPUTS\n" 

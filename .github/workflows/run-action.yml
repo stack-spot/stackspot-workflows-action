@@ -87,7 +87,7 @@ jobs:
       - name: Run action
         env:
           NAME: ${{ fromJson(github.event.inputs.action).name }}
-          INPUTS: ${{ fromJson(github.event.inputs.action).inputs }}
+          INPUTS: ${{ toJson(fromJson(github.event.inputs.action).inputs) }}
           CI: ${{ toJson(fromJson(github.event.inputs.action).connectors) }}
           ACTION_ENV: ${{ fromJson(github.event.inputs.action).env }}
         run: |
@@ -101,9 +101,13 @@ jobs:
             env=" --env $ACTION_ENV"
           fi
 
+          if [ "${INPUTS}" != "null" ]; then 
+              inputs_short="$(echo $INPUTS | jq . -c)"
+          fi
+
           echo -e "\n${green}⚡ Running Action: ${u_cyan}$NAME"
           echo -e "$STK run action $NAME --inputs-json '$(echo "$INPUTS" | jq)' $conn $env --non-interactive\n" 
-          $STK run action $NAME --inputs-json "$INPUTS" $conn $env --non-interactive\n
+          $STK run action $NAME --inputs-json $inputs_short $conn $env --non-interactive\n
 
       - name: Show Error Log
         if: failure()
