@@ -225,7 +225,7 @@ jobs:
            echo -e "\n${green}⚡ Running create infra: ${u_cyan}$NAME"
            echo -e "$STK create infra $NAME -S ${{ fromJson(github.event.inputs.infra).stack }} $connPrint -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $INPUTS\n" 
 
-           ${{ env.STK }} create infra $NAME -S ${{ fromJson(github.event.inputs.infra).stack }} $conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" $INPUTS
+           ${{ env.STK }} create infra $NAME -S ${{ fromJson(github.event.inputs.infra).stack }} $conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" $( echo $INPUTS | xargs)
       - name: Commit and Push.
         working-directory: user_repo
         run: |
