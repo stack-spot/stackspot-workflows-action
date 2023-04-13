@@ -103,6 +103,7 @@ jobs:
 
           if [ "${INPUTS}" != "null" ]; then 
               inputs_short="$(echo $INPUTS | jq . -c)"
+              echo $inputs_short
           fi
 
           echo -e "\n${green}⚡ Running Action: ${u_cyan}$NAME"
