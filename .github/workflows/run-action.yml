@@ -102,13 +102,13 @@ jobs:
           fi
 
           if [ "${INPUTS}" != "null" ]; then 
-              inputs_short="$(echo $INPUTS | jq . -c)"
+              inputs_short=" --inputs-json $(echo $INPUTS | jq . -c)"
               echo $inputs_short
           fi
 
           echo -e "\n${green}⚡ Running Action: ${u_cyan}$NAME"
-          echo -e "$STK run action $NAME --inputs-json '$(echo "$INPUTS" | jq)' $conn $env \n" 
-          $STK run action $NAME --inputs-json $inputs_short $conn $env
+          echo -e "$STK run action $NAME $inputs_short $conn $env \n" 
+          $STK run action $NAME $inputs_short $conn $env
 
       - name: Show Error Log
         if: failure()
