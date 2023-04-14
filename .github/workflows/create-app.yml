@@ -25,10 +25,8 @@ on:
 env:
   GITHUB_ORG: guedes-spot
   DEFAULT_BRANCH: main
-  RUNNER: stackspot-stacks-qa
   STK: stk-alpha
   DEBUG: true
-  LANG: en_US.UTF-8
 
 jobs:
 
@@ -128,6 +126,11 @@ jobs:
         uses: ./github-actions/restore-stk-cache
         with: 
           stk: ${{ env.STK }}
+      - name: Debug inputs
+        if: env.DEBUG
+        run: |
+          export APPLY_PLUGIN_ENABLE_DEBUG=true
+          export COMMAND_ARGS_ENABLE_DEBUG=true
       - name: Run actions
         run: |
           source .github/workflows/scripts/enable_colors.sh
@@ -148,8 +151,6 @@ jobs:
                 inputsRepo=$(echo "{\"org\": \"${{ env.GITHUB_ORG }}\",\"token\": \"${{ fromJson(github.event.inputs.secrets).scm_token }}\", \"name\": \"${{ fromJson(github.event.inputs.app).name }}\", \"description\": \"${{ fromJson(github.event.inputs.app).description }}\"} ")
                 inputs=$(echo "$inputsRepo" "$inputs" | jq -cs add)
               fi
-          
-              export COMMAND_ARGS_ENABLE_DEBUG=true
 
               echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"
               echo -e "$STK run action $name --inputs-json '$(echo "$inputs" | jq)' --non-interactive\n" 
@@ -208,7 +209,6 @@ jobs:
         id: formatinputs 
         run: |
           INPUTS=$(cat $GITHUB_EVENT_PATH | jq -r '.inputs.app' | jq -r '.inputs' )
-          echo $INPUTS
           python3 workflow_repo/.github/workflows/scripts/format_inputs.py "$INPUTS" >> $GITHUB_OUTPUT
       - name: Create
         env: 
@@ -290,7 +290,7 @@ jobs:
 
               name=$(_jq -r '.name')
               inputs=$(_jq -c '.inputs')
-          
+
               echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"
               echo -e "$STK run action $name --inputs-json '$(echo "$inputs" | jq)' --non-interactive\n" 
               $STK run action "$name" --inputs-json "$inputs" --non-interactive

@@ -50,7 +50,6 @@ jobs:
           echo "cli_login: ${{ github.event.inputs.cli_login }}"
           echo "workspace_slug: ${{ github.event.inputs.workspace_slug }}"
           echo "action: ${{ github.event.inputs.actions }}"
-
       - name: "Validate Input: 'infra.name'"
         if: fromJson(github.event.inputs.infra).name == ''
         run: |
@@ -128,6 +127,11 @@ jobs:
         uses: ./github-actions/restore-stk-cache
         with: 
           stk: ${{ env.STK }}
+      - name: Debug inputs
+        if: env.DEBUG
+        run: |
+          export APPLY_PLUGIN_ENABLE_DEBUG=true
+          export COMMAND_ARGS_ENABLE_DEBUG=true
       - name: Run actions
         run: |
           source .github/workflows/scripts/enable_colors.sh
@@ -217,11 +221,6 @@ jobs:
               connPrint=" -ci '$(echo $CI | jq . -c)'" 
            fi
 
-           inptus_params=$(echo $INPUTS | jq 'keys[]' | tr "\n" " " | sed 's/\(.*\) /\1/')
-           inptus_params="($inptus_params)"
-           inputs_values=$(echo $INPUTS | jq '.[]' | tr "\n" " " | sed 's/\(.*\) /\1/')
-           inputs_values="($inputs_values)"
-           
            echo -e "\n${green}⚡ Running create infra: ${u_cyan}$NAME"
            echo -e "$STK create infra $NAME -S ${{ fromJson(github.event.inputs.infra).stack }} $connPrint -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $INPUTS\n" 
 
@@ -291,7 +290,6 @@ jobs:
 
               name=$(_jq -r '.name')
               inputs=$(_jq -c '.inputs')
-          
 
               echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"
               echo -e "$STK run action $name --inputs-json '$(echo "$inputs" | jq)' --non-interactive\n" 
