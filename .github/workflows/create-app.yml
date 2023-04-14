@@ -225,7 +225,7 @@ jobs:
           connPrint=""
           if [ "${CI}" != "null" ]; then 
              conn=" -ci $(echo $CI | jq . -c)"
-             connPrint=" -ci '$(echo $CI | jq . -c)'" 
+             connPrint=" -ci '$(echo $CI | jq )'" 
           fi
 
           inputs2=""
@@ -238,7 +238,7 @@ jobs:
           echo -e "\n${green}⚡ Running create app: ${u_cyan}$NAME"
           echo -e "$STK create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $connPrint -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $inputs2Print\n" 
 
-          ${{ env.STK }} create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" $( echo $INPUTS | xargs)
+          ${{ env.STK }} create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" inputs2
       - name: Commit and Push.
         working-directory: user_repo
         run: |
