@@ -199,12 +199,6 @@ jobs:
         run: |
           git config --global user.email "${{ fromJson(github.event.inputs.cli_login).email }}"
           git config --global user.name "${{ fromJson(github.event.inputs.cli_login).email }}"
-      - name: Format inputs
-        if: fromJson(github.event.inputs.app).inputs != ''
-        id: formatinputs 
-        run: |
-          INPUTS=$(cat $GITHUB_EVENT_PATH | jq -r '.inputs.app' | jq -r '.inputs' )
-          python3 workflow_repo/.github/workflows/scripts/format_inputs.py "$INPUTS" >> $GITHUB_OUTPUT
       - name: Create
         env: 
           NAME: ${{ fromJson(github.event.inputs.app).name }}
