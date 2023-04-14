@@ -98,7 +98,6 @@ jobs:
           fi
           env=""
 
-          echo "env=${ACTION_ENV}"
           if [ "${ACTION_ENV}" != "null" ]; then
             env=" --env $ACTION_ENV"
           fi

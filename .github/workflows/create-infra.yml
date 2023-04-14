@@ -46,13 +46,10 @@ jobs:
       - name: Debug inputs
         if: env.DEBUG
         run: |
-          echo "infra:"
-          echo "${{ github.event.inputs.infra }}" | jq
-          echo "cli_login:"
-          echo "${{ github.event.inputs.cli_login }}" | jq
-          echo "action:"
-          echo "${{ github.event.inputs.actions }}"  | jq
+          echo "infra: ${{ github.event.inputs.infra }}"
+          echo "cli_login: ${{ github.event.inputs.cli_login }}"
           echo "workspace_slug: ${{ github.event.inputs.workspace_slug }}"
+          echo "action: ${{ github.event.inputs.actions }}"
 
       - name: "Validate Input: 'infra.name'"
         if: fromJson(github.event.inputs.infra).name == ''
@@ -151,8 +148,6 @@ jobs:
                 inputsRepo=$(echo "{\"org\": \"${{ env.GITHUB_ORG }}\",\"token\": \"${{ fromJson(github.event.inputs.secrets).scm_token }}\", \"name\": \"${{ fromJson(github.event.inputs.infra).name }}\", \"description\": \"${{ fromJson(github.event.inputs.infra).description }}\"} ")
                 inputs=$(echo "$inputsRepo" "$inputs" | jq -cs add)
               fi
-          
-              export COMMAND_ARGS_ENABLE_DEBUG=true
 
               echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"
               echo -e "$STK run action $name --inputs-json '$(echo "$inputs" | jq)' --non-interactive\n" 
@@ -275,6 +270,11 @@ jobs:
         uses: ./workflow_repo/github-actions/restore-stk-cache 
         with: 
           stk: ${{ env.STK }}
+      - name: Debug inputs
+        if: env.DEBUG
+        run: |
+          export APPLY_PLUGIN_ENABLE_DEBUG=true
+          export COMMAND_ARGS_ENABLE_DEBUG=true
       - name: Run actions
         working-directory: user_repo
         run: |
@@ -292,7 +292,6 @@ jobs:
               name=$(_jq -r '.name')
               inputs=$(_jq -c '.inputs')
           
-              export COMMAND_ARGS_ENABLE_DEBUG=true
 
               echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"
               echo -e "$STK run action $name --inputs-json '$(echo "$inputs" | jq)' --non-interactive\n" 
