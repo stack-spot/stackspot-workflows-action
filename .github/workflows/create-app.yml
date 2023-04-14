@@ -126,14 +126,14 @@ jobs:
         uses: ./github-actions/restore-stk-cache
         with: 
           stk: ${{ env.STK }}
-      - name: Debug inputs
-        if: env.DEBUG
-        run: |
-          export APPLY_PLUGIN_ENABLE_DEBUG=true
-          export COMMAND_ARGS_ENABLE_DEBUG=true
       - name: Run actions
         run: |
           source .github/workflows/scripts/enable_colors.sh
+          if $DEBUG
+          then
+            export APPLY_PLUGIN_ENABLE_DEBUG=true
+            export COMMAND_ARGS_ENABLE_DEBUG=true
+          fi
           i=0
           echo -e "\n"
           for row in $(echo '${{ github.event.inputs.actions }}' | jq '.before' | jq -r '.[] | @base64'); do
@@ -195,11 +195,6 @@ jobs:
         uses: ./workflow_repo/github-actions/restore-stk-cache 
         with: 
           stk: ${{ env.STK }}
-      - name: Debug inputs
-        if: env.DEBUG
-        run: |
-          export APPLY_PLUGIN_ENABLE_DEBUG=true
-          export COMMAND_ARGS_ENABLE_DEBUG=true
       - name: Set git username
         run: |
           git config --global user.email "${{ fromJson(github.event.inputs.cli_login).email }}"
@@ -214,11 +209,18 @@ jobs:
         env: 
           NAME: ${{ fromJson(github.event.inputs.app).name }}
           INPUTS: ${{ steps.formatinputs.outputs.stk_inputs }}
+          INPUTS2: ${{ toJson(fromJson(github.event.inputs.app).inputs) }}
           CI: ${{ toJson(fromJson(github.event.inputs.app).connectors) }}
           DESCRIPTION: ${{ fromJson(github.event.inputs.app).description }}
         working-directory: user_repo
         run: |
           source ../workflow_repo/.github/workflows/scripts/enable_colors.sh
+          if $DEBUG
+          then
+            export APPLY_PLUGIN_ENABLE_DEBUG=true
+            export COMMAND_ARGS_ENABLE_DEBUG=true
+          fi
+
           conn=""
           connPrint=""
           if [ "${CI}" != "null" ]; then 
@@ -226,8 +228,15 @@ jobs:
              connPrint=" -ci '$(echo $CI | jq . -c)'" 
           fi
 
+          inputs2=""
+          inputs2Print=""
+          if [ "${INPUTS2}" != "null" ]; then 
+             inputs2=" --inputs-json $(echo $INPUTS2 | jq . -c)"
+             inputs2Print=" --inputs-json '$(echo $INPUTS2 | jq )'" 
+          fi
+
           echo -e "\n${green}⚡ Running create app: ${u_cyan}$NAME"
-          echo -e "$STK create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $connPrint -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $INPUTS\n" 
+          echo -e "$STK create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $connPrint -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $inputs2Print\n" 
 
           ${{ env.STK }} create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" $( echo $INPUTS | xargs)
       - name: Commit and Push.
