@@ -199,7 +199,7 @@ jobs:
         run: |
           git config --global user.email "${{ fromJson(github.event.inputs.cli_login).email }}"
           git config --global user.name "${{ fromJson(github.event.inputs.cli_login).email }}"
-      - name: Create
+      - name: Create App
         env: 
           NAME: ${{ fromJson(github.event.inputs.app).name }}
           INPUTS: ${{ toJson(fromJson(github.event.inputs.app).inputs) }}
@@ -232,6 +232,10 @@ jobs:
           echo -e "$STK create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $connPrint -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $inputsPrint\n" 
 
           ${{ env.STK }} create app $NAME -S ${{ fromJson(github.event.inputs.app).starter }} $conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" $inputs
+      - name: Register app
+        working-directory: user_repo
+        run: |
+         ${{ env.STK }} register app
       - name: Commit and Push.
         working-directory: user_repo
         run: |
@@ -243,10 +247,6 @@ jobs:
             git commit -am "stackspot initial commit"
             git push
          fi
-      - name: Register app
-        working-directory: user_repo
-        run: |
-         ${{ env.STK }} register app
       - name: Show Error Log
         if: failure()
         run: |
