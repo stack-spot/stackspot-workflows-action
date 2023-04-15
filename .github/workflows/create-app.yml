@@ -235,6 +235,7 @@ jobs:
       - name: Register app
         working-directory: user_repo
         run: |
+         cd ${{ fromJson(github.event.inputs.app).name }}
          ${{ env.STK }} register app
       - name: Commit and Push.
         working-directory: user_repo
