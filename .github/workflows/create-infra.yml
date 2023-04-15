@@ -229,6 +229,7 @@ jobs:
       - name: Register infra
         working-directory: user_repo
         run: |
+         cd ${{ fromJson(github.event.inputs.infra).name }}
          ${{ env.STK }} register infra
       - name: Commit and Push.
         working-directory: user_repo
