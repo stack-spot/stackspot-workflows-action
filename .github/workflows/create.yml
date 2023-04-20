@@ -9,7 +9,7 @@ on:
       create:
         description: create info (json)
         required: true
-      type:
+      create_type:
         type: choice
         description: type
         required: true

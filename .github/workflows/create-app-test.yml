@@ -28,7 +28,7 @@ jobs:
     with:
       correlation_id: ${{ github.event.inputs.correlation_id }}
       create: ${{ github.event.inputs.app }}
-      type: app 
+      create_type: app 
       cli_login: ${{ github.event.inputs.cli_login }}
       workspace_slug: ${{ github.event.inputs.workspace_slug }}
       actions: ${{ github.event.inputs.actions }}
