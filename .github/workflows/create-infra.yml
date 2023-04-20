@@ -211,8 +211,8 @@ jobs:
           conn=""
           connPrint=""
           if [ "${CI}" != "null" ]; then 
-             conn=" -ci $(echo $CI | jq . -c)"
-             connPrint=" -ci '$(echo $CI | jq )'" 
+             conn=" --connection-interfaces $(echo $CI | jq . -c)"
+             connPrint=" --connection-interfaces '$(echo $CI | jq )'" 
           fi
 
           inputsValue="{}"
@@ -223,9 +223,9 @@ jobs:
           fi
 
           echo -e "\n${green}⚡ Running create infra: ${u_cyan}$NAME"
-          echo -e "$STK create infra $NAME -s ${{ fromJson(github.event.inputs.infra).stack }} $connPrint -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $inputsPrint\n" 
+          echo -e "$STK create infra $NAME --stack ${{ fromJson(github.event.inputs.infra).stack }} $connPrint --remote https://github.com/${{ steps.checkout_user_repo.outputs.repo }} --description '$DESCRIPTION' $inputsPrint\n" 
 
-          ${{ env.STK }} create infra $NAME -s ${{ fromJson(github.event.inputs.infra).stack }} $conn -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" --inputs-json "$inputsValue"
+          ${{ env.STK }} create infra $NAME --stack ${{ fromJson(github.event.inputs.infra).stack }} $conn --remote https://github.com/${{ steps.checkout_user_repo.outputs.repo }} --description "$DESCRIPTION" --inputs-json "$inputsValue"
       - name: Register infra
         working-directory: user_repo
         run: |
