@@ -221,17 +221,17 @@ jobs:
              connPrint=" -ci '$(echo $CI | jq )'" 
           fi
 
-          inputs=""
+          inputsValue="{}"
           inputsPrint=""
           if [ "${INPUTS}" != "null" ]; then 
-             inputs=" --inputs-json $(echo $INPUTS | jq . -c)"
              inputsPrint=" --inputs-json '$(echo $INPUTS | jq )'" 
+             inputsValue=$(echo $INPUTS | jq . -c)
           fi
 
           echo -e "\n${green}⚡ Running create app: ${u_cyan}$NAME"
           echo -e "$STK create app $NAME -s ${{ fromJson(github.event.inputs.app).starter }} $connPrint -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $inputsPrint\n" 
 
-          ${{ env.STK }} create app $NAME -s ${{ fromJson(github.event.inputs.app).starter }} $conn -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" $inputs
+          ${{ env.STK }} create app $NAME -s ${{ fromJson(github.event.inputs.app).starter }} $conn -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" --inputs-json "$inputsValue"
       - name: Register app
         working-directory: user_repo
         run: |

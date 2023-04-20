@@ -215,17 +215,17 @@ jobs:
              connPrint=" -ci '$(echo $CI | jq )'" 
           fi
 
-          inputs=""
+          inputsValue="{}"
           inputsPrint=""
           if [ "${INPUTS}" != "null" ]; then 
-             inputs=" --inputs-json $(echo $INPUTS | jq . -c)"
+             inputsValue=$(echo $INPUTS | jq . -c)
              inputsPrint=" --inputs-json '$(echo $INPUTS | jq )'" 
           fi
 
           echo -e "\n${green}⚡ Running create infra: ${u_cyan}$NAME"
           echo -e "$STK create infra $NAME -s ${{ fromJson(github.event.inputs.infra).stack }} $connPrint -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $inputsPrint\n" 
 
-          ${{ env.STK }} create infra $NAME -s ${{ fromJson(github.event.inputs.infra).stack }} $conn -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" $inputs
+          ${{ env.STK }} create infra $NAME -s ${{ fromJson(github.event.inputs.infra).stack }} $conn -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" --inputs-json "$inputsValue"
       - name: Register infra
         working-directory: user_repo
         run: |
