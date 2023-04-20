@@ -10,12 +10,8 @@ on:
         description: create info (json)
         required: true
       create_type:
-        type: choice
         description: type
         required: true
-        options: 
-        - app
-        - infra
       cli_login:
         description: CLI login info (json)
         required: true
