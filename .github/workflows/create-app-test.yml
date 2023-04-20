@@ -1,0 +1,53 @@
+name: Create
+run-name: ${{ inputs.correlation_id }}
+on: 
+  workflow_call:
+    inputs:
+      correlation_id:
+        description: Correlation id
+        required: true
+      create:
+        description: create info (json)
+        required: true
+      type:
+        type: choice
+        description: type
+        required: true
+        options: 
+        - app
+        - infra
+      cli_login:
+        description: CLI login info (json)
+        required: true
+      workspace_slug:
+        description: Workspace name
+        required: true
+      actions:
+        description: Actions (json)
+        required: false
+      github_org:
+        description: GitHub organization value (name)
+        required: true
+      config:
+        description: Extra config (json)
+        required: false
+        default: '{"default_branch": "main", "debug": true, "stk_version": "stk-beta"}'
+      secrets:
+        description: Secrets info (json)
+        required: true
+
+jobs:
+  call-workflow-passing-data:
+    uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@feature/reusable
+    with:
+      correlation_id: ${{ github.event.inputs.correlation_id }}
+      create: ${{ github.event.inputs.app }}
+      type: app 
+      cli_login: ${{ github.event.inputs.cli_login }}
+      workspace_slug: ${{ github.event.inputs.workspace_slug }}
+      actions: ${{ github.event.inputs.actions }}
+      github_org: ${{ github.repository_owner }}
+      config: '{"default_branch": "main", "debug": true, "stk_version": "stk-alpha"}'
+    secrets:
+      cli: ${{ fromJson(github.event.inputs.secrets).cli_token }}
+      git: ${{ fromJson(github.event.inputs.secrets).scm_token }}
