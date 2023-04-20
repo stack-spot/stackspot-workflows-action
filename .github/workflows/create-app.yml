@@ -217,8 +217,8 @@ jobs:
           conn=""
           connPrint=""
           if [ "${CI}" != "null" ]; then 
-             conn=" -ci $(echo $CI | jq . -c)"
-             connPrint=" -ci '$(echo $CI | jq )'" 
+             conn=" --connection-interfaces $(echo $CI | jq . -c)"
+             connPrint=" --connection-interfaces '$(echo $CI | jq )'" 
           fi
 
           inputsValue="{}"
@@ -229,9 +229,9 @@ jobs:
           fi
 
           echo -e "\n${green}⚡ Running create app: ${u_cyan}$NAME"
-          echo -e "$STK create app $NAME -s ${{ fromJson(github.event.inputs.app).starter }} $connPrint -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $inputsPrint\n" 
+          echo -e "$STK create app $NAME --starter ${{ fromJson(github.event.inputs.app).starter }} $connPrint --remote https://github.com/${{ steps.checkout_user_repo.outputs.repo }} --description '$DESCRIPTION' $inputsPrint --non-interactive\n" 
 
-          ${{ env.STK }} create app $NAME -s ${{ fromJson(github.event.inputs.app).starter }} $conn -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" --inputs-json "$inputsValue"
+          ${{ env.STK }} create app $NAME --starter ${{ fromJson(github.event.inputs.app).starter }} $conn --remote https://github.com/${{ steps.checkout_user_repo.outputs.repo }} --description "$DESCRIPTION" --inputs-json "$inputsValue" --non-interactive
       - name: Register app
         working-directory: user_repo
         run: |
