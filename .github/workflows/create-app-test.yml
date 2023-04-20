@@ -1,12 +1,12 @@
 name: Create
 run-name: ${{ inputs.correlation_id }}
 on: 
-  workflow_call:
+  workflow_dispatch:
     inputs:
       correlation_id:
         description: Correlation id
         required: true
-      create:
+      app:
         description: create info (json)
         required: true
       type:
@@ -30,7 +30,7 @@ on:
         required: true
 
 jobs:
-  call-workflow-passing-data:
+  create:
     uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@feature/reusable
     with:
       correlation_id: ${{ github.event.inputs.correlation_id }}
