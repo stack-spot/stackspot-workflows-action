@@ -25,13 +25,6 @@ on:
       actions:
         description: Actions (json)
         required: false
-      github_org:
-        description: GitHub organization value (name)
-        required: true
-      config:
-        description: Extra config (json)
-        required: false
-        default: '{"default_branch": "main", "debug": true, "stk_version": "stk-beta"}'
       secrets:
         description: Secrets info (json)
         required: true
