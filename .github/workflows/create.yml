@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Debug inputs
-        if: env.DEBUG
+        if: ${{ fromJson(github.event.inputs.config).debug }}
         run: |
           echo "create: ${{ github.event.inputs.create }}"
           echo "cli_login: ${{ github.event.inputs.cli_login }}"
@@ -125,6 +125,8 @@ jobs:
     runs-on: ${{ github.event.inputs.runner }}
     if: toJson(fromJson(github.event.inputs.actions).before) != '[]'
     needs: use-workspace
+    env:
+      DEBUG: ${{ fromJson(github.event.inputs.config).debug }}
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
@@ -175,6 +177,8 @@ jobs:
       always() &&
       needs.use-workspace.result == 'success' &&
       (needs.run-before-actions.result == 'success' || needs.run-before-actions.result == 'skipped')
+    env:
+      DEBUG: ${{ fromJson(github.event.inputs.config).debug }}
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
