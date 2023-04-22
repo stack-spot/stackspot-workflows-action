@@ -23,24 +23,24 @@ on:
         required: true
 
 jobs:
-  validate-inputs:
-    name: Validate Inputs
-    runs-on: ubuntu-latest
-    steps:
-      - name: Debug inputs
-        run: echo "${{ github.event.inputs.app }}"
-  # create:
-  #   uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@feature/reusable
-  #   with:
-  #     correlation_id: ${{ github.event.inputs.correlation_id }}
-  #     create: ${{ github.event.inputs.app }}
-  #     create_type: app 
-  #     cli_login: ${{ github.event.inputs.cli_login }}
-  #     workspace_slug: ${{ github.event.inputs.workspace_slug }}
-  #     actions: ${{ github.event.inputs.actions }}
-  #     github_org: ${{ github.repository_owner }}
-  #     config: "{\"default_branch\": \"main\", \"debug\": true, \"stk_version\": \"stk-ALPHA\"}"
-  #     runner: stackspot-stacks-prd
-  #   secrets:
-  #     cli: ${{ fromJson(github.event.inputs.secrets).cli_token }}
-  #     git: ${{ fromJson(github.event.inputs.secrets).scm_token }}
+#   validate-inputs:
+#     name: Validate Inputs
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Debug inputs
+#         run: echo "${{ github.event.inputs.app }}"
+  create:
+    uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@feature/reusable
+    with:
+      correlation_id: ${{ github.event.inputs.correlation_id }}
+      create: "${{ github.event.inputs.app }}"
+      create_type: app 
+      cli_login: ${{ github.event.inputs.cli_login }}
+      workspace_slug: ${{ github.event.inputs.workspace_slug }}
+      actions: ${{ github.event.inputs.actions }}
+      github_org: ${{ github.repository_owner }}
+      config: "{\"default_branch\": \"main\", \"debug\": true, \"stk_version\": \"stk-ALPHA\"}"
+      runner: stackspot-stacks-prd
+    secrets:
+      cli: ${{ fromJson(github.event.inputs.secrets).cli_token }}
+      git: ${{ fromJson(github.event.inputs.secrets).scm_token }}
