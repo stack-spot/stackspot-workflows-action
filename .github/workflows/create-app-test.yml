@@ -23,6 +23,9 @@ on:
         required: true
 
 jobs:
+  dev:
+    run: |
+      echo "create: ${{ github.event.inputs.app }}"
   create:
     uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@feature/reusable
     with:
