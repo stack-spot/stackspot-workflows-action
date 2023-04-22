@@ -33,7 +33,7 @@ jobs:
     uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@feature/reusable
     with:
       correlation_id: ${{ github.event.inputs.correlation_id }}
-      create: "${{ github.event.inputs.app }}"
+      create: ${{ github.event.inputs.app }}
       create_type: app 
       cli_login: ${{ github.event.inputs.cli_login }}
       workspace_slug: ${{ github.event.inputs.workspace_slug }}
