@@ -20,11 +20,12 @@ inputs:
 
 runs:
   using: "composite"
-  env:
-    DEBUG: ${{ inputs.debug }}
-    STK: ${{ inputs.stk }}
   steps:
     - name: Run actions
+      env:
+        DEBUG: ${{ inputs.debug }}
+        STK: ${{ inputs.stk }}
+      shell: bash
       run: |
         source .github/workflows/scripts/enable_colors.sh
         if $DEBUG
