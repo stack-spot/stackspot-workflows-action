@@ -1,5 +1,5 @@
 name: Create
-run-name: TEST
+run-name: ${{ github.event.inputs.correlation_id }}
 on: 
   workflow_dispatch:
     inputs:
@@ -32,7 +32,7 @@ jobs:
   create:
     uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@feature/reusable
     with:
-      create: ${{ github.event.inputs.create }}
+      create: ${{ github.event.inputs.app }}
       correlation_id: ${{ github.event.inputs.correlation_id }}
       create_type: app 
       cli_login: ${{ github.event.inputs.cli_login }}

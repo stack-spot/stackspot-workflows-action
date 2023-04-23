@@ -1,5 +1,5 @@
 name: Create
-run-name: "TEST"
+run-name: ${{ inputs.correlation_id }}
 on: 
   workflow_call:
     inputs:
