@@ -195,7 +195,7 @@ jobs:
         id: checkout_user_repo
         uses:  ./workflow_repo/github-actions/clone-external-repo
         with:
-          github_org: ${{ fromJson(inputs.config).github_org }}
+          github_org: ${{ inputs.github_org }}
           default_branch: ${{ fromJson(inputs.config).default_branch }}
           app_name: ${{ fromJson(inputs.create).name }}
           path: user_repo
@@ -282,7 +282,7 @@ jobs:
         id: checkout_user_repo
         uses:  ./workflow_repo/github-actions/clone-external-repo
         with:
-          github_org: ${{ fromJson(inputs.config).github_org }}
+          github_org: ${{ inputs.github_org }}
           app_name: ${{ fromJson(inputs.create).name }}
           path: user_repo
           token: ${{ secrets.git }}
