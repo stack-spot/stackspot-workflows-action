@@ -283,7 +283,7 @@ jobs:
     name: Run after actions
     runs-on: ${{ inputs.runner }}
     needs: create
-    if: toJson(fromJson(inputs.actions).before) != '[]'
+    if: toJson(fromJson(inputs.actions).after) != '[]'
     env:
       DEBUG: ${{ fromJson(inputs.config).debug }}
       STK: ${{ fromJson(inputs.config).stk }}
