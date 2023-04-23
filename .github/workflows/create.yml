@@ -1,5 +1,5 @@
 name: Create
-run-name: ${{ inputs.correlation_id }}
+run-name: "TEST"
 on: 
   workflow_call:
     inputs:
@@ -41,13 +41,13 @@ on:
       #   type: string
       #   required: false
       #   default: "{\"default_branch\": \"main\", \"debug\": true, \"stk_version\": \"stk-beta\"}"
-    secrets:
-        cli:
-          description: CLI secret login
-          required: true
-        git:
-          description: PAT secret git
-          required: true
+    # secrets:
+    #     cli:
+    #       description: CLI secret login
+    #       required: true
+    #     git:
+    #       description: PAT secret git
+    #       required: true
 
 
 jobs:

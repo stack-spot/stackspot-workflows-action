@@ -41,6 +41,6 @@ jobs:
       # github_org: ${{ github.repository_owner }}
       # config: "{\"default_branch\": \"main\", \"debug\": true, \"stk_version\": \"stk-ALPHA\"}"
       # runner: stackspot-stacks-prd
-    secrets:
-      cli: ${{ fromJson(github.event.inputs.secrets).cli_token }}
-      git: ${{ fromJson(github.event.inputs.secrets).scm_token }}
+    # secrets:
+    #   cli: ${{ fromJson(github.event.inputs.secrets).cli_token }}
+    #   git: ${{ fromJson(github.event.inputs.secrets).scm_token }}
