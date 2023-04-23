@@ -59,7 +59,7 @@ jobs:
       - name: Debug inputs
         # if: ${{ fromJson(github.event.inputs.config).debug }}
         run: |
-          echo "create: ${{ github.event.inputs.create }}"
+          echo "create_values: ${{ github.event.inputs.create_values }}"
           echo "cli_login: ${{ github.event.inputs.cli_login }}"
           echo "workspace_slug: ${{ github.event.inputs.workspace_slug }}"
           echo "action: ${{ github.event.inputs.actions }}"
