@@ -23,12 +23,12 @@ on:
         required: true
 
 jobs:
-#   validate-inputs:
-#     name: Validate Inputs
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Debug inputs
-#         run: echo "${{ github.event.inputs.app }}"
+  validate-inputs:
+    name: Validate Inputs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug inputs
+        run: echo "${{ github.event.inputs.app }}"
   create:
     uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@feature/reusable
     with:
