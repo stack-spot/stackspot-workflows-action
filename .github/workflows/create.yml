@@ -7,7 +7,7 @@ on:
       #   description: Correlation id
       #   type: string
       #   required: true
-      actions:
+      create_values:
         type: string
         required: true
       # create_type:
@@ -22,10 +22,10 @@ on:
       #   description: Workspace name
       #   type: string
       #   required: true
-      # actions:
-      #   description: Actions (json)
-      #   type: string
-      #   required: false
+      actions:
+        description: Actions (json)
+        type: string
+        required: false
       # github_org:
       #   description: GitHub organization value (name)
       #   type: string
