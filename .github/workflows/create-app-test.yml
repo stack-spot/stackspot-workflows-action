@@ -15,9 +15,9 @@ on:
       # workspace_slug:
       #   description: Workspace name
       #   required: true
-      # actions:
-      #   description: Actions (json)
-      #   required: false
+      actions:
+        description: Actions (json)
+        required: false
       # secrets:
       #   description: Secrets info (json)
       #   required: true
@@ -32,6 +32,7 @@ jobs:
   create:
     uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@feature/reusable
     with:
+      create_values: ASD
       actions: ASD
       # correlation_id: ${{ github.event.inputs.correlation_id }}
       # create_type: app 
