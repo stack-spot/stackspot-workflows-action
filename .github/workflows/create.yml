@@ -133,6 +133,7 @@ jobs:
       DEBUG: ${{ fromJson(inputs.config).debug }}
       STK: ${{ fromJson(inputs.config).stk }}
     steps:
+      - run: echo "${{ toJson(fromJson(inputs.actions).before) }}"
       - name: Checkout workflows repo
         uses: actions/checkout@v3
       - name: Restore STK Cache
