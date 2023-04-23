@@ -161,7 +161,7 @@ jobs:
 
               if $createRepo
               then
-                inputsRepo=$(echo "{\"org\": \"${{ fromJson(inputs.config).github_org }}\",\"token\": \"${{ secrets.git }}\", \"name\": \"${{ fromJson(inputs.create).name }}\", \"description\": \"${{ fromJson(inputs.create).description }}\"} ")
+                inputsRepo=$(echo "{\"org\": \"${{ inputs.github_org }}\",\"token\": \"${{ secrets.git }}\", \"name\": \"${{ fromJson(inputs.create).name }}\", \"description\": \"${{ fromJson(inputs.create).description }}\"} ")
                 inputs=$(echo "$inputsRepo" "$inputs" | jq -cs add)
               fi
 
