@@ -3,24 +3,24 @@ run-name: ${{ inputs.correlation_id }}
 on: 
   workflow_dispatch:
     inputs:
-      correlation_id:
-        description: Correlation id
-        required: true
+      # correlation_id:
+      #   description: Correlation id
+      #   required: true
       app:
         description: create info (json)
         required: true
-      cli_login:
-        description: CLI login info (json)
-        required: true
-      workspace_slug:
-        description: Workspace name
-        required: true
-      actions:
-        description: Actions (json)
-        required: false
-      secrets:
-        description: Secrets info (json)
-        required: true
+      # cli_login:
+      #   description: CLI login info (json)
+      #   required: true
+      # workspace_slug:
+      #   description: Workspace name
+      #   required: true
+      # actions:
+      #   description: Actions (json)
+      #   required: false
+      # secrets:
+      #   description: Secrets info (json)
+      #   required: true
 
 jobs:
   # validate-inputs:
