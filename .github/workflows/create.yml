@@ -127,7 +127,8 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: ${{ fromJson(inputs.config).origin_repository }}
-          ref: ${{ fromJson(inputs.config).origin_branch }}     
+          ref: ${{ fromJson(inputs.config).origin_branch }}   
+          token: ${{ secrets.git }}
       - name: Cache
         uses: ./github-actions/restore-stk-cache
         with: 
@@ -165,6 +166,7 @@ jobs:
         with:
           repository: ${{ fromJson(inputs.config).origin_repository }}
           ref: ${{ fromJson(inputs.config).origin_branch }}
+          token: ${{ secrets.git }}
       - name: Restore STK Cache
         uses: ./github-actions/restore-stk-cache
         with: 
@@ -199,10 +201,11 @@ jobs:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
         with:
-          repository: ${{ fromJson(inputs.config).origin_repository }}
-          ref: ${{ fromJson(inputs.config).origin_branch }}
           persist-credentials: false
           path: workflow_repo
+          repository: ${{ fromJson(inputs.config).origin_repository }}
+          ref: ${{ fromJson(inputs.config).origin_branch }}
+          token: ${{ secrets.git }}
       - name: Checkout the user repo
         id: checkout_user_repo
         uses:  ./workflow_repo/github-actions/clone-external-repo
@@ -292,6 +295,7 @@ jobs:
           path: workflow_repo
           repository: ${{ fromJson(inputs.config).origin_repository }}
           ref: ${{ fromJson(inputs.config).origin_branch }}
+          token: ${{ secrets.git }}
       - name: Checkout the user repo
         id: checkout_user_repo
         uses:  ./workflow_repo/github-actions/clone-external-repo
