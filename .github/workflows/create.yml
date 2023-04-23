@@ -63,7 +63,8 @@ jobs:
           echo "runner: ${{ github.event.inputs.runner }}"
           echo "cli_login: ${{ github.event.inputs.cli_login }}"
           echo "workspace_slug: ${{ github.event.inputs.workspace_slug }}"
-          echo "action: ${{ github.event.inputs.actions }}"
+          echo "actions: ${{ github.event.inputs.actions }}"
+          echo "actions: ${{ inputs.actions }}"
           echo "config: ${{ github.event.inputs.config }}"
       - name: "Validate Input: 'create.name'"
         if: fromJson(github.event.inputs.create).name == ''
