@@ -9,7 +9,7 @@ on:
       #   required: true
       create_values:
         type: string
-        required: true
+        required: false
       # create_type:
       #   description: type
       #   type: string
