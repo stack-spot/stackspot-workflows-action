@@ -75,10 +75,10 @@ jobs:
         run: |
          echo "ERROR: 'description' field not found in json for 'create' input"
          exit 1
-      - name: "Validate Input: 'create.s'"
-        if: fromJson(inputs.create).s == ''
+      - name: "Validate Input: 'create.starter' or 'create.stack' is defined"
+        if: ${{ (fromJson(inputs.create).starter == '') && (fromJson(inputs.create).stack == '') }}
         run: |
-         echo "ERROR: 'stack' field not found in json for 'create' input"
+         echo "ERROR: 'starter' and 'stack' field not found in json for 'create' input"
          exit 1
       - name: "Validate Input: 'cli_login.realm'"
         if: fromJson(inputs.cli_login).realm == ''
@@ -215,6 +215,7 @@ jobs:
           INPUTS: ${{ toJson(fromJson(inputs.create).inputs) }}
           CI: ${{ toJson(fromJson(inputs.create).connectors) }}
           DESCRIPTION: ${{ fromJson(inputs.create).description }}
+          S: ${{ fromJson(inputs.create).stack }}${{ fromJson(inputs.create).starter }}
         working-directory: user_repo
         run: |
           source ../workflow_repo/.github/workflows/scripts/enable_colors.sh
@@ -239,9 +240,9 @@ jobs:
           fi
 
           echo -e "\n${green}⚡ Running create ${{ inputs.type}}: ${u_cyan}$NAME"
-          echo -e "$STK create ${{ inputs.type}} $NAME -s ${{ fromJson(inputs.create).s }} $connPrint -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $inputsPrint\n" 
+          echo -e "$STK create ${{ inputs.type}} $NAME -s $S $connPrint -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $inputsPrint\n" 
 
-          $STK create ${{ inputs.type}} $NAME -s ${{ fromJson(inputs.create).s }} $conn -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" --inputs-json "$inputsValue"
+          $STK create ${{ inputs.type}} $NAME -s $S $conn -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" --inputs-json "$inputsValue"
       - name: Register ${{ inputs.type}}
         working-directory: user_repo
         run: |
