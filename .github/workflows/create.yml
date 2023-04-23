@@ -138,7 +138,7 @@ jobs:
       - name: Restore STK Cache
         uses: ./github-actions/restore-stk-cache
         with: 
-          stk: ${{ env.stk }}
+          stk: ${{ env.STK }}
       - name: Run actions
         run: |
           source .github/workflows/scripts/enable_colors.sh
@@ -290,7 +290,7 @@ jobs:
       - name: Restore STK Cache
         uses: ./workflow_repo/github-actions/restore-stk-cache 
         with: 
-          stk: ${{ env.stk }}
+          stk: ${{ env.STK }}
       - name: Run actions
         working-directory: user_repo
         run: |
