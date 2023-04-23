@@ -1,0 +1,56 @@
+name: 'Run actions'
+description: 'Run actions before/after'
+
+inputs:
+  actions:
+    required: true
+  stk:
+    required: true
+  github_org:
+    required: true
+  secret_git_token:
+    required: true
+  name:
+    required: true
+  description:
+    required: true
+  debug:
+    required: false
+    default: false
+
+runs:
+  using: "composite"
+  env:
+    DEBUG: ${{ inputs.debug }}
+    STK: ${{ inputs.stk }}
+  steps:
+    - name: Run actions
+      run: |
+        source .github/workflows/scripts/enable_colors.sh
+        if $DEBUG
+        then
+          export APPLY_PLUGIN_ENABLE_DEBUG=true
+          export COMMAND_ARGS_ENABLE_DEBUG=true
+        fi
+        i=0
+        echo -e "\n"
+        for row in $(echo '${{ inputs.actions }}' | jq -r '.[] | @base64'); do
+            i=$((i+1))
+            _jq() {
+              echo "${row}" | base64 --decode | jq ${1} "${2}"
+            }
+
+            name=$(_jq -r '.name')
+            inputs=$(_jq -c '.inputs')
+            createRepo=$(_jq -r '.create_repo')
+
+            if $createRepo
+            then
+              inputsRepo=$(echo "{\"org\": \"${{ inputs.github_org }}\",\"token\": \"${{ inputs.secret_git_token }}\", \"name\": \"${{ inputs.name }}\", \"description\": \"${{ input.description }}\"} ")
+              inputs=$(echo "$inputsRepo" "$inputs" | jq -cs add)
+            fi
+
+            echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"
+            echo -e "$STK run action $name --inputs-json '$(echo "$inputs" | jq)' --non-interactive\n" 
+            $STK run action "$name" --inputs-json "$inputs" --non-interactive
+        done
