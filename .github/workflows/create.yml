@@ -48,6 +48,8 @@ on:
         git:
           description: PAT secret git
           required: true
+env:
+  reusable_workflow_repo: stack-spot/stackspot-workflows-action
 
 jobs:
   validate-inputs:
@@ -100,6 +102,8 @@ jobs:
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
+        with:
+          repository: ${{ env.reusable_workflow_repo }}
       - name: Cache
         uses: ./github-actions/restore-stk-cache
         with: 
@@ -134,6 +138,8 @@ jobs:
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
+        with:
+          repository: ${{ env.reusable_workflow_repo }}
       - name: Restore STK Cache
         uses: ./github-actions/restore-stk-cache
         with: 
@@ -168,6 +174,7 @@ jobs:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
         with:
+          repository: ${{ env.reusable_workflow_repo }}
           persist-credentials: false
           path: workflow_repo
       - name: Checkout the user repo
@@ -257,6 +264,7 @@ jobs:
         with:
           persist-credentials: false
           path: workflow_repo
+          repository: ${{ env.reusable_workflow_repo }}
       - name: Checkout the user repo
         id: checkout_user_repo
         uses:  ./workflow_repo/github-actions/clone-external-repo
@@ -288,7 +296,6 @@ jobs:
             git commit -am "stackspot commit after actions"
             git push
          fi
-
       - name: Show Error Log
         if: failure()
         run: |
