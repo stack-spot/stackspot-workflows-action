@@ -33,7 +33,7 @@ jobs:
       workspace_slug: ${{ github.event.inputs.workspace_slug }}
       actions: ${{ github.event.inputs.actions }}
       github_org: ${{ github.repository_owner }}
-      config: "{\"default_branch\": \"main\", \"debug\": true, \"stk\": \"stk-beta\"}"
+      config: "{\"default_branch\": \"main\", \"debug\": true, \"stk\": \"stk-beta\", \"origin_repository\": \"stack-spot\/stackspot-workflows-action\", \"origin_branch\": \"feature/reusable\"}"
       runner: stackspot-stacks-prd
     secrets:
       cli: ${{ fromJson(github.event.inputs.secrets).cli_token }}
