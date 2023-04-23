@@ -40,7 +40,7 @@ on:
         description: Extra config (json)
         type: string
         required: false
-        default: "{\"default_branch\": \"main\", \"debug\": true, \"stk\": \"stk-beta\", \"origin_repository\": \"stack-spot\/stackspot-workflows-action\", \"origin_branch\": \"main\"}"
+        default: "{\"default_branch\": \"main\", \"debug\": true, \"stk\": \"stk-beta\", \"origin_repository\": \"stack-spot/stackspot-workflows-action\", \"origin_branch\": \"main\"}"
     secrets:
         cli:
           description: CLI secret login
