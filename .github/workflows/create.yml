@@ -8,7 +8,6 @@ on:
       #   type: string
       #   required: true
       create_values:
-        description: create
         type: string
         required: true
       # create_type:
