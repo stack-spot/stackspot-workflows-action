@@ -3,44 +3,44 @@ run-name: ${{ inputs.correlation_id }}
 on: 
   workflow_call:
     inputs:
-      correlation_id:
-        description: Correlation id
-        type: string
-        required: true
+      # correlation_id:
+      #   description: Correlation id
+      #   type: string
+      #   required: true
       create_values:
         description: create
         type: string
         required: true
-      create_type:
-        description: type
-        type: string
-        required: true
-      cli_login:
-        description: CLI login info (json)
-        type: string
-        required: true
-      workspace_slug:
-        description: Workspace name
-        type: string
-        required: true
-      actions:
-        description: Actions (json)
-        type: string
-        required: false
-      github_org:
-        description: GitHub organization value (name)
-        type: string
-        required: true
-      runner:
-        description: Runner name
-        type: string
-        default: ubuntu-latest
-        required: false
-      config:
-        description: Extra config (json)
-        type: string
-        required: false
-        default: "{\"default_branch\": \"main\", \"debug\": true, \"stk_version\": \"stk-beta\"}"
+      # create_type:
+      #   description: type
+      #   type: string
+      #   required: true
+      # cli_login:
+      #   description: CLI login info (json)
+      #   type: string
+      #   required: true
+      # workspace_slug:
+      #   description: Workspace name
+      #   type: string
+      #   required: true
+      # actions:
+      #   description: Actions (json)
+      #   type: string
+      #   required: false
+      # github_org:
+      #   description: GitHub organization value (name)
+      #   type: string
+      #   required: true
+      # runner:
+      #   description: Runner name
+      #   type: string
+      #   default: ubuntu-latest
+      #   required: false
+      # config:
+      #   description: Extra config (json)
+      #   type: string
+      #   required: false
+      #   default: "{\"default_branch\": \"main\", \"debug\": true, \"stk_version\": \"stk-beta\"}"
     secrets:
         cli:
           description: CLI secret login
