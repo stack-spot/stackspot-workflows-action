@@ -7,8 +7,8 @@ on:
         description: Correlation id
         type: string
         required: true
-      create:
-        description: create info (json)
+      create_values:
+        description: CLI login info (json)
         type: string
         required: true
       create_type:
