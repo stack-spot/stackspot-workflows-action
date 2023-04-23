@@ -47,7 +47,7 @@ runs:
 
             if $createRepo
             then
-              inputsRepo=$(echo "{\"org\": \"${{ inputs.github_org }}\",\"token\": \"${{ inputs.secret_git_token }}\", \"name\": \"${{ inputs.name }}\", \"description\": \"${{ input.description }}\"} ")
+              inputsRepo=$(echo "{\"org\": \"${{ inputs.github_org }}\",\"token\": \"${{ inputs.secret_git_token }}\", \"name\": \"${{ inputs.name }}\", \"description\": \"${{ inputs.description }}\"} ")
               inputs=$(echo "$inputsRepo" "$inputs" | jq -cs add)
             fi
 
