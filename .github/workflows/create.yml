@@ -49,7 +49,6 @@ on:
           description: PAT secret git
           required: true
 
-
 jobs:
   validate-inputs:
 
@@ -133,43 +132,22 @@ jobs:
       DEBUG: ${{ fromJson(inputs.config).debug }}
       STK: ${{ fromJson(inputs.config).stk }}
     steps:
-      - run: echo "${{ toJson(fromJson(inputs.actions).before) }}"
       - name: Checkout workflows repo
         uses: actions/checkout@v3
       - name: Restore STK Cache
         uses: ./github-actions/restore-stk-cache
         with: 
           stk: ${{ env.STK }}
-      - name: Run actions
-        run: |
-          source .github/workflows/scripts/enable_colors.sh
-          if $DEBUG
-          then
-            export APPLY_PLUGIN_ENABLE_DEBUG=true
-            export COMMAND_ARGS_ENABLE_DEBUG=true
-          fi
-          i=0
-          echo -e "\n"
-          for row in $(echo '${{ inputs.actions }}' | jq '.before' | jq -r '.[] | @base64'); do
-              i=$((i+1))
-              _jq() {
-                echo "${row}" | base64 --decode | jq ${1} "${2}"
-              }
-
-              name=$(_jq -r '.name')
-              inputs=$(_jq -c '.inputs')
-              createRepo=$(_jq -r '.create_repo')
-
-              if $createRepo
-              then
-                inputsRepo=$(echo "{\"org\": \"${{ inputs.github_org }}\",\"token\": \"${{ secrets.git }}\", \"name\": \"${{ fromJson(inputs.create).name }}\", \"description\": \"${{ fromJson(inputs.create).description }}\"} ")
-                inputs=$(echo "$inputsRepo" "$inputs" | jq -cs add)
-              fi
-
-              echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"
-              echo -e "$STK run action $name --inputs-json '$(echo "$inputs" | jq)' --non-interactive\n" 
-              $STK run action "$name" --inputs-json "$inputs" --non-interactive
-          done
+      - name: Run actions before
+        uses: ./github-actions/run-actions
+        with:
+          actions: ${{ fromJson(inputs.actions).before }}
+          stk: ${{ env.STK }}
+          github_org: ${{ inputs.github_org }}
+          secret_git_token: ${{ secrets.git }}
+          name: ${{ fromJson(inputs.create).name }}
+          description: ${{ fromJson(inputs.create).description }}
+          debug: ${{ env.DEBUG }}
       - name: Show Error Log
         if: failure()
         run: |
@@ -200,7 +178,7 @@ jobs:
           default_branch: ${{ fromJson(inputs.config).default_branch }}
           app_name: ${{ fromJson(inputs.create).name }}
           path: user_repo
-          token: ${{ secrets.git }}
+          secret_git_token: ${{ secrets.git }}
           github_url: ${{ fromJson(inputs.create).repo }}
       - name: Restore STK Cache
         uses: ./workflow_repo/github-actions/restore-stk-cache 
@@ -269,7 +247,7 @@ jobs:
     name: Run after actions
     runs-on: ${{ inputs.runner }}
     needs: create
-    if: fromJson(inputs.actions).after != ''
+    if: toJson(fromJson(inputs.actions).before) != '[]'
     env:
       DEBUG: ${{ fromJson(inputs.config).debug }}
       STK: ${{ fromJson(inputs.config).stk }}
@@ -286,38 +264,22 @@ jobs:
           github_org: ${{ inputs.github_org }}
           app_name: ${{ fromJson(inputs.create).name }}
           path: user_repo
-          token: ${{ secrets.git }}
+          secret_git_token: ${{ secrets.git }}
           github_url: ${{ fromJson(inputs.create).repo }}
       - name: Restore STK Cache
         uses: ./workflow_repo/github-actions/restore-stk-cache 
         with: 
           stk: ${{ env.STK }}
-      - name: Run actions
-        working-directory: user_repo
-        run: |
-          source ../workflow_repo/.github/workflows/scripts/enable_colors.sh
-          git config --global user.email "${{ fromJson(inputs.cli_login).email }}"
-          git config --global user.name "${{ fromJson(inputs.cli_login).email }}"
-          if $DEBUG
-          then
-            export APPLY_PLUGIN_ENABLE_DEBUG=true
-            export COMMAND_ARGS_ENABLE_DEBUG=true
-          fi
-          i=0
-          echo -e "\n"
-          for row in $(echo '${{ inputs.actions }}' | jq '.after' | jq -r '.[] | @base64'); do
-              i=$((i+1))
-              _jq() {
-                echo "${row}" | base64 --decode | jq ${1} "${2}"
-              }
-
-              name=$(_jq -r '.name')
-              inputs=$(_jq -c '.inputs')
-
-              echo -e "\n${green}⚡ Running Action $i: ${u_cyan}$name"
-              echo -e "$STK run action $name --inputs-json '$(echo "$inputs" | jq)' --non-interactive\n" 
-              $STK run action "$name" --inputs-json "$inputs" --non-interactive
-          done
+      - name: Run actions after
+        uses: ./github-actions/run-actions
+        with:
+          actions: ${{ fromJson(inputs.actions).after }}
+          stk: ${{ env.STK }}
+          github_org: ${{ inputs.github_org }}
+          secret_git_token: ${{ secrets.git }}
+          name: ${{ fromJson(inputs.create).name }}
+          description: ${{ fromJson(inputs.create).description }}
+          debug: ${{ env.DEBUG }}
       - name: Commit and Push.
         working-directory: user_repo
         run: |
