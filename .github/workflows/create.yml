@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Debug inputs
-        # if: ${{ fromJson(inputs.config).debug }}
+        if: ${{ fromJson(inputs.config).debug }}
         run: |
           echo "create: ${{ inputs.create }}"
           echo "runner: ${{ inputs.runner }}"
@@ -96,21 +96,23 @@ jobs:
     name: Use Workspace
     runs-on: ${{ inputs.runner }}
     needs: validate-inputs
+    env: 
+      STK: ${{ fromJson(inputs.config).stk }}
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
       - name: Cache
         uses: ./github-actions/restore-stk-cache
         with: 
-          stk: ${{ fromJson(inputs.config).stk }}
+          stk: ${{ env.STK }}
       - name: Install STK
         uses: ./github-actions/install-stk-cli
         with: 
-          stk: ${{ fromJson(inputs.config).stk }}
+          stk: ${{ env.STK }}
       - name: Login STK
         uses: ./github-actions/login-stk
         with: 
-          stk: ${{ fromJson(inputs.config).stk }}
+          stk: ${{ env.STK }}
           email: ${{ fromJson(inputs.cli_login).email }}
           pat: ${{ secrets.cli }}
           realm: ${{ fromJson(inputs.cli_login).realm }}
@@ -129,13 +131,14 @@ jobs:
     needs: use-workspace
     env:
       DEBUG: ${{ fromJson(inputs.config).debug }}
+      STK: ${{ fromJson(inputs.config).stk }}
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
       - name: Restore STK Cache
         uses: ./github-actions/restore-stk-cache
         with: 
-          stk: ${{ fromJson(inputs.config).stk }}
+          stk: ${{ env.stk }}
       - name: Run actions
         run: |
           source .github/workflows/scripts/enable_colors.sh
@@ -181,6 +184,7 @@ jobs:
       (needs.run-before-actions.result == 'success' || needs.run-before-actions.result == 'skipped')
     env:
       DEBUG: ${{ fromJson(inputs.config).debug }}
+      STK: ${{ fromJson(inputs.config).stk }}
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
@@ -200,7 +204,7 @@ jobs:
       - name: Restore STK Cache
         uses: ./workflow_repo/github-actions/restore-stk-cache 
         with: 
-          stk: ${{ fromJson(inputs.config).stk }}
+          stk: ${{ env.STK }}
       - name: Set git username
         run: |
           git config --global user.email "${{ fromJson(inputs.cli_login).email }}"
@@ -237,12 +241,12 @@ jobs:
           echo -e "\n${green}⚡ Running create ${{ inputs.type}}: ${u_cyan}$NAME"
           echo -e "$STK create ${{ inputs.type}} $NAME -s ${{ fromJson(inputs.create).s }} $connPrint -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $inputsPrint\n" 
 
-          ${{ fromJson(inputs.config).stk }} create ${{ inputs.type}} $NAME -s ${{ fromJson(inputs.create).s }} $conn -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" --inputs-json "$inputsValue"
+          $STK create ${{ inputs.type}} $NAME -s ${{ fromJson(inputs.create).s }} $conn -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" --inputs-json "$inputsValue"
       - name: Register ${{ inputs.type}}
         working-directory: user_repo
         run: |
          cd ${{ fromJson(inputs.create).name }}
-         ${{ fromJson(inputs.config).stk }} register ${{ inputs.type}}
+         $STK register ${{ inputs.type}}
       - name: Commit and Push.
         working-directory: user_repo
         run: |
@@ -264,6 +268,9 @@ jobs:
     runs-on: ${{ inputs.runner }}
     needs: create
     if: fromJson(inputs.actions).after != ''
+    env:
+      DEBUG: ${{ fromJson(inputs.config).debug }}
+      STK: ${{ fromJson(inputs.config).stk }}
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
@@ -282,7 +289,7 @@ jobs:
       - name: Restore STK Cache
         uses: ./workflow_repo/github-actions/restore-stk-cache 
         with: 
-          stk: ${{ fromJson(inputs.config).stk }}
+          stk: ${{ env.stk }}
       - name: Run actions
         working-directory: user_repo
         run: |
