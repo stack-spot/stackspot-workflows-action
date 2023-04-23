@@ -58,11 +58,6 @@ jobs:
       - name: Debug inputs
         if: ${{ fromJson(inputs.config).debug }}
         run: |
-          echo "repository: ${{ github.repository }}"
-          echo "ref_name: ${{ github.ref_name }}"
-          echo "action_repository: ${{ github.action_repository }}"
-          echo "action_ref: ${{ github.action_ref }}"
-          echo "action_ref: ${{ github.action_ref }}"
           echo "create: ${{ inputs.create }}"
           echo "runner: ${{ inputs.runner }}"
           echo "cli_login: ${{ inputs.cli_login }}"
