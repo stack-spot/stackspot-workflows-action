@@ -3,50 +3,51 @@ run-name: "TEST"
 on: 
   workflow_call:
     inputs:
-      # correlation_id:
-      #   description: Correlation id
-      #   type: string
-      #   required: true
-      create_values:
+      correlation_id:
+        description: Correlation id
         type: string
-        required: false
-      # create_type:
-      #   description: type
-      #   type: string
-      #   required: true
-      # cli_login:
-      #   description: CLI login info (json)
-      #   type: string
-      #   required: true
-      # workspace_slug:
-      #   description: Workspace name
-      #   type: string
-      #   required: true
+        required: true
+      create:
+        description: Json objet with create data
+        type: string
+        required: true
+      create_type:
+        description: type
+        type: string
+        required: true
+      cli_login:
+        description: CLI login info (json)
+        type: string
+        required: true
+      workspace_slug:
+        description: Workspace name
+        type: string
+        required: true
       actions:
         description: Actions (json)
         type: string
         required: false
-      # github_org:
-      #   description: GitHub organization value (name)
-      #   type: string
-      #   required: true
-      # runner:
-      #   description: Runner name
-      #   type: string
-      #   default: ubuntu-latest
-      #   required: false
-      # config:
-      #   description: Extra config (json)
-      #   type: string
-      #   required: false
-      #   default: "{\"default_branch\": \"main\", \"debug\": true, \"stk_version\": \"stk-beta\"}"
-    # secrets:
-    #     cli:
-    #       description: CLI secret login
-    #       required: true
-    #     git:
-    #       description: PAT secret git
-    #       required: true
+      github_org:
+        description: GitHub organization value (name)
+        type: string
+        required: true
+      runner:
+        description: Runner name
+        type: string
+        default: ubuntu-latest
+        required: false
+      config:
+        description: Extra config (json)
+        type: string
+        required: false
+        default: "{\"default_branch\": \"main\", \"debug\": true, \"stk_version\": \"stk-beta\"}"
+    secrets:
+        cli:
+          description: CLI secret login
+          required: true
+        git:
+          description: PAT secret git
+          required: true
 
 
 jobs:
@@ -56,38 +57,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Debug inputs
-        # if: ${{ fromJson(github.event.inputs.config).debug }}
+        # if: ${{ fromJson(inputs.config).debug }}
         run: |
-          echo "create_values: ${{ github.event.inputs.create_values }}"
-          echo "create_values: ${{ inputs.create_values }}"
-          echo "runner: ${{ github.event.inputs.runner }}"
-          echo "cli_login: ${{ github.event.inputs.cli_login }}"
-          echo "workspace_slug: ${{ github.event.inputs.workspace_slug }}"
-          echo "actions: ${{ github.event.inputs.actions }}"
+          echo "create: ${{ inputs.create }}"
+          echo "runner: ${{ inputs.runner }}"
+          echo "cli_login: ${{ inputs.cli_login }}"
+          echo "workspace_slug: ${{ inputs.workspace_slug }}"
           echo "actions: ${{ inputs.actions }}"
-          echo "config: ${{ github.event.inputs.config }}"
+          echo "config: ${{ inputs.config }}"
       - name: "Validate Input: 'create.name'"
-        if: fromJson(github.event.inputs.create).name == ''
+        if: fromJson(inputs.create).name == ''
         run: |
          echo "ERROR: 'name' field not found in json for 'create' input"
          exit 1
       - name: "Validate Input: 'create.description'"
-        if: fromJson(github.event.inputs.create).description == ''
+        if: fromJson(inputs.create).description == ''
         run: |
          echo "ERROR: 'description' field not found in json for 'create' input"
          exit 1
       - name: "Validate Input: 'create.s'"
-        if: fromJson(github.event.inputs.create).s == ''
+        if: fromJson(inputs.create).s == ''
         run: |
          echo "ERROR: 'stack' field not found in json for 'create' input"
          exit 1
       - name: "Validate Input: 'cli_login.realm'"
-        if: fromJson(github.event.inputs.cli_login).realm == ''
+        if: fromJson(inputs.cli_login).realm == ''
         run: |
          echo "ERROR: 'realm' field not found in json for 'cli_login' input"
          exit 1
       - name: "Validate Input: 'cli_login.email'"
-        if: fromJson(github.event.inputs.cli_login).email == ''
+        if: fromJson(inputs.cli_login).email == ''
         run: |
          echo "ERROR: 'email' field not found in json for 'cli_login' input"
          exit 1
@@ -95,7 +94,7 @@ jobs:
 
   use-workspace:
     name: Use Workspace
-    runs-on: ${{ github.event.inputs.runner }}
+    runs-on: ${{ inputs.runner }}
     needs: validate-inputs
     steps:
       - name: Checkout workflows repo
@@ -112,12 +111,12 @@ jobs:
         uses: ./github-actions/login-stk
         with: 
           stk: ${{ env.STK }}
-          email: ${{ fromJson(github.event.inputs.cli_login).email }}
+          email: ${{ fromJson(inputs.cli_login).email }}
           pat: ${{ secrets.cli }}
-          realm: ${{ fromJson(github.event.inputs.cli_login).realm }}
+          realm: ${{ fromJson(inputs.cli_login).realm }}
       - name: Use Workspace
         run: |
-          $STK use workspace ${{ github.event.inputs.workspace_slug }}
+          $STK use workspace ${{ inputs.workspace_slug }}
       - name: Show Error Log
         if: failure()
         run: |
@@ -125,11 +124,11 @@ jobs:
 
   run-before-actions:
     name: Run before actions
-    runs-on: ${{ github.event.inputs.runner }}
-    if: toJson(fromJson(github.event.inputs.actions).before) != '[]'
+    runs-on: ${{ inputs.runner }}
+    if: toJson(fromJson(inputs.actions).before) != '[]'
     needs: use-workspace
     env:
-      DEBUG: ${{ fromJson(github.event.inputs.config).debug }}
+      DEBUG: ${{ fromJson(inputs.config).debug }}
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
@@ -147,7 +146,7 @@ jobs:
           fi
           i=0
           echo -e "\n"
-          for row in $(echo '${{ github.event.inputs.actions }}' | jq '.before' | jq -r '.[] | @base64'); do
+          for row in $(echo '${{ inputs.actions }}' | jq '.before' | jq -r '.[] | @base64'); do
               i=$((i+1))
               _jq() {
                 echo "${row}" | base64 --decode | jq ${1} "${2}"
@@ -159,7 +158,7 @@ jobs:
 
               if $createRepo
               then
-                inputsRepo=$(echo "{\"org\": \"${{ fromJson(github.event.inputs.config).github_org }}\",\"token\": \"${{ secrets.git }}\", \"name\": \"${{ fromJson(github.event.inputs.create).name }}\", \"description\": \"${{ fromJson(github.event.inputs.create).description }}\"} ")
+                inputsRepo=$(echo "{\"org\": \"${{ fromJson(inputs.config).github_org }}\",\"token\": \"${{ secrets.git }}\", \"name\": \"${{ fromJson(inputs.create).name }}\", \"description\": \"${{ fromJson(inputs.create).description }}\"} ")
                 inputs=$(echo "$inputsRepo" "$inputs" | jq -cs add)
               fi
 
@@ -174,14 +173,14 @@ jobs:
 
   create:
     name: Create 
-    runs-on: ${{ github.event.inputs.runner }}
+    runs-on: ${{ inputs.runner }}
     needs: [use-workspace, run-before-actions, validate-inputs]
     if: |
       always() &&
       needs.use-workspace.result == 'success' &&
       (needs.run-before-actions.result == 'success' || needs.run-before-actions.result == 'skipped')
     env:
-      DEBUG: ${{ fromJson(github.event.inputs.config).debug }}
+      DEBUG: ${{ fromJson(inputs.config).debug }}
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
@@ -192,26 +191,26 @@ jobs:
         id: checkout_user_repo
         uses:  ./workflow_repo/github-actions/clone-external-repo
         with:
-          github_org: ${{ fromJson(github.event.inputs.config).github_org }}
-          default_branch: ${{ fromJson(github.event.inputs.config).default_branch }}
-          app_name: ${{ fromJson(github.event.inputs.create).name }}
+          github_org: ${{ fromJson(inputs.config).github_org }}
+          default_branch: ${{ fromJson(inputs.config).default_branch }}
+          app_name: ${{ fromJson(inputs.create).name }}
           path: user_repo
           token: ${{ secrets.git }}
-          github_url: ${{ fromJson(github.event.inputs.create).repo }}
+          github_url: ${{ fromJson(inputs.create).repo }}
       - name: Restore STK Cache
         uses: ./workflow_repo/github-actions/restore-stk-cache 
         with: 
           stk: ${{ env.STK }}
       - name: Set git username
         run: |
-          git config --global user.email "${{ fromJson(github.event.inputs.cli_login).email }}"
-          git config --global user.name "${{ fromJson(github.event.inputs.cli_login).email }}"
-      - name: Create ${{ github.event.inputs.type}}
+          git config --global user.email "${{ fromJson(inputs.cli_login).email }}"
+          git config --global user.name "${{ fromJson(inputs.cli_login).email }}"
+      - name: Create ${{ inputs.type}}
         env: 
-          NAME: ${{ fromJson(github.event.inputs.create).name }}
-          INPUTS: ${{ toJson(fromJson(github.event.inputs.create).inputs) }}
-          CI: ${{ toJson(fromJson(github.event.inputs.create).connectors) }}
-          DESCRIPTION: ${{ fromJson(github.event.inputs.create).description }}
+          NAME: ${{ fromJson(inputs.create).name }}
+          INPUTS: ${{ toJson(fromJson(inputs.create).inputs) }}
+          CI: ${{ toJson(fromJson(inputs.create).connectors) }}
+          DESCRIPTION: ${{ fromJson(inputs.create).description }}
         working-directory: user_repo
         run: |
           source ../workflow_repo/.github/workflows/scripts/enable_colors.sh
@@ -235,22 +234,22 @@ jobs:
              inputsPrint=" --inputs-json '$(echo $INPUTS | jq )'" 
           fi
 
-          echo -e "\n${green}⚡ Running create ${{ github.event.inputs.type}}: ${u_cyan}$NAME"
-          echo -e "$STK create ${{ github.event.inputs.type}} $NAME -s ${{ fromJson(github.event.inputs.create).s }} $connPrint -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $inputsPrint\n" 
+          echo -e "\n${green}⚡ Running create ${{ inputs.type}}: ${u_cyan}$NAME"
+          echo -e "$STK create ${{ inputs.type}} $NAME -s ${{ fromJson(inputs.create).s }} $connPrint -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $inputsPrint\n" 
 
-          ${{ env.STK }} create ${{ github.event.inputs.type}} $NAME -s ${{ fromJson(github.event.inputs.create).s }} $conn -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" --inputs-json "$inputsValue"
-      - name: Register ${{ github.event.inputs.type}}
+          ${{ env.STK }} create ${{ inputs.type}} $NAME -s ${{ fromJson(inputs.create).s }} $conn -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" --inputs-json "$inputsValue"
+      - name: Register ${{ inputs.type}}
         working-directory: user_repo
         run: |
-         cd ${{ fromJson(github.event.inputs.create).name }}
-         ${{ env.STK }} register ${{ github.event.inputs.type}}
+         cd ${{ fromJson(inputs.create).name }}
+         ${{ env.STK }} register ${{ inputs.type}}
       - name: Commit and Push.
         working-directory: user_repo
         run: |
          if [[ `git status --porcelain` ]]; then
-            rm -rf ${{ fromJson(github.event.inputs.create).name }}/.git
-            cp -r ${{ fromJson(github.event.inputs.create).name }}/. .
-            rm -fr ${{ fromJson(github.event.inputs.create).name }}
+            rm -rf ${{ fromJson(inputs.create).name }}/.git
+            cp -r ${{ fromJson(inputs.create).name }}/. .
+            rm -fr ${{ fromJson(inputs.create).name }}
             git add -A
             git commit -am "stackspot initial commit"
             git push
@@ -262,9 +261,9 @@ jobs:
 
   run-after-actions:
     name: Run after actions
-    runs-on: ${{ github.event.inputs.runner }}
+    runs-on: ${{ inputs.runner }}
     needs: create
-    if: fromJson(github.event.inputs.actions).after != ''
+    if: fromJson(inputs.actions).after != ''
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
@@ -275,11 +274,11 @@ jobs:
         id: checkout_user_repo
         uses:  ./workflow_repo/github-actions/clone-external-repo
         with:
-          github_org: ${{ fromJson(github.event.inputs.config).github_org }}
-          app_name: ${{ fromJson(github.event.inputs.create).name }}
+          github_org: ${{ fromJson(inputs.config).github_org }}
+          app_name: ${{ fromJson(inputs.create).name }}
           path: user_repo
           token: ${{ secrets.git }}
-          github_url: ${{ fromJson(github.event.inputs.create).repo }}
+          github_url: ${{ fromJson(inputs.create).repo }}
       - name: Restore STK Cache
         uses: ./workflow_repo/github-actions/restore-stk-cache 
         with: 
@@ -288,8 +287,8 @@ jobs:
         working-directory: user_repo
         run: |
           source ../workflow_repo/.github/workflows/scripts/enable_colors.sh
-          git config --global user.email "${{ fromJson(github.event.inputs.cli_login).email }}"
-          git config --global user.name "${{ fromJson(github.event.inputs.cli_login).email }}"
+          git config --global user.email "${{ fromJson(inputs.cli_login).email }}"
+          git config --global user.name "${{ fromJson(inputs.cli_login).email }}"
           if $DEBUG
           then
             export APPLY_PLUGIN_ENABLE_DEBUG=true
@@ -297,7 +296,7 @@ jobs:
           fi
           i=0
           echo -e "\n"
-          for row in $(echo '${{ github.event.inputs.actions }}' | jq '.after' | jq -r '.[] | @base64'); do
+          for row in $(echo '${{ inputs.actions }}' | jq '.after' | jq -r '.[] | @base64'); do
               i=$((i+1))
               _jq() {
                 echo "${row}" | base64 --decode | jq ${1} "${2}"
