@@ -310,7 +310,7 @@ jobs:
         with: 
           stk: ${{ env.STK }}
       - name: Run actions after
-        uses: ./github-actions/run-actions
+        uses: ./workflow_repo/github-actions/run-actions
         with:
           actions: ${{ toJson(fromJson(inputs.actions).after) }}
           stk: ${{ env.STK }}
