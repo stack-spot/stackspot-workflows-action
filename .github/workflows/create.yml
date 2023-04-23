@@ -174,7 +174,7 @@ jobs:
       - name: Run actions before
         uses: ./github-actions/run-actions
         with:
-          actions: ${{ fromJson(inputs.actions).before }}
+          actions: ${{ toJson(fromJson(inputs.actions).before) }}
           stk: ${{ env.STK }}
           github_org: ${{ inputs.github_org }}
           secret_git_token: ${{ secrets.git }}
@@ -312,7 +312,7 @@ jobs:
       - name: Run actions after
         uses: ./github-actions/run-actions
         with:
-          actions: ${{ fromJson(inputs.actions).after }}
+          actions: ${{ toJson(fromJson(inputs.actions).after) }}
           stk: ${{ env.STK }}
           github_org: ${{ inputs.github_org }}
           secret_git_token: ${{ secrets.git }}
