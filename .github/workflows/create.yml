@@ -59,7 +59,6 @@ jobs:
       - name: Debug inputs
         # if: ${{ fromJson(github.event.inputs.config).debug }}
         run: |
-          echo "all: ${{ fromJson(github.event.inputs) }}"
           echo "create: ${{ github.event.inputs.create }}"
           echo "cli_login: ${{ github.event.inputs.cli_login }}"
           echo "workspace_slug: ${{ github.event.inputs.workspace_slug }}"
