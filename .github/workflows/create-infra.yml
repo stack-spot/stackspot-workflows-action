@@ -32,7 +32,7 @@ jobs:
       cli_login: ${{ github.event.inputs.cli_login }}
       workspace_slug: ${{ github.event.inputs.workspace_slug }}
       actions: ${{ github.event.inputs.actions }}
-      github_org: ${{ github.repository_owner }}
+      github_org: guedes-spot
       config: "{\"default_branch\": \"main\", \"debug\": true, \"stk\": \"stk-alpha\", \"origin_repository\": \"stack-spot/stackspot-workflows-action\", \"origin_branch\": \"main\"}"
       runner: stackspot-stacks-qa
     secrets:
