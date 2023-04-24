@@ -255,9 +255,9 @@ jobs:
           fi
 
           echo -e "\n${green}⚡ Running create ${{ inputs.create_type}}: ${u_cyan}$NAME"
-          echo -e "$STK create ${{ inputs.create_type}} $NAME -S $S $connPrint -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $inputsPrint\n" 
+          echo -e "$STK create ${{ inputs.create_type}} $NAME -s $S $connPrint -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d '$DESCRIPTION' $inputsPrint\n" 
 
-          $STK create ${{ inputs.create_type}} $NAME -S $S $conn -R https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" --inputs-json "$inputsValue"
+          $STK create ${{ inputs.create_type}} $NAME -s $S $conn -r https://github.com/${{ steps.checkout_user_repo.outputs.repo }} -d "$DESCRIPTION" --inputs-json "$inputsValue"
       - name: Register ${{ inputs.create_type}}
         working-directory: user_repo
         run: |
