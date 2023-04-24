@@ -109,7 +109,7 @@ jobs:
         run: |
          echo "ERROR: 'origin_repository' field not found in json for 'config' input"
          exit 1
-      - name: "Validate Input: 'config.origin_repository'"
+      - name: "Validate Input: 'config.origin_branch'"
         if: fromJson(inputs.config).origin_branch == ''
         run: |
          echo "ERROR: 'origin_branch' field not found in json for 'config' input"
