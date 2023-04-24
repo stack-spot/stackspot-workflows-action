@@ -243,7 +243,7 @@ jobs:
           conn=""
           connPrint=""
           if [ "${CI}" != "null" ]; then 
-             conn=" --connection-interfaces $(echo $CI | jq . -c)"
+             conn="--connection-interfaces $(echo $CI | jq . -c)"
              connPrint=" --connection-interfaces '$(echo $CI | jq )'" 
           fi
 
@@ -251,12 +251,11 @@ jobs:
           inputsPrint=""
           if [ "${INPUTS}" != "null" ]; then 
              inputsValue=$(echo $INPUTS | jq . -c)
-             inputsPrint=" --inputs-json '$(echo $INPUTS | jq )'" 
+             inputsPrint="--inputs-json '$(echo $INPUTS | jq )'" 
           fi
 
-          if [ "${{ inputs.create_type}}" == "app" ]; then 
-            starter_stack="--starter $S"
-          else 
+          starter_stack="--starter $S"
+          if [ "${{ inputs.create_type}}" == "infra" ]; then 
             starter_stack="--stack $S"
           fi
 
