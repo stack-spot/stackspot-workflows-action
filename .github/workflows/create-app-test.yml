@@ -1,5 +1,5 @@
 name: Create
-run-name: ${{ inputs.correlation_id }}
+run-name: ${{ github.event.inputs.correlation_id }}
 on: 
   workflow_dispatch:
     inputs:
@@ -23,23 +23,17 @@ on:
         required: true
 
 jobs:
-  validate-inputs:
-    name: Validate Inputs
-    runs-on: ubuntu-latest
-    steps:
-      - name: Debug inputs
-        run: echo "${{ github.event.inputs.app }}"
   create:
     uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@feature/reusable
     with:
+      create: ${{ github.event.inputs.app }}
       correlation_id: ${{ github.event.inputs.correlation_id }}
-      create_values: "ASD"
       create_type: app 
       cli_login: ${{ github.event.inputs.cli_login }}
       workspace_slug: ${{ github.event.inputs.workspace_slug }}
       actions: ${{ github.event.inputs.actions }}
       github_org: ${{ github.repository_owner }}
-      config: "{\"default_branch\": \"main\", \"debug\": true, \"stk_version\": \"stk-ALPHA\"}"
+      config: "{\"default_branch\": \"main\", \"debug\": true, \"stk\": \"stk-beta\", \"origin_repository\": \"stack-spot\/stackspot-workflows-action\", \"origin_branch\": \"feature/reusable\"}"
       runner: stackspot-stacks-prd
     secrets:
       cli: ${{ fromJson(github.event.inputs.secrets).cli_token }}

@@ -10,7 +10,7 @@ inputs:
   path:
     description: Path to clone repository
     required: true
-  token:
+  secret_git_token:
     description: 'A Github token (pat or jwt)'
     required: true
   github_url:
@@ -43,17 +43,9 @@ runs:
         url=$(echo -n "${{inputs.github_url }}" | sed 's/.*github.com\///')
         echo "REPO=$url"  >> $GITHUB_ENV
         echo "REPO=$url"  >> $GITHUB_OUTPUT
-#    - name: Clone repo
-#      uses: actions/checkout@v3
-#      with:
-#        path: ${{ inputs.path}}
-#        repository: ${{ env.REPO }}
-#        token: ${{ inputs.token }}
-#        persist-credentials: true
-#        fetch-depth: 0
     - name: Clone repo
       shell: bash
       run: |
-        git clone https://${{inputs.token}}@github.com/${{ env.REPO }} ${{ inputs.path }}
+        git clone https://${{inputs.secret_git_token}}@github.com/${{ env.REPO }} ${{ inputs.path }}
         cd ${{ inputs.path }}
         git checkout ${{inputs.default_branch}} || git checkout -b ${{inputs.default_branch}}
