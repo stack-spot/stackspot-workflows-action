@@ -23,6 +23,7 @@ spec:
       type: text
       items:
         - Github
+        - Azure
         - Gitlab
         - Bitbucket
       default: Github
@@ -36,6 +37,14 @@ spec:
         variable: provider
         operator: ==
         value: Github
+    - type: run
+      trigger: after-render
+      commands:
+        - cp -r {{component_path}}/azure azure
+      condition:
+        variable: provider
+        operator: ==
+        value: Azure
     - type: run
       trigger: after-render
       commands:
