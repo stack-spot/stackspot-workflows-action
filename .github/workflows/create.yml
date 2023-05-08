@@ -231,6 +231,7 @@ jobs:
           CI: ${{ toJson(fromJson(inputs.create).connectors) }}
           DESCRIPTION: ${{ fromJson(inputs.create).description }}
           S: ${{ fromJson(inputs.create).stack }}${{ fromJson(inputs.create).starter }}
+          PLUGINS: ${{ fromJson(inputs.create).plugins }}
         working-directory: user_repo
         run: |
           source ../workflow_repo/.github/workflows/scripts/enable_colors.sh
@@ -259,10 +260,15 @@ jobs:
             starter_stack="--stack $S"
           fi
 
-          echo -e "\n${green}⚡ Running create ${{ inputs.create_type}}: ${u_cyan}$NAME"
-          echo -e "$STK create ${{ inputs.create_type}} $NAME $starter_stack $connPrint --remote https://github.com/${{ steps.checkout_user_repo.outputs.repo }} --description '$DESCRIPTION' $inputsPrint --non-interactive\n" 
+          plugins=""
+          if [ "${{ inputs.create_type}}" == "infra" ]; then 
+            plugins="--plugins $PLUGINS"
+          fi
 
-          $STK create ${{ inputs.create_type}} $NAME $starter_stack $conn --remote https://github.com/${{ steps.checkout_user_repo.outputs.repo }} --description "$DESCRIPTION" --inputs-json "$inputsValue" --non-interactive
+          echo -e "\n${green}⚡ Running create ${{ inputs.create_type}}: ${u_cyan}$NAME"
+          echo -e "$STK create ${{ inputs.create_type}} $NAME $starter_stack $plugins $connPrint --remote https://github.com/${{ steps.checkout_user_repo.outputs.repo }} --description '$DESCRIPTION' $inputsPrint --non-interactive\n" 
+
+          $STK create ${{ inputs.create_type}} $NAME $starter_stack $plugins $conn --remote https://github.com/${{ steps.checkout_user_repo.outputs.repo }} --description "$DESCRIPTION" --inputs-json "$inputsValue" --non-interactive
       - name: Register ${{ inputs.create_type}}
         working-directory: user_repo
         run: |
