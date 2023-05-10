@@ -4,7 +4,7 @@ metadata:
   name: stakspot-gh-mk-repo-with-secrts
   display-name: Stackspot Create GitHub Repo With Secrets
   description: Action to create github repository With Secrets
-  version: 1.0.0
+  version: 1.0.1
 spec:
   type: python
   about: docs/about.md
