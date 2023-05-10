@@ -278,6 +278,7 @@ jobs:
         working-directory: user_repo
         run: |
          if [[ `git status --porcelain` ]]; then
+            git checkout -b stackspot-$(date +%s)
             rm -rf ${{ fromJson(inputs.create).name }}/.git
             cp -r ${{ fromJson(inputs.create).name }}/. .
             rm -fr ${{ fromJson(inputs.create).name }}
