@@ -6,6 +6,13 @@ from nacl import encoding, public
 
 API_BASE_URL = "https://api.github.com"
 JWT_REGEX=r"^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-\+\/=]*)"
+CONFLICT_ERROR = {
+    "resource": "Repository",
+    "code": "custom",
+    "field": "name",
+    "message": "name already exists on this account"
+}
+
 
 def run(metadata):
     inputs = metadata.inputs
