@@ -339,6 +339,27 @@ jobs:
             git commit -am "stackspot commit after actions"
             git push
          fi
+      - name: Create Pull Request
+        env:
+          name: ${{ fromJson(inputs.create).name }}
+          description: ${{ fromJson(inputs.create).description }}
+          repository: ${{ fromJson(inputs.config).origin_repository }}
+          token: ${{ secrets.git }}
+        run: |
+          branch=$(git symbolic-ref --short HEAD)
+          repo=${repository}
+          api_url=${repo//github.com/api.github.com}
+          curl --location '$api_url/pulls'\
+            --header 'Authorization: Bearer ${token}' \
+            --header 'Accept: application/vnd.github+json' \
+            --header 'X-GitHub-Api-Version: 2022-11-28' \
+            --header 'Content-Type: application/json' \
+            --data '{
+              "title": "Create ${name}",
+              "body": "${description}",
+              "head": "$branch",
+              "base": "main"
+            }'
       - name: Show Error Log
         if: failure()
         run: |
