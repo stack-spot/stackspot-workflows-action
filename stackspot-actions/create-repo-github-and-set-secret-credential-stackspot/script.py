@@ -58,7 +58,7 @@ def run(metadata):
         raise Exception(output)
     elif r.status_code == 422 and response.get("errors") == [CONFLICT_ERROR]:
         print("Repository already exists!")
-    elif r.status_code != 201:
+    elif r.status_code == 201:
         print(f"Success created repository {response.get('html_url')}")
     else:
         output = "Repository creation failed. Output detail:\n\n" + json.dumps(response)
