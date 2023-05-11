@@ -31,12 +31,6 @@ jobs:
     name: Validate JSON Inputs
     runs-on: ubuntu-latest
     steps:
-      - name: Masking secrets inputs
-        run: |
-          SECRET_LOGIN_TOKEN=$(cat $GITHUB_EVENT_PATH | jq -r '.inputs.secrets' | jq -r '.cli_token' )
-          echo "::add-mask::$SECRET_LOGIN_TOKEN"
-          SECRET_LOGIN_TOKEN=$(cat $GITHUB_EVENT_PATH | jq -r '.inputs.secrets' )
-          echo "::add-mask::$SECRET_LOGIN_TOKEN"
       - name: Debug inputs
         if: env.DEBUG
         run: |
@@ -59,7 +53,7 @@ jobs:
          echo "ERROR: 'realm' field not found in json for 'cli_login' input"
          exit 1
       - name: "Validate Input: 'secrets.cli_token'"
-        if: fromJson(inputs.secrets).cli_token == ''
+        if: fromJson(secrets.secrets).cli_token == ''
         run: |
          echo "ERROR: 'cli_token' field not found in json for 'secrets' input"
          exit 1
@@ -88,7 +82,7 @@ jobs:
         with: 
           stk: ${{ fromJson(inputs.config).stk }}
           email: ${{ fromJson(inputs.cli_login).email }}
-          pat: ${{ fromJson(inputs.secrets).cli_token }}
+          pat: ${{ fromJson(secrets.secrets).cli_token }}
           realm: ${{ fromJson(inputs.cli_login).realm }}
       
       - name: Use workspace
