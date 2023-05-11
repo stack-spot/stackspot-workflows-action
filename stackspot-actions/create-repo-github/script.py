@@ -4,6 +4,12 @@ import re
 
 API_BASE_URL = "https://api.github.com"
 JWT_REGEX=r"^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-\+\/=]*)"
+CONFLICT_ERROR = {
+    "resource": "Repository",
+    "code": "custom",
+    "field": "name",
+    "message": "name already exists on this account"
+}
 
 def format_data(inputs: dict, name_parameters: list):
     data = {}
@@ -48,9 +54,11 @@ def run(metadata):
         output =  "Forbidden access, check your token value and try again"
         print(output)
         raise Exception(output)
-    if r.status_code != 201:
+    elif r.status_code == 422 and response.get("errors") == [CONFLICT_ERROR]:
+        print("Repository already exists!")
+    elif r.status_code == 201:
+        print(f"Success created repository {response.get('html_url')}")
+    else:
         output = "Repository creation failed. Output detail:\n\n" + json.dumps(response)
         print(output)
         raise Exception(output)
-
-    print(f"Success created repository {response.get('html_url')}")

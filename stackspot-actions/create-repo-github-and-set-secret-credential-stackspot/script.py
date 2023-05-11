@@ -6,6 +6,13 @@ from nacl import encoding, public
 
 API_BASE_URL = "https://api.github.com"
 JWT_REGEX=r"^([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_=]+)\.([a-zA-Z0-9_\-\+\/=]*)"
+CONFLICT_ERROR = {
+    "resource": "Repository",
+    "code": "custom",
+    "field": "name",
+    "message": "name already exists on this account"
+}
+
 
 def run(metadata):
     inputs = metadata.inputs
@@ -45,7 +52,18 @@ def run(metadata):
     r = requests.post(f"{API_BASE_URL}/orgs/{org}/repos", headers=headers, json=data, verify=False)
     response = r.json()
 
-    print(f"Success created repository {response.get('html_url')}")
+    if r.status_code == 403:
+        output =  "Forbidden access, check your token value and try again"
+        print(output)
+        raise Exception(output)
+    elif r.status_code == 422 and response.get("errors") == [CONFLICT_ERROR]:
+        print("Repository already exists!")
+    elif r.status_code == 201:
+        print(f"Success created repository {response.get('html_url')}")
+    else:
+        output = "Repository creation failed. Output detail:\n\n" + json.dumps(response)
+        print(output)
+        raise Exception(output)
 
     set_secret('STK_CLIENT_ID', client_id, org, repo_name, token)
     set_secret('STK_CLIENT_KEY', client_key, org, repo_name, token)
