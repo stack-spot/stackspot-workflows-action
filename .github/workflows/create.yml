@@ -282,6 +282,7 @@ jobs:
           description: ${{ fromJson(inputs.create).description }}
           token: ${{ secrets.git }}
           default_branch: ${{ fromJson(inputs.config).default_branch }}
+          repo: ${{ steps.checkout_user_repo.outputs.repo }}
         run: |
          if [[ `git status --porcelain` ]]; then
             bname=stackspot-$(date +%s)
@@ -293,9 +294,10 @@ jobs:
             git commit -am "stackspot initial commit"
             git push origin $bname
 
-            echo "https://api.github.com/${{ steps.checkout_user_repo.outputs.repo }}/pulls"
-            
-            curl --location "https://api.github.com/${{ steps.checkout_user_repo.outputs.repo }}/pulls"\
+            pr_url = "https://api.github.com/${repo}/pulls"
+            echo $pr_url
+
+            curl --location $pr_url\
               --header "Authorization: Bearer ${token}" \
               --header "Accept: application/vnd.github+json" \
               --header "X-GitHub-Api-Version: 2022-11-28" \
