@@ -293,6 +293,8 @@ jobs:
             git commit -am "stackspot initial commit"
             git push origin $bname
 
+            echo "https://api.github.com/${{ steps.checkout_user_repo.outputs.repo }}/pulls"
+            
             curl --location "https://api.github.com/${{ steps.checkout_user_repo.outputs.repo }}/pulls"\
               --header "Authorization: Bearer ${token}" \
               --header "Accept: application/vnd.github+json" \
