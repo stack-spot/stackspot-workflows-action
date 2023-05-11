@@ -286,7 +286,7 @@ jobs:
         run: |
          if [[ `git status --porcelain` ]]; then
             bname=stackspot-$(date +%s)
-            
+
             git checkout -b $bname
             rm -rf ${{ fromJson(inputs.create).name }}/.git
             cp -r ${{ fromJson(inputs.create).name }}/. .
@@ -296,6 +296,12 @@ jobs:
             git push origin $bname
 
             echo "https://api.github.com/${repo}/pulls"
+            echo "{
+              \"title\": \"Create ${name}\",
+              \"body\": \"${description}\",
+              \"head\": \"${bname}\",
+              \"base\": \"${default_branch}\"
+            }"
 
             curl --location "https://api.github.com/${repo}/pulls" \
               --header "Authorization: Bearer ${token}" \
