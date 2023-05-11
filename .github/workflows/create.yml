@@ -340,6 +340,12 @@ jobs:
             git commit -am "stackspot commit after actions"
             git push
          fi
+  
+  create-pull-request:
+    name: Create pull request
+    runs-on: ${{ inputs.runner }}
+    needs: create
+    steps:
       - name: Create Pull Request
         env:
           name: ${{ fromJson(inputs.create).name }}
