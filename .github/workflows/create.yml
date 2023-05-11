@@ -295,7 +295,7 @@ jobs:
             git commit -am "stackspot initial commit"
             git push origin $bname
 
-            echo "https://api.github.com/${repo}/pulls"
+            echo "https://api.github.com/repos/${repo}/pulls"
             echo "{
               \"title\": \"Create ${name}\",
               \"body\": \"${description}\",
@@ -303,7 +303,7 @@ jobs:
               \"base\": \"${default_branch}\"
             }"
 
-            curl --location "https://api.github.com/${repo}/pulls" \
+            curl --location "https://api.github.com/repos/${repo}/pulls" \
               --header "Authorization: Bearer ${token}" \
               --header "Accept: application/vnd.github+json" \
               --header "X-GitHub-Api-Version: 2022-11-28" \
