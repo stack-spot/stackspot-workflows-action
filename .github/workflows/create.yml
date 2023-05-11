@@ -274,18 +274,52 @@ jobs:
         run: |
          cd ${{ fromJson(inputs.create).name }}
          $STK register ${{ inputs.create_type}}
+
       - name: Commit and Push.
         working-directory: user_repo
+        env:
+          name: ${{ fromJson(inputs.create).name }}
+          description: ${{ fromJson(inputs.create).description }}
+          token: ${{ secrets.git }}
+          default_branch: ${{ fromJson(inputs.config).default_branch }}
+          repo: ${{ steps.checkout_user_repo.outputs.repo }}
         run: |
          if [[ `git status --porcelain` ]]; then
-            git checkout -b stackspot-$(date +%s)
+            bname=stackspot-$(date +%s)
+
+            git checkout -b $bname
             rm -rf ${{ fromJson(inputs.create).name }}/.git
             cp -r ${{ fromJson(inputs.create).name }}/. .
             rm -fr ${{ fromJson(inputs.create).name }}
             git add -A
             git commit -am "stackspot initial commit"
-            git push
+            git push origin $bname
+
+            echo "https://api.github.com/repos/${repo}/pulls"
+            echo "{
+              \"title\": \"Create ${name}\",
+              \"body\": \"${description}\",
+              \"head\": \"${bname}\",
+              \"base\": \"${default_branch}\"
+            }"
+
+            curl --location "https://api.github.com/repos/${repo}/pulls" \
+              --header "Authorization: Bearer ${token}" \
+              --header "Accept: application/vnd.github+json" \
+              --header "X-GitHub-Api-Version: 2022-11-28" \
+              --header "Content-Type: application/json" \
+              --data "{
+                \"title\": \"Create ${name}\",
+                \"body\": \"${description}\",
+                \"head\": \"${bname}\",
+                \"base\": \"${default_branch}\"
+              }"
          fi
+
+      - name: Show Error Log
+        if: failure()
+        run: |
+          cat ~/.$STK/logs/*
       - name: Show Error Log
         if: failure()
         run: |
@@ -335,30 +369,8 @@ jobs:
         working-directory: user_repo
         run: |
          if [[ `git status --porcelain` ]]; then
+            branch=$(git symbolic-ref --short HEAD)
             git add -A
             git commit -am "stackspot commit after actions"
-            git push
+            git push origin $branch
          fi
-      - name: Create Pull Request
-        env:
-          name: ${{ fromJson(inputs.create).name }}
-          description: ${{ fromJson(inputs.create).description }}
-          token: ${{ secrets.git }}
-          default_branch: ${{ fromJson(inputs.config).default_branch }}
-        run: |
-          branch=$(git symbolic-ref --short HEAD)
-          curl --location 'https://api.github.com/${{ steps.checkout_user_repo.outputs.repo }}/pulls'\
-            --header 'Authorization: Bearer ${token}' \
-            --header 'Accept: application/vnd.github+json' \
-            --header 'X-GitHub-Api-Version: 2022-11-28' \
-            --header 'Content-Type: application/json' \
-            --data '{
-              "title": "Create ${name}",
-              "body": "${description}",
-              "head": "$branch",
-              "base": "${default_branch}"
-            }'
-      - name: Show Error Log
-        if: failure()
-        run: |
-          cat ~/.$STK/logs/*
