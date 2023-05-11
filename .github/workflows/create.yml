@@ -336,9 +336,10 @@ jobs:
         working-directory: user_repo
         run: |
          if [[ `git status --porcelain` ]]; then
+            branch=$(git symbolic-ref --short HEAD)
             git add -A
             git commit -am "stackspot commit after actions"
-            git push
+            git push origin $branch
          fi
   
   create-pull-request:
