@@ -293,17 +293,17 @@ jobs:
             git commit -am "stackspot initial commit"
             git push origin $bname
 
-            curl --location 'https://api.github.com/${{ steps.checkout_user_repo.outputs.repo }}/pulls'\
-              --header 'Authorization: Bearer ${token}' \
-              --header 'Accept: application/vnd.github+json' \
-              --header 'X-GitHub-Api-Version: 2022-11-28' \
-              --header 'Content-Type: application/json' \
-              --data '{
-                "title": "Create ${name}",
-                "body": "${description}",
-                "head": "$bname",
-                "base": "${default_branch}"
-              }'
+            curl --location "https://api.github.com/${{ steps.checkout_user_repo.outputs.repo }}/pulls"\
+              --header "Authorization: Bearer ${token}" \
+              --header "Accept: application/vnd.github+json" \
+              --header "X-GitHub-Api-Version: 2022-11-28" \
+              --header "Content-Type: application/json" \
+              --data "{
+                \"title\": \"Create ${name}\",
+                \"body\": \"${description}\",
+                \"head\": \"$bname\",
+                \"base\": \"${default_branch}\"
+              }"
          fi
 
       - name: Show Error Log
