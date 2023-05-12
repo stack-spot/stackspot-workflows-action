@@ -74,12 +74,12 @@ jobs:
       - name: Install STK
         uses: ./github-actions/install-stk-cli
         with: 
-          stk: ${{ fromJson(inputs.config).stk }}
+          stk: ${{ fromJson(inputs.workflow_config).stk }}
       
       - name: Login STK
         uses: ./github-actions/login-stk
         with: 
-          stk: ${{ fromJson(inputs.config).stk }}
+          stk: ${{ fromJson(inputs.workflow_config).stk }}
           email: ${{ fromJson(inputs.cli_login).email }}
           pat: ${{ fromJson(secrets.secrets).cli_token }}
           realm: ${{ fromJson(inputs.cli_login).realm }}
