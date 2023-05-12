@@ -4,7 +4,7 @@ metadata:
   name: stakspot-github-create-repository
   display-name: Stackspot Create GitHub Repository
   description: Action to create github repository
-  version: 1.0.1
+  version: 1.0.2
 spec:
   type: python
   about: docs/about.md
