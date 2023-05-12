@@ -63,7 +63,7 @@ jobs:
     needs: validate-inputs
     env:
       INPUTS: '${{ inputs.action_inputs }}'
-    runs-on: fromJson(inputs.workflow_config).runner
+    runs-on: ${{ fromJson(inputs.workflow_config).runner }}
     steps:
       - name: Install STK
         uses: ./github-actions/install-stk-cli
