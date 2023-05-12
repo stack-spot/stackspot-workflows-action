@@ -28,8 +28,8 @@ on:
         description: Secrets info (json)
         required: true
 env:
-  STK: fromJson(inputs.workflow_config).stk
-  DEBUG: fromJson(inputs.workflow_config).debug
+  STK: ${{ fromJson(inputs.workflow_config).stk }}
+  DEBUG: ${{ fromJson(inputs.workflow_config).debug }}
 jobs:
 
   validate-inputs:
