@@ -65,6 +65,12 @@ jobs:
       INPUTS: '${{ inputs.action_inputs }}'
     runs-on: ${{ fromJson(inputs.workflow_config).runner }}
     steps:
+      - name: Checkout workflows repo
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ fromJson(inputs.config).origin_repository }}
+          ref: ${{ fromJson(inputs.config).origin_branch }}
+
       - name: Install STK
         uses: ./github-actions/install-stk-cli
         with: 
