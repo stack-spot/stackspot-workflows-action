@@ -57,11 +57,6 @@ jobs:
         run: |
          echo "ERROR: 'realm' field not found in json for 'cli_login' input"
          exit 1
-      - name: "Validate Input: 'secrets.cli_token'"
-        if: fromJson(secrets.secrets).cli_token == ''
-        run: |
-         echo "ERROR: 'cli_token' field not found in json for 'secrets' input"
-         exit 1
 
   run-action-using-stk-cli:
     name: Run Stackspot Action
@@ -70,13 +65,6 @@ jobs:
       INPUTS: '${{ inputs.action_inputs }}'
     runs-on: fromJson(inputs.workflow_config).runner
     steps:
-      - name: Checkout workflows repo
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ fromJson(inputs.config).origin_repository }}
-          ref: ${{ fromJson(inputs.config).origin_branch }}   
-          token: ${{ secrets.git }}
-      
       - name: Install STK
         uses: ./github-actions/install-stk-cli
         with: 
