@@ -5,26 +5,31 @@ on:
     inputs:
       correlation_id:
         description: Correlation id
+        type: string
         required: true
       action:
         description: Action info (json)
+        type: string
         required: true
       cli_login:
         description: CLI login info (json)
+        type: string
         required: true
       workspace_slug:
         description: Workspace identifier
+        type: string
         required: true
       workflow_config:
         description: Workflow config (json)
+        type: string
         required: true
     secrets:
       secrets:
         description: Secrets info (json)
         required: true
 env:
-  STK: fromJson(inputs.workflow_config).stk
-  DEBUG: fromJson(inputs.workflow_config).debug
+  STK: ${{ fromJson(inputs.workflow_config).stk }}
+  DEBUG: ${{ fromJson(inputs.workflow_config).debug }}
 jobs:
 
   validate-inputs:
@@ -52,35 +57,29 @@ jobs:
         run: |
          echo "ERROR: 'realm' field not found in json for 'cli_login' input"
          exit 1
-      - name: "Validate Input: 'secrets.cli_token'"
-        if: fromJson(secrets.secrets).cli_token == ''
-        run: |
-         echo "ERROR: 'cli_token' field not found in json for 'secrets' input"
-         exit 1
 
   run-action-using-stk-cli:
     name: Run Stackspot Action
     needs: validate-inputs
     env:
       INPUTS: '${{ inputs.action_inputs }}'
-    runs-on: fromJson(inputs.workflow_config).runner
+    runs-on: ${{ fromJson(inputs.workflow_config).runner }}
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
         with:
-          repository: ${{ fromJson(inputs.config).origin_repository }}
-          ref: ${{ fromJson(inputs.config).origin_branch }}   
-          token: ${{ secrets.git }}
-      
+          repository: ${{ fromJson(inputs.workflow_config).origin_repository }}
+          ref: ${{ fromJson(inputs.workflow_config).origin_branch }}
+
       - name: Install STK
         uses: ./github-actions/install-stk-cli
         with: 
-          stk: ${{ fromJson(inputs.config).stk }}
+          stk: ${{ fromJson(inputs.workflow_config).stk }}
       
       - name: Login STK
         uses: ./github-actions/login-stk
         with: 
-          stk: ${{ fromJson(inputs.config).stk }}
+          stk: ${{ fromJson(inputs.workflow_config).stk }}
           email: ${{ fromJson(inputs.cli_login).email }}
           pat: ${{ fromJson(secrets.secrets).cli_token }}
           realm: ${{ fromJson(inputs.cli_login).realm }}
