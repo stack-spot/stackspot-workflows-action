@@ -5,18 +5,23 @@ on:
     inputs:
       correlation_id:
         description: Correlation id
+        type: string
         required: true
       action:
         description: Action info (json)
+        type: string
         required: true
       cli_login:
         description: CLI login info (json)
+        type: string
         required: true
       workspace_slug:
         description: Workspace identifier
+        type: string
         required: true
       workflow_config:
         description: Workflow config (json)
+        type: string
         required: true
     secrets:
       secrets:
