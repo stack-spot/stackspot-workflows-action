@@ -2,6 +2,7 @@ import logging
 import tempfile
 import time
 import os
+import sys
 from typing import Optional
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -50,9 +51,10 @@ class Provider(ABC):
     
     def create_workflow_files(self, inputs: Inputs):
         logging.info("Creating workflow files...")
+        stk = sys.argv[0]
         os.system(f"rm -f create-app.yml crate-infra.yml run-action.yml")
         stk_apply_plugin_cmd = (
-            f"stk-alpha apply plugin {inputs.component_path} --skip-warning "
+            f"{stk} apply plugin {inputs.component_path} --skip-warning "
             f"--provider {inputs.provider} "
             f"--org_name {inputs.org_name} "
             f"--repo_name {inputs.repo_name} "
