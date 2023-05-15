@@ -288,7 +288,7 @@ jobs:
           if [ "${{ inputs.create_type}}" == "infra" ]; then 
             type="infra-id:"
           fi
-          register_id=$(cat .stk/stk.yaml | grep $type | cut -d : -f 2 | tr -d '[:space:]')
+          register_id=sudo cat .stk/stk.yaml | grep $type | cut -d : -f 2 | tr -d '[:space:]'
           echo $register_id
 
           curl --location --request PUT "${workflow_api}/executions" \
