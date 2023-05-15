@@ -1,0 +1,31 @@
+schema-version: v1
+kind: action
+metadata:
+  name: setup-stackspot-workflows
+  display-name: StackSpot Setup Workflows
+  description: Action to configure Stackspot workflows in SCM provider
+  version: 0.0.1
+spec: 
+  type: python
+  inputs:
+    - label: SCM provider
+      name: provider
+      type: text
+      items:
+        - Azure
+        - Github
+    - label: Organization Name
+      name: org_name
+      type: text
+      help: 'Inform your resource name (e.g.: Client)'
+    - label: Repository Name
+      name: repo_name
+      type: text
+    - label: Personal Access Token
+      name: pat
+      type: password
+    - label: Create Repository
+      name: create_repo
+      type: bool
+  python:
+    script: stackspot-actions/setup-stackspot-workflows/setup.py

@@ -1,0 +1,42 @@
+{% raw -%}
+trigger:
+- none
+
+name: ${{ parameters.correlation_id }}
+
+parameters:
+  - name: correlation_id
+    displayName: Correlation id
+    type: string
+  - name: workspace_slug
+    displayName: Workspace
+    type: string
+  - name: action
+    displayName: Action (json)
+    type: string
+  - name: cli_login
+    displayName: CLI login (json)
+    type: string
+
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: stack-spot/stackspot-workflows-action
+      endpoint: stackspot_github_connection
+
+pool:
+  name: default
+
+jobs:
+  - job:
+    displayName: run-action
+    steps:
+      - template: .azupre/run-action.yml@templates
+        parameters:
+          correlation_id: ${{ parameters.correlation_id }}
+          workspace_slug: ${{ parameters.workspace_slug }}
+          action: ${{ parameters.action }}
+          cli_login: ${{ parameters.cli_login }}
+          config: "{ \"debug\": true, \"stk\": \"stk-alpha\"}"
+{% endraw %}

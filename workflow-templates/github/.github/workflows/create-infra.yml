@@ -1,0 +1,44 @@
+{%- raw -%}
+name: Create Infra
+run-name: ${{ github.event.inputs.correlation_id }}
+on: 
+  workflow_dispatch:
+    inputs:
+      correlation_id:
+        description: Correlation id
+        required: true
+      infra:
+        description: create info (json)
+        required: true
+      cli_login:
+        description: CLI login info (json)
+        required: true
+      workspace_slug:
+        description: Workspace name
+        required: true
+      actions:
+        description: Actions (json)
+        required: false
+      secrets:
+        description: Secrets info (json)
+        required: true
+
+jobs:
+  create-infra:
+    uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@qa
+    with:
+      create: ${{ github.event.inputs.infra }}
+      correlation_id: ${{ github.event.inputs.correlation_id }}
+      create_type: infra 
+      cli_login: ${{ github.event.inputs.cli_login }}
+      workspace_slug: ${{ github.event.inputs.workspace_slug }}
+      actions: ${{ github.event.inputs.actions }}
+{%- endraw %}
+      github_org: {{github_org}}
+      config: "{\"default_branch\": \"{{default_branch}}\", \"debug\": false, \"stk\": \"stk\", \"origin_repository\": \"{{github_org}}/{{workflows_repo_name}}\", \"origin_branch\": \"{{default_branch}}\"}"
+      runner: {{runner}}
+{%- raw %}
+    secrets:
+      cli: ${{ fromJson(github.event.inputs.secrets).cli_token }}
+      git: ${{ fromJson(github.event.inputs.secrets).scm_token }}
+{% endraw %}

@@ -3,7 +3,7 @@ kind: plugin
 metadata:
   name: setup-runner
   display-name: setup-runner
-  description: Plugin to setup workflow to run actions
+  description: Plugin to setup StackSpot workflows
   version: 0.0.1
   picture: plugin.png
 spec:
@@ -18,46 +18,36 @@ spec:
   technologies: # Ref: https://docs.stackspot.com/docs/create-stacks/yaml-files/yaml/#technologies
     - Api
   inputs:
-    - label: Choose your SCM provider
+    - label: SCM provider
       name: provider
       type: text
       items:
-        - Github
         - Azure
-        - Gitlab
-        - Bitbucket
-      default: Github
-      required: true
+        - Github
+    - label: Organization Name
+      name: org_name
+      type: text
+      help: 'Inform your resource name (e.g.: Client)'
+    - label: Repository Name
+      name: repo_name
+      type: text
+    - label: Create Repository
+      name: create_repo
+      type: bool
   hooks:
-    - type: run
+    # Render workflows templates
+    - type: render-templates
       trigger: after-render
-      commands:
-        - cp -r {{component_path}}/.github .github
-      condition:
-        variable: provider
-        operator: ==
-        value: Github
-    - type: run
-      trigger: after-render
-      commands:
-        - cp -r {{component_path}}/azure azure
+      path: workflow-templates/azure
       condition:
         variable: provider
         operator: ==
         value: Azure
-    - type: run
+
+    - type: render-templates
       trigger: after-render
-      commands:
-        - echo Not implemented.
+      path: workflow-templates/github
       condition:
         variable: provider
         operator: ==
-        value: Gitlab
-    - type: run
-      trigger: after-render
-      commands:
-        - echo Not implemented.
-      condition:
-        variable: provider
-        operator: ==
-        value: Bitbucket
+        value: Github
