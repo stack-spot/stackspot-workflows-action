@@ -289,7 +289,11 @@ jobs:
             type="infra-id:"
           fi
           register_id=sudo cat .stk/stk.yaml | grep $type | cut -d : -f 2 | tr -d '[:space:]'
-          echo $register_id
+          
+          echo "{
+              \"correlation_id\": \"${correlation_id}\",
+              \"register_id\": \"${register_id}\"
+          }"
 
           curl --location --request PUT "${workflow_api}/executions" \
           --header "Authorization: ${token}" \
