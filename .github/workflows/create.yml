@@ -276,6 +276,7 @@ jobs:
          $STK register ${{ inputs.create_type}}
       
       - name: Send Register id to execution
+        working-directory: user_repo
         env:
           token: ${{ secrets.cli }}
           workflow_api: ${{ fromJson(inputs.config).workflow_api }}
