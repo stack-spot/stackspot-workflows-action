@@ -50,7 +50,7 @@ class AzureProvider(Provider):
         response.raise_for_status()
     
 
-    def __setup_pipeline(self, name: str, inputs: Inputs):
+    def __setup_pipeline(self, name: str, inputs: Inputs, repo_id: str):
         logging.info("Configuring pipeline %s...", name)
         url = UrlBuilder(inputs).path(inputs.repo_name).path("_apis").path("pipelines").build()
         response = requests.post(
@@ -72,13 +72,93 @@ class AzureProvider(Provider):
                         }
                     },
                     "repository": {
-                        "id": "63a33171-ad49-4c9b-b4f1-a8663c048840",
+                        "id": repo_id,
                         "type": "azureReposGit"
                     },
                 }
             }
         )
         self.__handle_api_response_errors(response)
+    
+
+    def __setup_github_connection(self, inputs:Inputs):
+        project_id = self.__get_project_id(inputs)
+        url = UrlBuilder(inputs).path(inputs.repo_name).path("_apis").path("serviceendpoint").path("endpoints").build()
+        body = {
+            "name": "stackspot_github_connection",
+            "description": "Connection to StackSpot github",
+            "type": "github",
+            "url": "https://github.com",
+            "authorization": {
+                "scheme": "Token",
+                "parameters": {
+                    "AccessToken": inputs.github_pat,
+                    "apitoken": ""
+                }
+            },
+            "serviceEndpointProjectReferences": [
+                {
+                    "projectReference": {
+                        "id": project_id,
+                        "name": inputs.repo_name
+                    },
+                    "name": "stackspot_github_connection",
+                    "description": "Connection to StackSpot github"
+                }
+            ]
+        }
+        response = requests.post(
+            url, 
+            headers=self.__default_headers(inputs),
+            params=self.default_params,
+            json=body
+        )
+        self.__handle_api_response_errors(response)
+        endpoint_id = response.json()["id"]
+        url = UrlBuilder(inputs).path(inputs.repo_name).path("_apis").path("pipelines").path("pipelinePermissions").path("endpoint").path(endpoint_id).build()
+        body =  {
+            "resource":{
+                "id": endpoint_id,
+                "type":"endpoint",
+                "name":""
+            },
+            "pipelines":[],
+            "allPipelines":{
+                "authorized":True,
+                "authorizedBy":None,
+                "authorizedOn":None
+            }
+        }
+        response = requests.patch(
+            url, 
+            headers=self.__default_headers(inputs),
+            params={
+                "api-version": "7.0-preview",
+            },
+            json=body
+        )
+        self.__handle_api_response_errors(response)
+
+    
+    def __get_repo_id(self, inputs: Inputs) -> str:
+        url = UrlBuilder(inputs).path(inputs.repo_name).path("_apis").path("git").path("repositories").path(inputs.repo_name).build()
+        response = requests.get(
+            url,
+            headers=self.__default_headers(inputs),
+            params=self.default_params,
+        )
+        self.__handle_api_response_errors(response)
+        return response.json()["id"]
+    
+    def __get_project_id(self, inputs: Inputs) -> str:
+        get_project_url = UrlBuilder(inputs).path("_apis").path("projects").path(inputs.repo_name).build()
+        response = requests.get(
+            url=get_project_url,
+            headers=self.__default_headers(inputs),
+            params=self.default_params
+        )
+        self.__handle_api_response_errors(response)
+        return response.json()["id"]
 
     def execute_repo_creation(self, inputs: Inputs):
         create_project_url = UrlBuilder(inputs).path("_apis").path("projects").build()
@@ -105,14 +185,8 @@ class AzureProvider(Provider):
 
 
     def repo_exists(self, inputs: Inputs) -> bool:
-        get_project_url = UrlBuilder(inputs).path("_apis").path("projects").path(inputs.repo_name).build()
-        response = requests.get(
-            url=get_project_url,
-            headers=self.__default_headers(inputs),
-            params=self.default_params
-        )
         try:
-            self.__handle_api_response_errors(response)
+            self.__get_project_id(inputs)
             return True
         except NotFoundError:
             return False
@@ -123,6 +197,8 @@ class AzureProvider(Provider):
         return f"https://{inputs.org_name}:{inputs.pat}@dev.azure.com/{inputs.org_name}/{inputs.repo_name}/_git/{inputs.repo_name}"
     
     def execute_provider_setup(self, inputs: Inputs):
-        self.__setup_pipeline("create-app", inputs)
-        self.__setup_pipeline("create-infra", inputs)
-        self.__setup_pipeline("run-action", inputs)
+        repo_id = self.__get_repo_id(inputs)
+        self.__setup_pipeline("create-app", inputs, repo_id)
+        self.__setup_pipeline("create-infra", inputs, repo_id)
+        self.__setup_pipeline("run-action", inputs, repo_id)
+        self.__setup_github_connection(inputs)

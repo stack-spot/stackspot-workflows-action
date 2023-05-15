@@ -24,8 +24,16 @@ spec:
     - label: Personal Access Token
       name: pat
       type: password
+    - label: Personal Access Token (Github)
+      name: github_pat
+      type: password
+      condition:
+        variable: provider
+        operator: ==
+        value: Azure
     - label: Create Repository
       name: create_repo
       type: bool
+
   python:
     script: stackspot-actions/setup-stackspot-workflows/setup.py

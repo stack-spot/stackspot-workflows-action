@@ -2,6 +2,7 @@ import logging
 import tempfile
 import time
 import os
+from typing import Optional
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from .errors import RepoAlreadyExistsError, RepoDoesNotExistError, CloningRepoError
@@ -15,6 +16,7 @@ class Inputs:
     provider: str
     repo_name: str
     target_path: str
+    github_pat: Optional[str] = None
 
 class Provider(ABC):
 
@@ -68,7 +70,7 @@ class Provider(ABC):
         ...
 
     @abstractmethod
-    def execute_repo_creation(self, inputs: Inputs) -> str:
+    def execute_repo_creation(self, inputs: Inputs):
         ...
 
     @abstractmethod

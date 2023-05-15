@@ -20,9 +20,9 @@ PROVIDERS: Mapping[str, Provider] = {
 
 def parse_inputs(metadata: Metadata) -> Inputs:
     inputs = metadata.inputs
-    field_valuse = { field.name: inputs.get(field.name) for field in fields(Inputs) }
+    field_values = { field.name: inputs.get(field.name) for field in fields(Inputs) }
     kwargs = {
-        **field_valuse,
+        **field_values,
         "component_path": metadata.component_path,
         "target_path": metadata.target_path,
     }
