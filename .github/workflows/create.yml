@@ -274,6 +274,34 @@ jobs:
         run: |
          cd ${{ fromJson(inputs.create).name }}
          $STK register ${{ inputs.create_type}}
+      
+      - name: Send Register id to execution
+        working-directory: user_repo
+        env:
+          token: ${{ secrets.cli }}
+          workflow_api: ${{ fromJson(inputs.config).workflow_api }}
+          correlation_id: ${{ inputs.correlation_id }}
+        run: |
+          cd ${{ fromJson(inputs.create).name }}
+          
+          type="app-id:"
+          if [ "${{ inputs.create_type}}" == "infra" ]; then 
+            type="infra-id:"
+          fi
+          register_id=$(sudo cat .stk/stk.yaml | grep $type | cut -d : -f 2 | tr -d '[:space:]')
+          
+          echo "{
+              \"correlation_id\": \"${correlation_id}\",
+              \"register_id\": \"${register_id}\"
+          }"
+
+          curl --location --request PUT "${workflow_api}/executions" \
+          --header "Authorization: ${token}" \
+          --header "Content-Type: application/json" \
+          --data-raw "{
+              \"correlation_id\": \"${correlation_id}\",
+              \"register_id\": \"${register_id}\"
+          }"
 
       - name: Commit and Push.
         working-directory: user_repo
