@@ -281,6 +281,8 @@ jobs:
           workflow_api: ${{ fromJson(inputs.config).workflow_api }}
           correlation_id: ${{ inputs.correlation_id }}
         run: |
+          cd ${{ fromJson(inputs.create).name }}
+          
           type="app-id:"
           if [ "${{ inputs.create_type}}" == "infra" ]; then 
             type="infra-id:"
