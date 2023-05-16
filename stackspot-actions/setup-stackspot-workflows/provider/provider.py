@@ -1,4 +1,5 @@
 import logging
+import requests
 import tempfile
 import time
 import os
@@ -6,7 +7,7 @@ import sys
 from typing import Optional
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from .errors import RepoAlreadyExistsError, RepoDoesNotExistError, CloningRepoError
+from .errors import RepoAlreadyExistsError, RepoDoesNotExistError, CloningRepoError, NotFoundError, UnauthorizedError
 
 @dataclass(frozen=True)
 class Inputs:
@@ -70,6 +71,18 @@ class Provider(ABC):
     def commit_and_push(self):
         logging.info("Commit and push workflow files to repo...")
         os.system(f"git branch -m main && git add . && git commit -m 'Initial commit' && git push origin main")
+    
+    
+    def _handle_api_response_errors(self, response: requests.Response) -> bool:
+        if response.ok:
+            return True
+        match response.status_code:
+            case requests.codes.not_found:
+                raise NotFoundError()
+            case requests.codes.unauthorized:
+                raise UnauthorizedError()
+        logging.error("Error response body: %s", response.text)
+        response.raise_for_status()
 
     @abstractmethod
     def execute_provider_setup(self, inputs: Inputs):

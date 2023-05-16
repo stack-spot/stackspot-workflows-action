@@ -38,17 +38,6 @@ class AzureProvider(Provider):
         auth_b64_bytes = base64.b64encode(auth_bytes)
         return f"Basic {auth_b64_bytes.decode()}"
     
-    def __handle_api_response_errors(self, response: requests.Response) -> bool:
-        if response.ok:
-            return True
-        match response.status_code:
-            case requests.codes.not_found:
-                raise NotFoundError()
-            case requests.codes.unauthorized:
-                raise UnauthorizedError()
-        logging.error("Error response body: %s", response.text)
-        response.raise_for_status()
-    
 
     def __setup_pipeline(self, name: str, inputs: Inputs, repo_id: str):
         logging.info("Configuring pipeline %s...", name)
@@ -78,7 +67,7 @@ class AzureProvider(Provider):
                 }
             }
         )
-        self.__handle_api_response_errors(response)
+        self._handle_api_response_errors(response)
     
 
     def __setup_github_connection(self, inputs:Inputs):
@@ -114,7 +103,7 @@ class AzureProvider(Provider):
             params=self.default_params,
             json=body
         )
-        self.__handle_api_response_errors(response)
+        self._handle_api_response_errors(response)
         endpoint_id = response.json()["id"]
         url = UrlBuilder(inputs).path(inputs.repo_name).path("_apis").path("pipelines").path("pipelinePermissions").path("endpoint").path(endpoint_id).build()
         body =  {
@@ -138,7 +127,7 @@ class AzureProvider(Provider):
             },
             json=body
         )
-        self.__handle_api_response_errors(response)
+        self._handle_api_response_errors(response)
 
     
     def __get_repo_id(self, inputs: Inputs) -> str:
@@ -148,7 +137,7 @@ class AzureProvider(Provider):
             headers=self.__default_headers(inputs),
             params=self.default_params,
         )
-        self.__handle_api_response_errors(response)
+        self._handle_api_response_errors(response)
         return response.json()["id"]
     
     def __get_project_id(self, inputs: Inputs) -> str:
@@ -158,7 +147,7 @@ class AzureProvider(Provider):
             headers=self.__default_headers(inputs),
             params=self.default_params
         )
-        self.__handle_api_response_errors(response)
+        self._handle_api_response_errors(response)
         return response.json()["id"]
 
     def execute_repo_creation(self, inputs: Inputs):
@@ -182,7 +171,7 @@ class AzureProvider(Provider):
             params=self.default_params,
             json=body
         )
-        self.__handle_api_response_errors(response)
+        self._handle_api_response_errors(response)
 
 
     def repo_exists(self, inputs: Inputs) -> bool:
