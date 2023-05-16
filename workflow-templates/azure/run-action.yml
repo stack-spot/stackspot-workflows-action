@@ -26,7 +26,13 @@ resources:
       endpoint: stackspot_github_connection
 
 pool:
-  name: default
+{% endraw %}
+  {% if use_self_hosted_pool %}
+  name: {{ self_hosted_pool_name }}
+  {%- else %}
+  vmImage: ubuntu-latest
+  {%- endif %}
+{% raw %}
 
 jobs:
   - job:

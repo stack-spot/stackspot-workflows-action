@@ -31,6 +31,20 @@ spec:
         variable: provider
         operator: ==
         value: Azure
+    - label: Do you want to use self-hosted agent pool to run workflows?
+      name: use_self_hosted_pool
+      type: bool
+      condition:
+        variable: provider
+        operator: ==
+        value: Azure
+    - label: Name of agent pool to use
+      name: self_hosted_pool_name
+      type: text
+      condition:
+        variable: use_self_hosted_pool
+        operator: ==
+        value: true
     - label: Create Repository
       name: create_repo
       type: bool

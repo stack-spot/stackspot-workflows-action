@@ -18,6 +18,9 @@ class Inputs:
     repo_name: str
     target_path: str
     github_pat: Optional[str] = None
+    use_self_hosted_pool: Optional[bool] = None
+    self_hosted_pool_name: Optional[str] = None
+
 
 class Provider(ABC):
 
@@ -56,10 +59,11 @@ class Provider(ABC):
         stk_apply_plugin_cmd = (
             f"{stk} apply plugin {inputs.component_path} --skip-warning "
             f"--provider {inputs.provider} "
-            f"--org_name {inputs.org_name} "
-            f"--repo_name {inputs.repo_name} "
-            f"--create_repo {inputs.create_repo}"
         )
+        if inputs.use_self_hosted_pool is not None:
+            stk_apply_plugin_cmd +=  f"--use_self_hosted_pool {inputs.use_self_hosted_pool} "
+        if inputs.self_hosted_pool_name is not None:
+            stk_apply_plugin_cmd +=  f"--self_hosted_pool_name {inputs.self_hosted_pool_name} "
         os.system(stk_apply_plugin_cmd)
         os.system(f"rm -rf .stk")
 

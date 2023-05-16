@@ -82,6 +82,7 @@ class AzureProvider(Provider):
     
 
     def __setup_github_connection(self, inputs:Inputs):
+        logging.info("Setting up github service connection...")
         project_id = self.__get_project_id(inputs)
         url = UrlBuilder(inputs).path(inputs.repo_name).path("_apis").path("serviceendpoint").path("endpoints").build()
         body = {
