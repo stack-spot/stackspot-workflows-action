@@ -1,0 +1,23 @@
+schema-version: v1
+kind: action
+metadata:
+  name: create-repo-azure
+  display-name: create-repo-azure
+  description: Create new Azure project and repository
+  version: 0.0.2
+spec:
+  type: python
+  about: docs/about.md
+  usage: docs/usage.md
+  release-notes: docs/release-notes.md
+  requirements: docs/requirements.md
+  implementation: docs/implementation.md
+  inputs:
+    - label: Azure project name
+      name: project_name
+      type: text
+      required: true
+      help: Input the Azure devOps project name, if it does not exist it will be created 
+  python:
+    workdir: .
+    script: script.py
