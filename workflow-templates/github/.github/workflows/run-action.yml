@@ -22,15 +22,19 @@ on:
       workflow_config:
         description: Workflow config
         required: false
-{%- endraw %}
         default: "{ 
-            \"runner\": \"{{runner}}\", 
+            {% endraw %}
+            {% if use_self_hosted_pool %}
+            \"runner\": \"{{ self_hosted_pool_name }}\",
+            {%- else %}
+            \"runner\": \"ubuntu-latest\",
+            {%- endif %}
+            {% raw %}
             \"debug\": false, 
-            \"stk\": \"stk\", 
-            \"origin_repository\": \"{{github_org}}/{{workflows_repo_name}}\", 
-            \"origin_branch\": \"feature/reusable\"
+            \"stk\": \"stk\",
+            \"origin_repository\": \"stack-spot/stackspot-workflows-action\", 
+            \"origin_branch\": \"main\"
           }"
-{%- raw %}
 jobs:
   create:
     uses: stack-spot/stackspot-workflows-action/.github/workflows/run-action.yml@main

@@ -31,14 +31,11 @@ spec:
         variable: provider
         operator: ==
         value: Azure
-    - label: Do you want to use self-hosted agent pool to run workflows?
+    - label: Do you want to use self-hosted runners to run StackSpot workflows?
       name: use_self_hosted_pool
       type: bool
-      condition:
-        variable: provider
-        operator: ==
-        value: Azure
-    - label: Name of agent pool to use
+      default: false
+    - label: Which self-hosted runner group do you want to use?
       name: self_hosted_pool_name
       type: text
       condition:

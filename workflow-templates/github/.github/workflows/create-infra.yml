@@ -25,7 +25,7 @@ on:
 
 jobs:
   create-infra:
-    uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@qa
+    uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@main
     with:
       create: ${{ github.event.inputs.infra }}
       correlation_id: ${{ github.event.inputs.correlation_id }}
@@ -33,11 +33,15 @@ jobs:
       cli_login: ${{ github.event.inputs.cli_login }}
       workspace_slug: ${{ github.event.inputs.workspace_slug }}
       actions: ${{ github.event.inputs.actions }}
-{%- endraw %}
-      github_org: {{github_org}}
-      config: "{\"default_branch\": \"{{default_branch}}\", \"debug\": false, \"stk\": \"stk\", \"origin_repository\": \"{{github_org}}/{{workflows_repo_name}}\", \"origin_branch\": \"{{default_branch}}\"}"
-      runner: {{runner}}
-{%- raw %}
+      github_org: ${{ github.repository_owner }}
+      config: "{\"default_branch\": \"main\", \"debug\": false, \"stk\": \"stk\", \"origin_repository\": \"stack-spot/stackspot-workflows-action\", \"origin_branch\": \"main\", \"workflow_api\": \"https://workflow-api.v1.stackspot.com\"}"
+      {% endraw %}
+      {% if use_self_hosted_pool %}
+      runner: {{ self_hosted_pool_name }}
+      {%- else %}
+      runner: ubuntu-latest
+      {%- endif %}
+      {% raw %}
     secrets:
       cli: ${{ fromJson(github.event.inputs.secrets).cli_token }}
       git: ${{ fromJson(github.event.inputs.secrets).scm_token }}
