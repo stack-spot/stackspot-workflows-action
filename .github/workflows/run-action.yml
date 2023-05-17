@@ -1,64 +1,61 @@
 name: Run Action
 run-name: ${{ inputs.correlation_id }}
 on: 
-  workflow_dispatch:
+  workflow_call:
     inputs:
       correlation_id:
         description: Correlation id
+        type: string
         required: true
       action:
         description: Action info (json)
-        required: true
-      secrets:
-        description: Secrets info (json)
+        type: string
         required: true
       cli_login:
         description: CLI login info (json)
+        type: string
         required: true
       workspace_slug:
         description: Workspace identifier
+        type: string
         required: true
-
+      workflow_config:
+        description: Workflow config (json)
+        type: string
+        required: true
+    secrets:
+      secrets:
+        description: Secrets info (json)
+        required: true
 env:
-  STK: stk-alpha #or 'stk-beta' or 'stk'
-  DEBUG: true
+  STK: ${{ fromJson(inputs.workflow_config).stk }}
+  DEBUG: ${{ fromJson(inputs.workflow_config).debug }}
 jobs:
 
   validate-inputs:
     name: Validate JSON Inputs
-    runs-on: [self-hosted, linux, stackspot-stacks-qa]
+    runs-on: ubuntu-latest
     steps:
-      - name: Masking secrets inputs
-        run: |
-          SECRET_LOGIN_TOKEN=$(cat $GITHUB_EVENT_PATH | jq -r '.inputs.secrets' | jq -r '.cli_token' )
-          echo "::add-mask::$SECRET_LOGIN_TOKEN"
-          SECRET_LOGIN_TOKEN=$(cat $GITHUB_EVENT_PATH | jq -r '.inputs.secrets' )
-          echo "::add-mask::$SECRET_LOGIN_TOKEN"
       - name: Debug inputs
         if: env.DEBUG
         run: |
-          echo "action: ${{ github.event.inputs.action }}"
-          echo "cli_login: ${{ github.event.inputs.cli_login }}"
-          echo "workspace_slug: ${{ github.event.inputs.workspace_slug }}"
+          echo "action: ${{ inputs.action }}"
+          echo "cli_login: ${{ inputs.cli_login }}"
+          echo "workspace_slug: ${{ inputs.workspace_slug }}"
       - name: "Validate Input: 'action.name'"
-        if: fromJson(github.event.inputs.action).name == ''
+        if: fromJson(inputs.action).name == ''
         run: |
          echo "ERROR: 'name' field not found in json for 'action' input"
          exit 1
       - name: "Validate Input: 'cli_login.email'"
-        if: fromJson(github.event.inputs.cli_login).email == ''
+        if: fromJson(inputs.cli_login).email == ''
         run: |
          echo "ERROR: 'email' field not found in json for 'cli_login' input"
          exit 1
       - name: "Validate Input: 'cli_login.realm'"
-        if: fromJson(github.event.inputs.cli_login).realm == ''
+        if: fromJson(inputs.cli_login).realm == ''
         run: |
          echo "ERROR: 'realm' field not found in json for 'cli_login' input"
-         exit 1
-      - name: "Validate Input: 'secrets.cli_token'"
-        if: fromJson(github.event.inputs.secrets).cli_token == ''
-        run: |
-         echo "ERROR: 'cli_token' field not found in json for 'secrets' input"
          exit 1
 
   run-action-using-stk-cli:
@@ -66,30 +63,37 @@ jobs:
     needs: validate-inputs
     env:
       INPUTS: '${{ inputs.action_inputs }}'
-    runs-on: [self-hosted, linux, stackspot-stacks-qa]
+    runs-on: ${{ fromJson(inputs.workflow_config).runner }}
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
+        with:
+          repository: ${{ fromJson(inputs.workflow_config).origin_repository }}
+          ref: ${{ fromJson(inputs.workflow_config).origin_branch }}
+
       - name: Install STK
         uses: ./github-actions/install-stk-cli
         with: 
-          stk: ${{ fromJson(inputs.config).stk }}
+          stk: ${{ fromJson(inputs.workflow_config).stk }}
+      
       - name: Login STK
         uses: ./github-actions/login-stk
         with: 
-          stk: ${{ fromJson(inputs.config).stk }}
-          email: ${{ fromJson(github.event.inputs.cli_login).email }}
-          pat: ${{ fromJson(github.event.inputs.secrets).cli_token }}
-          realm: ${{ fromJson(github.event.inputs.cli_login).realm }}
+          stk: ${{ fromJson(inputs.workflow_config).stk }}
+          email: ${{ fromJson(inputs.cli_login).email }}
+          pat: ${{ fromJson(secrets.secrets).cli_token }}
+          realm: ${{ fromJson(inputs.cli_login).realm }}
+      
       - name: Use workspace
         run: |
          $STK use workspace ${{ inputs.workspace_slug }}
+      
       - name: Run action
         env:
-          NAME: ${{ fromJson(github.event.inputs.action).name }}
-          INPUTS: ${{ toJson(fromJson(github.event.inputs.action).inputs) }}
-          CI: ${{ toJson(fromJson(github.event.inputs.action).connectors) }}
-          ACTION_ENV: ${{ fromJson(github.event.inputs.action).env }}
+          NAME: ${{ fromJson(inputs.action).name }}
+          INPUTS: ${{ toJson(fromJson(inputs.action).inputs) }}
+          CI: ${{ toJson(fromJson(inputs.action).connectors) }}
+          ACTION_ENV: ${{ fromJson(inputs.action).env }}
         run: |
           source .github/workflows/scripts/enable_colors.sh
           conn=""
@@ -110,6 +114,7 @@ jobs:
           echo -e "\n${green}⚡ Running Action: ${u_cyan}$NAME"
           echo -e "$STK run action $NAME $inputs_short $conn $env \n" 
           $STK run action $NAME $inputs_short $conn $env
+      
       - name: Show Error Log
         if: failure()
         run: |

@@ -3,7 +3,7 @@ kind: action
 metadata:
   name: stakspot-github-create-repository
   display-name: Stackspot Create GitHub Repository
-  description: Action to create github repository
+  description: Action to create github repository if not exists
   version: 1.0.2
 spec:
   type: python
