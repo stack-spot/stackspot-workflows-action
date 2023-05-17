@@ -269,13 +269,8 @@ jobs:
           echo -e "$STK create ${{ inputs.create_type}} $NAME $starter_stack $plugins $connPrint --remote https://github.com/${{ steps.checkout_user_repo.outputs.repo }} --description '$DESCRIPTION' $inputsPrint --non-interactive\n" 
 
           $STK create ${{ inputs.create_type}} $NAME $starter_stack $plugins $conn --remote https://github.com/${{ steps.checkout_user_repo.outputs.repo }} --description "$DESCRIPTION" --inputs-json "$inputsValue" --non-interactive
-      - name: Register ${{ inputs.create_type}}
-        working-directory: user_repo
-        run: |
-         cd ${{ fromJson(inputs.create).name }}
-         $STK register ${{ inputs.create_type}}
       
-      - name: Send Register id to execution
+      - name: Register ${{ inputs.create_type}}
         working-directory: user_repo
         env:
           token: ${{ secrets.cli }}
@@ -283,23 +278,25 @@ jobs:
           correlation_id: ${{ inputs.correlation_id }}
         run: |
           cd ${{ fromJson(inputs.create).name }}
+          $STK register ${{ inputs.create_type}}
           
           type="app-id:"
           if [ "${{ inputs.create_type}}" == "infra" ]; then 
             type="infra-id:"
           fi
           register_id=$(sudo cat .stk/stk.yaml | grep $type | cut -d : -f 2 | tr -d '[:space:]')
-          
+          account_slug=$(echo $correlation_id | cut -d "|" -f 1)
+          execution_id=$(echo $correlation_id | cut -d "|" -f 4)
+
+          echo "${workflow_api}/accounts/${account_slug}/executions/${execution_id}"
           echo "{
-              \"correlation_id\": \"${correlation_id}\",
               \"register_id\": \"${register_id}\"
           }"
 
-          curl --location --request PUT "${workflow_api}/executions" \
+          curl --location --request PUT "${workflow_api}/accounts/${account_slug}/executions/${execution_id}" \
           --header "Authorization: ${token}" \
           --header "Content-Type: application/json" \
           --data-raw "{
-              \"correlation_id\": \"${correlation_id}\",
               \"register_id\": \"${register_id}\"
           }"
 
