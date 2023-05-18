@@ -27,6 +27,8 @@ resources:
       type: github
       name: stack-spot/stackspot-workflows-action
       endpoint: stackspot_github_connection
+      ref: main
+
 
 pool:
 {% endraw %}
@@ -49,4 +51,5 @@ jobs:
           cli_login: ${{ parameters.cli_login }}
           workspace_slug: ${{ parameters.workspace_slug }}
           actions: ${{ parameters.actions }}
+          config: "{\"default_branch\": \"main\", \"debug\": false, \"stk\": \"stk\"}"
 {% endraw %}
