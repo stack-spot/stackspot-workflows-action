@@ -45,5 +45,5 @@ jobs:
           workspace_slug: ${{ parameters.workspace_slug }}
           action: ${{ parameters.action }}
           cli_login: ${{ parameters.cli_login }}
-          config: "{\"default_branch\": \"main\", \"debug\": false, \"stk\": \"stk\"}"
+          config: '{"default_branch": "main", "debug": false, "stk": "stk"}'
 {% endraw %}
