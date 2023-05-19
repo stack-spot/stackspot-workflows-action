@@ -1,0 +1,49 @@
+{% raw -%}
+trigger:
+- none
+
+name: ${{ parameters.correlation_id }}
+
+parameters:
+  - name: correlation_id
+    displayName: Correlation id
+    type: string
+  - name: workspace_slug
+    displayName: Workspace
+    type: string
+  - name: action
+    displayName: Action (json)
+    type: string
+  - name: cli_login
+    displayName: CLI login (json)
+    type: string
+
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: stack-spot/stackspot-workflows-action
+      endpoint: stackspot_github_connection
+      ref: main
+
+pool:
+{% endraw %}
+  {% if use_self_hosted_pool %}
+  name: {{ self_hosted_pool_name }}
+  {%- else %}
+  vmImage: ubuntu-latest
+  {%- endif %}
+{% raw %}
+
+jobs:
+  - job:
+    displayName: run-action
+    steps:
+      - template: .azure/run-action.yml@templates
+        parameters:
+          correlation_id: ${{ parameters.correlation_id }}
+          workspace_slug: ${{ parameters.workspace_slug }}
+          action: ${{ parameters.action }}
+          cli_login: ${{ parameters.cli_login }}
+          config: '{"default_branch": "main", "debug": false, "stk": "stk", "workflow_api": "https://workflow-api.v1.stackspot.com"}'
+{% endraw %}

@@ -3,7 +3,7 @@ kind: plugin
 metadata:
   name: setup-runner
   display-name: setup-runner
-  description: Plugin to setup workflow to run actions
+  description: Plugin to setup StackSpot workflows
   version: 0.0.1
   picture: plugin.png
 spec:
@@ -18,46 +18,37 @@ spec:
   technologies: # Ref: https://docs.stackspot.com/docs/create-stacks/yaml-files/yaml/#technologies
     - Api
   inputs:
-    - label: Choose your SCM provider
+    - label: SCM provider
       name: provider
       type: text
       items:
-        - Github
         - Azure
-        - Gitlab
-        - Bitbucket
-      default: Github
-      required: true
-  hooks:
-    - type: run
-      trigger: after-render
-      commands:
-        - cp -r {{component_path}}/.github .github
+        - Github
+    - label: Do you want to use self-hosted runners to run StackSpot workflows?
+      name: use_self_hosted_pool
+      type: bool
+      default: false
+    - label: Which self-hosted runner group do you want to use?
+      name: self_hosted_pool_name
+      type: text
       condition:
-        variable: provider
+        variable: use_self_hosted_pool
         operator: ==
-        value: Github
-    - type: run
+        value: true
+  hooks:
+    # Render workflows templates
+    - type: render-templates
       trigger: after-render
-      commands:
-        - cp -r {{component_path}}/azure azure
+      path: workflow-templates/azure
       condition:
         variable: provider
         operator: ==
         value: Azure
-    - type: run
+
+    - type: render-templates
       trigger: after-render
-      commands:
-        - echo Not implemented.
+      path: workflow-templates/github
       condition:
         variable: provider
         operator: ==
-        value: Gitlab
-    - type: run
-      trigger: after-render
-      commands:
-        - echo Not implemented.
-      condition:
-        variable: provider
-        operator: ==
-        value: Bitbucket
+        value: Github
