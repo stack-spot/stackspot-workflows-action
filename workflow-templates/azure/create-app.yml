@@ -50,5 +50,5 @@ jobs:
           cli_login: ${{ parameters.cli_login }}
           workspace_slug: ${{ parameters.workspace_slug }}
           actions: ${{ parameters.actions }}
-          config: "{\"default_branch\": \"main\", \"debug\": false, \"stk\": \"stk\"}"
+          config: '{"default_branch": "main", "debug": false, "stk": "stk", "workflow_api": "https://workflow-api.v1.stackspot.com"}'
 {% endraw %}
