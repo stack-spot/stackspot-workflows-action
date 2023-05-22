@@ -1,0 +1,48 @@
+{%- raw -%}
+name: Create App
+run-name: ${{ github.event.inputs.correlation_id }}
+on: 
+  workflow_dispatch:
+    inputs:
+      correlation_id:
+        description: Correlation id
+        required: true
+      app:
+        description: create info (json)
+        required: true
+      cli_login:
+        description: CLI login info (json)
+        required: true
+      workspace_slug:
+        description: Workspace name
+        required: true
+      actions:
+        description: Actions (json)
+        required: false
+      secrets:
+        description: Secrets info (json)
+        required: true
+
+jobs:
+  create:
+    uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@main
+    with:
+      create: ${{ github.event.inputs.app }}
+      correlation_id: ${{ github.event.inputs.correlation_id }}
+      create_type: app 
+      cli_login: ${{ github.event.inputs.cli_login }}
+      workspace_slug: ${{ github.event.inputs.workspace_slug }}
+      actions: ${{ github.event.inputs.actions }}
+      github_org: ${{ github.repository_owner }}
+      config: "{\"default_branch\": \"main\", \"debug\": false, \"stk\": \"stk\", \"origin_repository\": \"stack-spot/stackspot-workflows-action\", \"origin_branch\": \"main\", \"workflow_api\": \"https://workflow-api.v1.stackspot.com\"}"
+      {% endraw %}
+      {% if use_self_hosted_pool %}
+      runner: {{ self_hosted_pool_name }}
+      {%- else %}
+      runner: ubuntu-latest
+      {%- endif %}
+      {% raw %}
+    secrets:
+      cli: ${{ fromJson(github.event.inputs.secrets).cli_token }}
+      git: ${{ fromJson(github.event.inputs.secrets).scm_token }}
+{% endraw %}

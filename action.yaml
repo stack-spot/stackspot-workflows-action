@@ -1,0 +1,50 @@
+schema-version: v1
+kind: action
+metadata:
+  name: setup-stackspot-workflows
+  display-name: StackSpot Setup Workflows
+  description: Action to configure Stackspot workflows in SCM provider
+  version: 0.0.1
+spec: 
+  type: python
+  inputs:
+    - label: SCM provider
+      name: provider
+      type: text
+      items:
+        - Azure
+        - Github
+    - label: Organization Name
+      name: org_name
+      type: text
+      help: 'Inform your resource name (e.g.: Client)'
+    - label: Repository Name
+      name: repo_name
+      type: text
+    - label: Personal Access Token
+      name: pat
+      type: password
+    - label: Personal Access Token (Github)
+      name: github_pat
+      type: password
+      condition:
+        variable: provider
+        operator: ==
+        value: Azure
+    - label: Do you want to use self-hosted runners to run StackSpot workflows?
+      name: use_self_hosted_pool
+      type: bool
+      default: false
+    - label: Which self-hosted runner group do you want to use?
+      name: self_hosted_pool_name
+      type: text
+      condition:
+        variable: use_self_hosted_pool
+        operator: ==
+        value: true
+    - label: Create Repository
+      name: create_repo
+      type: bool
+
+  python:
+    script: stackspot-actions/setup-stackspot-workflows/setup.py

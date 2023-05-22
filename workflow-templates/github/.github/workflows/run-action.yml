@@ -1,0 +1,49 @@
+{%- raw -%}
+name: Run Action
+run-name: ${{ inputs.correlation_id }}
+on: 
+  workflow_dispatch:
+    inputs:
+      correlation_id:
+        description: Correlation id
+        required: true
+      action:
+        description: Action info (json)
+        required: true
+      secrets:
+        description: Secrets info (json)
+        required: true
+      cli_login:
+        description: CLI login info (json)
+        required: true
+      workspace_slug:
+        description: Workspace identifier
+        required: true
+      workflow_config:
+        description: Workflow config
+        required: false
+        default: "{ 
+            {% endraw %}
+            {% if use_self_hosted_pool %}
+            \"runner\": \"{{ self_hosted_pool_name }}\",
+            {%- else %}
+            \"runner\": \"ubuntu-latest\",
+            {%- endif %}
+            {% raw %}
+            \"debug\": false, 
+            \"stk\": \"stk\",
+            \"origin_repository\": \"stack-spot/stackspot-workflows-action\", 
+            \"origin_branch\": \"main\"
+          }"
+jobs:
+  create:
+    uses: stack-spot/stackspot-workflows-action/.github/workflows/run-action.yml@main
+    with:
+      action: ${{ github.event.inputs.action }}
+      cli_login: ${{ github.event.inputs.cli_login }}
+      workspace_slug: ${{ github.event.inputs.workspace_slug }}
+      correlation_id: ${{ github.event.inputs.correlation_id }}
+      workflow_config: ${{ github.event.inputs.workflow_config }}
+    secrets:
+      secrets: ${{ github.event.inputs.secrets }}
+{% endraw %}
