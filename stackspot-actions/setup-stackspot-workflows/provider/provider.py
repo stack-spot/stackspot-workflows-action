@@ -33,9 +33,11 @@ class Provider(ABC):
         elif not self.repo_exists(inputs):
             raise RepoDoesNotExistError()
         with tempfile.TemporaryDirectory() as workdir:
+            cwd = os.getcwd()
             self.clone_created_repo(workdir, inputs)
             self.create_workflow_files(inputs)
             self.commit_and_push()
+            os.chdir(cwd)
         self.execute_provider_setup(inputs)
 
     def create_repo(self, inputs: Inputs):
