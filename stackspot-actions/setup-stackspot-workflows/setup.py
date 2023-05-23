@@ -2,7 +2,7 @@ import logging
 from dataclasses import fields
 from typing import Protocol, Mapping
 from provider import Inputs, Provider
-from provider.errors import RepoAlreadyExistsError, UnauthorizedError, RepoDoesNotExistError
+from provider.errors import RepoAlreadyExistsError, UnauthorizedError, RepoDoesNotExistError, GitUserSetupError
 from provider.github import GithubProvider
 from provider.azure import AzureProvider
 
@@ -40,6 +40,8 @@ def run(metadata: Metadata):
         logging.error("Repository already exists!")
     except RepoDoesNotExistError:
         logging.error("Repository provided doesn't exist and creation was not requested!")
+    except GitUserSetupError:
+        logging.error("You must setup your git user before run this action!\nUse the following commands to setup your git user:\ngit config --global user.name \"Your Name\"\ngit config --global user.email your-email@your-company.com")
     except:
         logging.exception("Unhandled error happened!")
     print()

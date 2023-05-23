@@ -13,3 +13,6 @@ class UnauthorizedError(Exception):
 
 class NotFoundError(Exception):
     pass
+
+class GitUserSetupError(Exception):
+    pass

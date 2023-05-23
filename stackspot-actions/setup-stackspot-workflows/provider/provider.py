@@ -5,10 +5,26 @@ import time
 import os
 import sys
 import shutil
+import stat
+from pathlib import Path
 from typing import Optional
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from .errors import RepoAlreadyExistsError, RepoDoesNotExistError, CloningRepoError, NotFoundError, UnauthorizedError
+from .errors import (
+    RepoAlreadyExistsError, RepoDoesNotExistError, 
+    CloningRepoError, NotFoundError, UnauthorizedError, 
+    GitUserSetupError
+)
+
+# This handler is necessary to make remove_stack_dir in Windows
+# @see https://stackoverflow.com/questions/2656322/shutil-rmtree-fails-on-windows-with-access-is-denied
+def on_delete_error(func, path, exc_info):
+    # Is the error an access error?
+    if not os.access(path, os.W_OK):
+        os.chmod(path, stat.S_IWUSR)
+        func(path)
+    else:
+        raise
 
 @dataclass(frozen=True)
 class Inputs:
@@ -27,21 +43,30 @@ class Inputs:
 class Provider(ABC):
 
     def setup(self, inputs: Inputs):
+        self.check_git_configuration()
         logging.info("Setting up %s SCM...", inputs.provider)
+        cwd = os.getcwd()
         if inputs.create_repo:
             self.create_repo(inputs)
             time.sleep(5)
         elif not self.repo_exists(inputs):
             raise RepoDoesNotExistError()
-        with tempfile.TemporaryDirectory() as workdir:
-            cwd = os.getcwd()
-            try:
-                self.clone_created_repo(workdir, inputs)
-                self.create_workflow_files(inputs)
-                self.commit_and_push()
-            finally:
-                os.chdir(cwd)
+        workdir = tempfile.mkdtemp()
+        try:
+            self.clone_created_repo(workdir, inputs)
+            self.create_workflow_files(inputs)
+            self.commit_and_push()
+        finally:
+            os.chdir(cwd)
+            shutil.rmtree(workdir, onerror=on_delete_error, ignore_errors=True)
         self.execute_provider_setup(inputs)
+
+    
+    def check_git_configuration(self):
+        result_user_name = os.system("git config --global user.name")
+        result_user_email = os.system("git config --global user.email")
+        if (result_user_name + result_user_email) > 0:
+            raise GitUserSetupError()
 
     def create_repo(self, inputs: Inputs):
         logging.info("Creating repository to host StackSpot workflows...")
@@ -61,7 +86,8 @@ class Provider(ABC):
     def create_workflow_files(self, inputs: Inputs):
         logging.info("Creating workflow files...")
         stk = sys.argv[0]
-        os.system(f"rm -f create-app.yml crate-infra.yml run-action.yml")
+        for file in ("create-app.yml", "create-infra.yml", "run-action.yml"):
+            Path(file).unlink(missing_ok=True)
         stk_apply_plugin_cmd = (
             f"{stk} apply plugin {inputs.component_path} --skip-warning "
             f"--provider {inputs.provider} "
@@ -71,11 +97,11 @@ class Provider(ABC):
         if inputs.self_hosted_pool_name is not None:
             stk_apply_plugin_cmd +=  f"--self_hosted_pool_name {inputs.self_hosted_pool_name} "
         os.system(stk_apply_plugin_cmd)
-        shutil.rmtree(".stk")
+        shutil.rmtree(".stk", onerror=on_delete_error)
 
     def commit_and_push(self):
-        logging.info("Commit and push workflow files to repo...")
-        os.system(f"git branch -m main && git add . && git commit -m 'Initial commit' && git push origin main")
+        logging.info("Commiting and pushing workflow files to repo...")
+        os.system('git branch -m main && git add . && git commit -m "Initial commit" && git push origin main')
     
     
     def _handle_api_response_errors(self, response: requests.Response) -> bool:
