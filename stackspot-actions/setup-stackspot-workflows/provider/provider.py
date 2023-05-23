@@ -4,6 +4,7 @@ import tempfile
 import time
 import os
 import sys
+import shutil
 from typing import Optional
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -34,10 +35,12 @@ class Provider(ABC):
             raise RepoDoesNotExistError()
         with tempfile.TemporaryDirectory() as workdir:
             cwd = os.getcwd()
-            self.clone_created_repo(workdir, inputs)
-            self.create_workflow_files(inputs)
-            self.commit_and_push()
-            os.chdir(cwd)
+            try:
+                self.clone_created_repo(workdir, inputs)
+                self.create_workflow_files(inputs)
+                self.commit_and_push()
+            finally:
+                os.chdir(cwd)
         self.execute_provider_setup(inputs)
 
     def create_repo(self, inputs: Inputs):
@@ -68,7 +71,7 @@ class Provider(ABC):
         if inputs.self_hosted_pool_name is not None:
             stk_apply_plugin_cmd +=  f"--self_hosted_pool_name {inputs.self_hosted_pool_name} "
         os.system(stk_apply_plugin_cmd)
-        os.system(f"rm -rf .stk")
+        shutil.rmtree(".stk")
 
     def commit_and_push(self):
         logging.info("Commit and push workflow files to repo...")
