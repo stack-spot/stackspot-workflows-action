@@ -39,9 +39,9 @@ jobs:
       - name: Debug inputs
         if: env.DEBUG
         run: |
-          echo "action: ${{ inputs.action }}"
-          echo "cli_login: ${{ inputs.cli_login }}"
-          echo "workspace_slug: ${{ inputs.workspace_slug }}"
+          echo action: ${{ inputs.action }}
+          echo cli_login: ${{ inputs.cli_login }}
+          echo workspace_slug: ${{ inputs.workspace_slug }}
       - name: "Validate Input: 'action.name'"
         if: fromJson(inputs.action).name == ''
         run: |

@@ -58,12 +58,12 @@ jobs:
       - name: Debug inputs
         if: ${{ fromJson(inputs.config).debug }}
         run: |
-          echo "create: ${{ inputs.create }}"
-          echo "runner: ${{ inputs.runner }}"
-          echo "cli_login: ${{ inputs.cli_login }}"
-          echo "workspace_slug: ${{ inputs.workspace_slug }}"
-          echo "actions: ${{ inputs.actions }}"
-          echo "config: ${{ inputs.config }}"
+          echo create: ${{ inputs.create }}
+          echo runner: ${{ inputs.runner }}
+          echo cli_login: ${{ inputs.cli_login }}
+          echo workspace_slug: ${{ inputs.workspace_slug }}
+          echo actions: ${{ inputs.actions }}
+          echo config: ${{ inputs.config }}
       - name: "Validate Input: 'create.name'"
         if: fromJson(inputs.create).name == ''
         run: |
