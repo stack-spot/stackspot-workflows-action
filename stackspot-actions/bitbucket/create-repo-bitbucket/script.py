@@ -59,7 +59,7 @@ class Runner:
 
         self.workspace_name = inputs.get("org")
         self.project_name = inputs.get("project_name")
-        self.repo_name = inputs.get("repo_name")
+        self.repo_name = inputs.get("name")
 
     def __call__(self) -> Any:
         self.__workspace_exists()
@@ -188,7 +188,12 @@ class Runner:
 
         url = f"{self.base_url}/repositories/{self.workspace_name}/{self.repo_name}"
 
-        payload = json.dumps({"scm": "git", "project": {"key": project_key}})
+        payload = json.dumps(
+            {
+                "scm": "git",
+                "project": {"key": project_key},
+            }
+        )
 
         try:
             response = requests.post(url, data=payload, headers=self.post_headers)
