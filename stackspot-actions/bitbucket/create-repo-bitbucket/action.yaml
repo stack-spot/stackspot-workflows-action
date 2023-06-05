@@ -4,7 +4,7 @@ metadata:
   name: create-repo-bitbucket
   display-name: create-repo-bitbucket
   description: Create new bitbucket project and repository
-  version: 0.0.1
+  version: 0.0.3
 spec:
   type: python
   about: docs/about.md
@@ -13,16 +13,6 @@ spec:
   requirements: docs/requirements.md
   implementation: docs/implementation.md
   inputs:
-    - label: Bitbucket workspace token
-      name: token
-      type: password
-      required: true
-      help: Input the Bitbucket Workspace access token.
-    - label: Bitbucket workspace name
-      name: workspace_name
-      type: text
-      required: true
-      help: Input the Bitbucket devOps workspace name, it can't be created for you.
     - label: Bitbucket project name
       name: project_name
       type: text
