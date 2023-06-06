@@ -31,7 +31,10 @@ jobs:
       - name: Debug inputs
         if: env.DEBUG
         run: |
-          echo "inputs: ${{ fromJson(inputs.inputs) }}"
+          echo "plugin_name: ${{ fromJson(inputs.inputs).plugin_name }}"
+          echo "cli_login_realm: ${{ fromJson(inputs.inputs).cli_login_realm }}"
+          echo "cli_login_email: ${{ fromJson(inputs.inputs).cli_login_email }}"
+          echo "workspace_slug: ${{ fromJson(inputs.inputs).workspace_slug}}"
       - name: "Validate Input: 'name'"
         if: fromJson(inputs.inputs).plugin_name == ''
         run: |
