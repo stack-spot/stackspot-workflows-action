@@ -31,29 +31,30 @@ jobs:
       - name: Debug inputs
         if: env.DEBUG
         run: |
-          echo ${{inputs.inputs}}
-          echo "inputs: ${{ fromJson(inputs.inputs) }}"
+          echo "plugin_name: ${{ fromJson(inputs.inputs).plugin_name }}"
+          echo "cli_login_realm: ${{ fromJson(inputs.inputs).cli_login_realm }}"
+          echo "cli_login_email: ${{ fromJson(inputs.inputs).cli_login_email }}"
           echo "workspace_slug: ${{ fromJson(inputs.inputs).workspace_slug }}"
-          echo ${{ fromJson(inputs.inputs.plugin.name) }}
-      # echo ${{ fromJson(inputs.inputs.plugin).name }}
-      # echo "plugin: ${{ fromJson(inputs.inputs).plugin.name }}"
-      # echo "cli_login: ${{ fromJson(inputs.inputs).cli_login }}"
-      # echo "workspace_slug: ${{ fromJson(inputs.workspace_slug).workspace_slug }}"
-      # - name: "Validate Input: 'plugin.name'"
-      #   if: fromJson(inputs.inputs).plugin.name == ''
-      #   run: |
-      #    echo "ERROR: 'name' field not found in json for 'plugin' input"
-      #    exit 1
-      # - name: "Validate Input: 'cli_login.email'"
-      #   if: fromJson(inputs.inputs).cli_login.email == ''
-      #   run: |
-      #    echo "ERROR: 'email' field not found in json for 'cli_login' input"
-      #    exit 1
-      # - name: "Validate Input: 'cli_login.realm'"
-      #   if: fromJson(inputs.inputs).cli_login.email == ''
-      #   run: |
-      #    echo "ERROR: 'realm' field not found in json for 'cli_login' input"
-      #    exit 1
+      - name: "Validate Input: 'name'"
+        if: fromJson(inputs.inputs).plugin.name == ''
+        run: |
+         echo "ERROR: 'plugin_name' field not found in json."
+         exit 1
+      - name: "Validate Input: 'cli_login_realm'"
+        if: fromJson(inputs.inputs).cli_login_realm == ''
+        run: |
+         echo "ERROR: 'realm' field not found in json."
+         exit 1
+      - name: "Validate Input: 'cli_login_email'"
+        if: fromJson(inputs.inputs).cli_login_email == ''
+        run: |
+         echo "ERROR: 'cli_login_email' field not found in json."
+         exit 1
+      - name: "Validate Input: 'workspace_slug'"
+        if: fromJson(inputs.inputs).workspace_slug == ''
+        run: |
+         echo "ERROR: 'workspace_slug' field not found in json."
+         exit 1
 
   # apply-plugin-using-stk-cli:
   #   name: Apply Stackspot Plugin
