@@ -33,6 +33,7 @@ jobs:
         run: |
           echo ${{inputs.inputs}}
           echo "inputs: ${{ fromJson(inputs.inputs) }}"
+          echo "workspace_slug: ${{ fromJson(inputs.inputs).workspace_slug }}"
       # echo "plugin: ${{ fromJson(inputs.inputs).plugin.name }}"
       # echo "cli_login: ${{ fromJson(inputs.inputs).cli_login }}"
       # echo "workspace_slug: ${{ fromJson(inputs.workspace_slug).workspace_slug }}"
