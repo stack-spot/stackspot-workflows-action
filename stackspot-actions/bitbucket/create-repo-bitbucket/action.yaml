@@ -4,7 +4,7 @@ metadata:
   name: create-repo-bitbucket
   display-name: create-repo-bitbucket
   description: Create new bitbucket project and repository
-  version: 0.0.4
+  version: 0.0.1
 spec:
   type: python
   about: docs/about.md
