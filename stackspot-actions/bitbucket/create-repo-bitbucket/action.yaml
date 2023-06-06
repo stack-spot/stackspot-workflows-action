@@ -4,7 +4,7 @@ metadata:
   name: create-repo-bitbucket
   display-name: create-repo-bitbucket
   description: Create new bitbucket project and repository
-  version: 0.0.4
+  version: 0.0.1
 spec:
   type: python
   about: docs/about.md
@@ -18,6 +18,15 @@ spec:
       type: text
       required: true
       help: Input the Bitbucket devOps project name, if it does not exist it will be created
+    - label: Repository visibility
+      name: visibility
+      type: text
+      required: true
+      help: Input the Bitbucket repository visibility
+      items:
+        - PUBLIC
+        - PRIVATE
+      default: PRIVATE
   python:
     workdir: .
     script: script.py

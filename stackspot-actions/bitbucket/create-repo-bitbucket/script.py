@@ -45,6 +45,23 @@ class CreateRepositoryError(BitbucketCreateRepoException):
         super().__init__(f"An error ocurred while creating the repository: {err}")
 
 
+class GetProjectGeneralError(BitbucketCreateRepoException):
+    def __init__(self, err):
+        super().__init__(f"An error ocurred while listing the projects: {err}")
+
+
+class CouldNotSetProjectKeyError(BitbucketCreateRepoException):
+    def __init__(self):
+        super().__init__(
+            f"Action was not able to set a project key based on the project name, please select a different project name."
+        )
+
+
+class GetProjectKeyGeneralError(BitbucketCreateRepoException):
+    def __init__(self, err):
+        super().__init__(f"An error ocurred while fetching the project keys: {err}")
+
+
 class Runner:
     def __init__(self, metadata) -> None:
         self.base_url = "https://api.bitbucket.org/2.0"
@@ -60,6 +77,7 @@ class Runner:
         self.workspace_name = inputs.get("org")
         self.project_name = inputs.get("project_name")
         self.repo_name = inputs.get("name")
+        self.is_private = inputs.get("visibility", "PRIVATE") == "PRIVATE"
 
     def __call__(self) -> Any:
         self.__workspace_exists()
@@ -146,6 +164,24 @@ class Runner:
             )
             if e.response.status_code == requests.codes.not_found:
                 return None
+            raise GetProjectGeneralError(e)
+
+    def __project_key_exists(self, key: str):
+        """
+        Checks if the project key exists
+        """
+        print(f"> Checking if the '{key}' exists.")
+        url = f"{self.base_url}/workspaces/{self.workspace_name}/projects/{key}"
+
+        try:
+            response = requests.get(url, self.get_headers)
+            response.raise_for_status()
+            return True
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == requests.codes.not_found:
+                print("> Key does not exists")
+                return False
+            raise GetProjectKeyGeneralError(e)
 
     def __create_project(self):
         """
@@ -159,12 +195,22 @@ class Runner:
         if len(self.project_name) < 3:
             raise ProjectNameTooShort(self.project_name)
 
-        key = (
-            self.project_name.replace(" ", "")
-            .replace("_", "")
-            .replace("-", "")[:3]
-            .upper()
+        cleaned_project_name = (
+            self.project_name.replace(" ", "").replace("_", "").replace("-", "").upper()
         )
+
+        maximum_name_length = len(cleaned_project_name) - 4
+        key = cleaned_project_name[:3]
+        if self.__project_key_exists(key):
+            for i in range(maximum_name_length):
+                key = cleaned_project_name[i + 1 : i + 4]
+                if i < maximum_name_length and self.__project_key_exists(key):
+                    continue
+                elif i > maximum_name_length:
+                    raise CouldNotSetProjectKeyError()
+                else:
+                    break
+
         print(f"> Project key set to {key}")
 
         payload = json.dumps({"name": self.project_name, "key": key})
@@ -192,6 +238,7 @@ class Runner:
             {
                 "scm": "git",
                 "project": {"key": project_key},
+                "is_private": self.is_private,
             }
         )
 
