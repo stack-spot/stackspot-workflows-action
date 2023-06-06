@@ -31,24 +31,25 @@ jobs:
       - name: Debug inputs
         if: env.DEBUG
         run: |
-          echo "plugin: ${{ fromJson(inputs.inputs).plugin.name }}"
-          echo "cli_login: ${{ fromJson(inputs.inputs).cli_login }}"
-          echo "workspace_slug: ${{ fromJson(inputs.workspace_slug).workspace_slug }}"
-      - name: "Validate Input: 'plugin.name'"
-        if: fromJson(inputs.inputs).plugin.name == ''
-        run: |
-         echo "ERROR: 'name' field not found in json for 'plugin' input"
-         exit 1
-      - name: "Validate Input: 'cli_login.email'"
-        if: fromJson(inputs.inputs).cli_login.email == ''
-        run: |
-         echo "ERROR: 'email' field not found in json for 'cli_login' input"
-         exit 1
-      - name: "Validate Input: 'cli_login.realm'"
-        if: fromJson(inputs.inputs).cli_login.email == ''
-        run: |
-         echo "ERROR: 'realm' field not found in json for 'cli_login' input"
-         exit 1
+          echo "inputs: ${{ fromJson(inputs.inputs) }}"
+      # echo "plugin: ${{ fromJson(inputs.inputs).plugin.name }}"
+      # echo "cli_login: ${{ fromJson(inputs.inputs).cli_login }}"
+      # echo "workspace_slug: ${{ fromJson(inputs.workspace_slug).workspace_slug }}"
+      # - name: "Validate Input: 'plugin.name'"
+      #   if: fromJson(inputs.inputs).plugin.name == ''
+      #   run: |
+      #    echo "ERROR: 'name' field not found in json for 'plugin' input"
+      #    exit 1
+      # - name: "Validate Input: 'cli_login.email'"
+      #   if: fromJson(inputs.inputs).cli_login.email == ''
+      #   run: |
+      #    echo "ERROR: 'email' field not found in json for 'cli_login' input"
+      #    exit 1
+      # - name: "Validate Input: 'cli_login.realm'"
+      #   if: fromJson(inputs.inputs).cli_login.email == ''
+      #   run: |
+      #    echo "ERROR: 'realm' field not found in json for 'cli_login' input"
+      #    exit 1
 
   # apply-plugin-using-stk-cli:
   #   name: Apply Stackspot Plugin
