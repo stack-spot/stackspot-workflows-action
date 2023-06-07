@@ -35,7 +35,7 @@ spec:
     - label: Project Name
       name: project_name
       type: text
-      help: 'Informe your Project Name'
+      help: 'Inform your Project Name'
     - label: Repository Name
       name: repo_name
       type: text

@@ -13,6 +13,11 @@ from provider.azure import AzureProvider
 
 logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
+GIT_USER_SETUP_ERROR_MESSAGE = """You must setup your git user before run this action!
+Use the following commands to setup your git user:
+git config --global user.name \"Your Name\"
+git config --global user.email your-email@your-company.com"""
+
 PROVIDER_BITBUCKET_LOWERED = "bitbucket"
 
 
@@ -91,10 +96,7 @@ def run(metadata: Metadata):
     except RepoDoesNotExistError:
         logging.error("Repository provided doesn't exist and creation was not requested!")
     except GitUserSetupError:
-        logging.error("""You must setup your git user before run this action!
-Use the following commands to setup your git user:
-git config --global user.name \"Your Name\"
-git config --global user.email your-email@your-company.com""")
+        logging.error(GIT_USER_SETUP_ERROR_MESSAGE)
     except:
         logging.exception("Unhandled error happened!")
     print()

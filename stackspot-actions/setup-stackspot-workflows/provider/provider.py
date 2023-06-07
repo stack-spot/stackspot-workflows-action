@@ -1,5 +1,4 @@
 import logging
-import requests
 import tempfile
 import time
 import os
@@ -10,11 +9,7 @@ from pathlib import Path
 from typing import Optional
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from .errors import (
-    RepoAlreadyExistsError, RepoDoesNotExistError, 
-    CloningRepoError, NotFoundError, UnauthorizedError, 
-    GitUserSetupError
-)
+from .errors import RepoAlreadyExistsError, RepoDoesNotExistError, CloningRepoError, GitUserSetupError
 
 
 # This handler is necessary to make remove_stack_dir in Windows
@@ -86,11 +81,11 @@ class Provider(ABC):
         if result != 0:
             raise CloningRepoError()
         os.chdir(inputs.repo_name)
-    
-    def create_workflow_files(self, workdir: str, inputs: Inputs):
+
+    def create_workflow_files(self, inputs: Inputs):
         logging.info("Creating workflow files...")
         stk = sys.argv[0]
-        self._remove_all_files_generated_on_apply_plugin(workdir, inputs)
+        self._remove_all_files_generated_on_apply_plugin(inputs)
         stk_apply_plugin_cmd = (
             f"{stk} apply plugin {inputs.component_path} --skip-warning "
             f"--provider {inputs.provider} "
@@ -106,14 +101,11 @@ class Provider(ABC):
         logging.info("Commiting and pushing workflow files to repo...")
         os.system('git branch -m main && git add . && git commit -m "Initial commit" && git push origin main')
 
-
-
-    def _remove_all_files_generated_on_apply_plugin(self, workdir: str, inputs: Inputs):
+    def _remove_all_files_generated_on_apply_plugin(self, inputs: Inputs):
         workflow_template_provider_path = Path(inputs.component_path) / "workflow-templates" / inputs.provider.lower()
+        workdir = os.getcwd()
 
         for subdir, dirs, files in os.walk(workflow_template_provider_path):
-            if ".git" in dirs:
-                dirs.remove(".git")
             for file in files:
                 file_to_be_applied_path = Path(os.path.join(subdir, file))
                 relative_path_file_to_be_applied = file_to_be_applied_path.relative_to(workflow_template_provider_path)
