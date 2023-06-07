@@ -126,6 +126,8 @@ jobs:
         working-directory: user_repo
         run: |
 
+          source ../.github/workflows/scripts/enable_colors.sh
+
           if $DEBUG
           then
             export APPLY_PLUGIN_ENABLE_DEBUG=true
