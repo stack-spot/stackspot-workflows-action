@@ -89,7 +89,7 @@ jobs:
 
       - name: Checkout the user repo
         id: checkout_user_repo
-        uses:  ./workflow_repo/github-actions/clone-external-repo
+        uses:  ./github-actions/clone-external-repo
         with:
           github_org: stack-spot
           default_branch: main
