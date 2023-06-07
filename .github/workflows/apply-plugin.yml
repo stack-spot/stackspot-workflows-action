@@ -151,10 +151,10 @@ jobs:
 
             description="Applying the plugin ${NAME}"
 
-            echo ${GITHUB_ORG}
-            echo ${APP_NAME}
+            echo $GITHUB_ORG
+            echo $APP_NAME
 
-            echo "https://api.github.com/repos/${{GITHUB_ORG}}/${{APP_NAME}}/pulls"
+            echo "https://api.github.com/repos/$GITHUB_ORG/$APP_NAME/pulls"
             echo "{
               \"title\": \"Apply ${NAME}\",
               \"body\": \"${description}\",
