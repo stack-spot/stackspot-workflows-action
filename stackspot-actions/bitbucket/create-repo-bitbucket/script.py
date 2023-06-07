@@ -17,7 +17,7 @@ class WorkspaceNotFound(BitbucketCreateRepoException):
 class WorkspaceExistsGeneralError(BitbucketCreateRepoException):
     def __init__(self, err):
         super().__init__(
-            f"An error ocurred while checking if the workspace exists: {err}"
+            f"An error occurred while checking if the workspace exists: {err}"
         )
 
 
@@ -30,36 +30,36 @@ class ProjectNameTooShort(BitbucketCreateRepoException):
 
 class ProjectCreationError(BitbucketCreateRepoException):
     def __init__(self, err):
-        super().__init__(f"An error ocurred while creating the project: {err}")
+        super().__init__(f"An error occurred while creating the project: {err}")
 
 
 class RepositoryExistsGeneralError(BitbucketCreateRepoException):
     def __init__(self, err):
         super().__init__(
-            f"An error ocurred while checking if the repository exists: {err}"
+            f"An error occurred while checking if the repository exists: {err}"
         )
 
 
 class CreateRepositoryError(BitbucketCreateRepoException):
     def __init__(self, err):
-        super().__init__(f"An error ocurred while creating the repository: {err}")
+        super().__init__(f"An error occurred while creating the repository: {err}")
 
 
 class GetProjectGeneralError(BitbucketCreateRepoException):
     def __init__(self, err):
-        super().__init__(f"An error ocurred while listing the projects: {err}")
+        super().__init__(f"An error occurred while listing the projects: {err}")
 
 
 class CouldNotSetProjectKeyError(BitbucketCreateRepoException):
     def __init__(self):
         super().__init__(
-            f"Action was not able to set a project key based on the project name, please select a different project name."
+            "Action was not able to set a project key based on the project name, please select a different project name."
         )
 
 
 class GetProjectKeyGeneralError(BitbucketCreateRepoException):
     def __init__(self, err):
-        super().__init__(f"An error ocurred while fetching the project keys: {err}")
+        super().__init__(f"An error occurred while fetching the project keys: {err}")
 
 
 class Runner:

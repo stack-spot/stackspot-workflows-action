@@ -1,8 +1,9 @@
+#file: noinspection YAMLSchemaValidation
 schema-version: v1
 kind: action
 metadata:
   name: setup-stackspot-workflows
-  display-name: StackSpot Setup Workflows
+  display-name: StackSpot Setup Workflows.
   description: Action to configure Stackspot workflows in SCM provider
   version: 0.0.1
 spec: 
@@ -13,17 +14,52 @@ spec:
       type: text
       items:
         - Azure
+        - BitBucket
         - Github
     - label: Organization Name
       name: org_name
       type: text
-      help: 'Inform your resource name (e.g.: Client)'
+      help: 'Inform your Organization Name (e.g.: StackSpot)'
+      condition:
+        variable: provider
+        operator: "!="
+        value: BitBucket
+    - label: Workspace Name
+      name: org_name
+      type: text
+      help: 'Inform your Workspace Name (e.g.: stack-spot)'
+      condition:
+        variable: provider
+        operator: ==
+        value: BitBucket
+    - label: Project Name
+      name: project_name
+      type: text
+      help: 'Inform your Project Name'
     - label: Repository Name
       name: repo_name
       type: text
     - label: Personal Access Token
       name: pat
       type: password
+      condition:
+        variable: provider
+        operator: "!="
+        value: BitBucket
+    - label: Client Key
+      name: client_key
+      type: text
+      condition:
+        variable: provider
+        operator: "=="
+        value: BitBucket
+    - label: Client Secret
+      name: client_secret
+      type: password
+      condition:
+        variable: provider
+        operator: "=="
+        value: BitBucket
     - label: Personal Access Token (Github)
       name: github_pat
       type: password
@@ -35,13 +71,7 @@ spec:
       name: use_self_hosted_pool
       type: bool
       default: false
-    - label: Which self-hosted runner group do you want to use?
-      name: self_hosted_pool_name
-      type: text
-      condition:
-        variable: use_self_hosted_pool
-        operator: ==
-        value: true
+    # Field self_hosted_pool_name is asked when use_self_hosted_pool is true on setup.py
     - label: Create Repository
       name: create_repo
       type: bool
