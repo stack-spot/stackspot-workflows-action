@@ -111,10 +111,17 @@ jobs:
           CI: ${{ toJson(fromJson(inputs.inputs).plugin_connectors) }}
         run: |
           source .github/workflows/scripts/enable_colors.sh
-          conn=""
+          conn=()
           if [ "${CI}" != "null" ]; then 
-              conn=" --connection-interfaces $(echo $CI | jq . -c)"
+              for json_object in $(echo "$CI" | jq -c '.[]'); do
+                name=$(echo "$json_object" | jq -r '.name')
+                type=$(echo "$json_object" | jq -r '.type')
+                conn="--connectors.$type $name"
+                conn+=("$conn")
+              done
           fi
+
+          concatened_conn = $(IFS=' ' && echo "${conn[*]}")
           
           if [ "${INPUTS}" != "null" ]; then 
               inputs_short=" --inputs-json $(echo $INPUTS | jq . -c)"
@@ -122,8 +129,8 @@ jobs:
           fi
 
           echo -e "\n${green}⚡ Applying plugin: ${u_cyan}$NAME"
-          echo -e "$STK apply plugin $NAME $inputs_short $conn \n"
-          $STK apply plugin $NAME $inputs_short $conn
+          echo -e "$STK apply plugin $NAME $inputs_short $concatened_conn \n"
+          $STK apply plugin $NAME $inputs_short $concatened_conn
       
       - name: Show Error Log
         if: failure()
