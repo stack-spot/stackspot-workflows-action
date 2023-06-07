@@ -24,6 +24,14 @@ def get_api_base_url_builder(inputs: Inputs) -> UrlBuilder:
     return UrlBuilder(inputs).path("repositories").path(inputs.org_name).path(inputs.repo_name)
 
 
+def get_api_projects_builder(inputs: Inputs) -> UrlBuilder:
+    return UrlBuilder(inputs).path("workspaces").path(inputs.org_name).path("projects")
+
+
+def get_api_project_builder(inputs: Inputs, project_key: str) -> UrlBuilder:
+    return get_api_projects_builder(inputs).path(project_key)
+
+
 def get_api_pipeline_config_url_builder(inputs: Inputs) -> UrlBuilder:
     return get_api_base_url_builder(inputs).path("pipelines_config")
 
