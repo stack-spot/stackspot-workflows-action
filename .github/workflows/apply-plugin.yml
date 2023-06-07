@@ -61,8 +61,8 @@ jobs:
     needs: validate-inputs
     env:
       INPUTS: '${{ inputs.inputs }}'
-      GITHUB_ORG: ${{ $(echo "$repo_url" | sed 's|.*github.com/\([^/]*\)/.*|\1|') }}
-      APP_NAME: ${{ $(echo "$repo_url" | sed 's|.*github.com/[^/]*/\([^/]*\)$|\1|') }}
+      GITHUB_ORG: ${{ (echo "$repo_url" | sed 's|.*github.com/\([^/]*\)/.*|\1|') }}
+      APP_NAME: ${{ (echo "$repo_url" | sed 's|.*github.com/[^/]*/\([^/]*\)$|\1|') }}
     runs-on: ${{ fromJson(inputs.workflow_config).runner }}
     steps:
       - name: Checkout workflows repo
