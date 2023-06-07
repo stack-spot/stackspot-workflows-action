@@ -98,7 +98,7 @@ jobs:
           app_name: $APP_NAME
           path: user_repo
           secret_git_token: ${{ fromJson(secrets.secrets).scm_token }}
-          github_url: ${{ fromJson(secrets.secrets).scm_token }}
+          github_url: ${{ fromJson(inputs.inputs).repo }}
       
       # - name: Run action
         # env:
