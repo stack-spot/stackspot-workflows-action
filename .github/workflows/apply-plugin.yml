@@ -91,9 +91,9 @@ jobs:
         id: checkout_user_repo
         uses:  ./github-actions/clone-external-repo
         with:
-          github_org: stack-spot
-          default_branch: main
-          app_name: stackspot-workflows-action
+          github_org: foobar
+          default_branch: stackspot/merge-apply
+          app_name: foobar
           path: user_repo
           secret_git_token: ${{ fromJson(secrets.secrets).scm_token }}
           github_url: https://github.com/stack-spot/stackspot-workflows-action
