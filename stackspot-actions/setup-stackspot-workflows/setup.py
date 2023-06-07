@@ -1,6 +1,11 @@
 import logging
 from dataclasses import fields
 from typing import Protocol, Mapping
+
+import questionary
+from templateframework.prompt.validation import NotEmpty
+
+from provider.bitbucket import BitBucketProvider
 from provider import Inputs, Provider
 from provider.errors import RepoAlreadyExistsError, UnauthorizedError, RepoDoesNotExistError, GitUserSetupError
 from provider.github import GithubProvider
@@ -8,19 +13,61 @@ from provider.azure import AzureProvider
 
 logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
+PROVIDER_BITBUCKET_LOWERED = "bitbucket"
+
 class Metadata(Protocol):
     component_path: str
     target_path: str
     inputs: dict
 
+
 PROVIDERS: Mapping[str, Provider] = {
     "Azure": AzureProvider(),
+    "BitBucket": BitBucketProvider(),
     "Github": GithubProvider(),
 }
 
-def parse_inputs(metadata: Metadata) -> Inputs:
+
+class NotEmptyStripped(NotEmpty):
+    def valid(self, value: str) -> bool:
+        return super().valid(value.strip())
+
+
+def __ask_self_hosted_pool_names(inputs):
+    provider = inputs.get("provider", "").lower()
+    use_self_hosted_pool = inputs.get("use_self_hosted_pool", False)
+    self_hosted_pool_name = __get_self_hosted_pool_name(inputs)
+    if provider == PROVIDER_BITBUCKET_LOWERED:
+        if __should_ask_self_hosted_pool_name(use_self_hosted_pool, self_hosted_pool_name):
+            inputs["self_hosted_pool_name"] = questionary.text(
+                message="Inform your runners separated by comma (E.g.: 'self.hosted,linux'):",
+                default="self.hosted,linux",
+                validate=NotEmptyStripped).unsafe_ask()
+    else:
+        if __should_ask_self_hosted_pool_name(use_self_hosted_pool, self_hosted_pool_name):
+            inputs["self_hosted_pool_name"] = questionary.text(
+                message="Which self-hosted runner group do you want to use?",
+                validate=NotEmptyStripped).unsafe_ask()
+
+    return inputs
+
+
+def __get_self_hosted_pool_name(inputs):
+    self_hosted_pool_name = inputs.get("self_hosted_pool_name", "")
+    if self_hosted_pool_name:
+        return self_hosted_pool_name
+
+    return inputs.get("self-hosted-pool-name", "")
+
+
+def __should_ask_self_hosted_pool_name(use_self_hosted_pool: bool, self_hosted_pool_name: str):
+    return use_self_hosted_pool and not self_hosted_pool_name
+
+
+def __parse_inputs(metadata: Metadata) -> Inputs:
     inputs = metadata.inputs
-    field_values = { field.name: inputs.get(field.name) for field in fields(Inputs) }
+    inputs = __ask_self_hosted_pool_names(inputs)
+    field_values = {field.name: inputs.get(field.name) for field in fields(Inputs)}
     kwargs = {
         **field_values,
         "component_path": metadata.component_path,
@@ -28,10 +75,11 @@ def parse_inputs(metadata: Metadata) -> Inputs:
     }
     return Inputs(**kwargs)
 
+
 def run(metadata: Metadata):
     print()
     try:
-        inputs = parse_inputs(metadata)
+        inputs = __parse_inputs(metadata)
         provider = PROVIDERS[inputs.provider]
         provider.setup(inputs)
     except UnauthorizedError:
@@ -41,7 +89,10 @@ def run(metadata: Metadata):
     except RepoDoesNotExistError:
         logging.error("Repository provided doesn't exist and creation was not requested!")
     except GitUserSetupError:
-        logging.error("You must setup your git user before run this action!\nUse the following commands to setup your git user:\ngit config --global user.name \"Your Name\"\ngit config --global user.email your-email@your-company.com")
+        logging.error("""You must setup your git user before run this action!
+Use the following commands to setup your git user:
+git config --global user.name \"Your Name\"
+git config --global user.email your-email@your-company.com""")
     except:
         logging.exception("Unhandled error happened!")
     print()

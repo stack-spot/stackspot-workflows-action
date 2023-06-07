@@ -54,6 +54,10 @@ class GithubProvider(Provider):
         self._handle_api_response_errors(response)
         return response.json()
 
+    def execute_pre_setup_provider(self, inputs: Inputs):
+        #  Ignored due to not needing to perform even a step before the clone
+        pass
+
     def execute_repo_creation(self, inputs: Inputs):
         url_builder = (
             UrlBuilder(inputs).path("orgs").path(inputs.org_name).path("repos")
