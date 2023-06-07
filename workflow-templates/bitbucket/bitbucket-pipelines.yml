@@ -1,7 +1,7 @@
 {% set runners %}
 {% if use_self_hosted_pool %}
 {% set self_hosted_pool_names = self_hosted_pool_name.split(',') %}
-runs-on:
+{{"\n"}}        runs-on:
 {%- for self_hosted_pool_name in self_hosted_pool_names %}
 {{"\n"}}          - {{self_hosted_pool_name}}
 {%- endfor %}
@@ -12,8 +12,7 @@ image: atlassian/default-image:3
 definitions:
   steps:
     - step: &install-stk-login-use-workspace
-        name: 'Install stk, login and use workspace'
-        {{runners}}
+        name: 'Install stk, login and use workspace'{{runners}}
         script:
           # ------------------------- DOWNLOAD CLI -------------------------
           - echo "Step [1/8] Download CLI";
@@ -64,8 +63,7 @@ definitions:
           - .stk-alpha/**
 
     - step: &run-action-validate-inputs
-        name: 'Valdiate JSON Inputs'
-        {{runners}}
+        name: 'Valdiate JSON Inputs'{{runners}}
         script:
           # Add variable colors
           - echo "Step [1/11] Configure pipeline.";
@@ -133,8 +131,7 @@ definitions:
           - echo -e "Step [11/11] $green⚡Validation successfully"
 
     - step: &run-action
-        name: 'Run Action'
-        {{runners}}
+        name: 'Run Action'{{runners}}
         script:
           # Copy to home directory .stk or .stk-alpha, update PATH with binary path and add variable colors
           - echo "Step [1/3] Configure pipeline.";
@@ -185,8 +182,7 @@ definitions:
             $BITBUCKET_CLONE_DIR/scripts/show_stk_logs_file.sh $BITBUCKET_EXIT_CODE $workflow_config
     
     - step: &create-validate-inputs
-        name: 'Validate Inputs'
-        {{runners}}
+        name: 'Validate Inputs'{{runners}}
         script:
           # Add variable colors
           - echo "Step [1/13] Configure pipeline.";
@@ -279,8 +275,7 @@ definitions:
 
 
     - step: &create-register-run-actions
-        name: 'Create'
-        {{runners}}
+        name: 'Create'{{runners}}
         script:
           # Copy to home directory .stk or .stk-alpha, update PATH with binary path and add variable colors
           - echo "Step [1/11] Configure pipeline.";

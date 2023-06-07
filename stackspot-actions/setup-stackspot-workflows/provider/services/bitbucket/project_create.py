@@ -91,7 +91,7 @@ def __create_project(bitbucket_access_token: str, inputs: Inputs):
 
     print(f"> Project key set to {key}")
 
-    payload = {"name": inputs.project_name, "key": key}
+    payload = {"name": inputs.project_name, "key": key, "is_private": True}
     post(get_api_projects_builder(inputs), bitbucket_access_token, payload)
 
     print(f"> Project '{inputs.project_name}' created in the workspace {inputs.org_name}.")
