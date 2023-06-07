@@ -69,8 +69,8 @@ jobs:
         run: |
           org=$(echo "$repo_url" | sed 's|.*github.com/\([^/]*\)/.*|\1|')
           app=$(echo "$repo_url" | sed 's|.*github.com/[^/]*/\([^/]*\)$|\1|')
-          echo "GITHUB_ORG=org" >> $GITHUB_OUTPUT
-          echo "APP_NAME=app" >> $GITHUB_OUTPUT
+          echo "GITHUB_ORG=$org" >> $GITHUB_OUTPUT
+          echo "APP_NAME=$app" >> $GITHUB_OUTPUT
 
       - name: Checkout workflows repo
         uses: actions/checkout@v3
