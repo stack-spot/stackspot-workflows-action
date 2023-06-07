@@ -129,8 +129,8 @@ jobs:
           fi
 
           echo -e "\n${green}⚡ Applying plugin: ${u_cyan}$NAME"
-          echo -e "$STK apply plugin $NAME $inputs_short $concatened_conn --non-interactive \n"
-          $STK apply plugin $NAME $inputs_short $concatened_conn --non-interactive
+          echo -e "$STK apply plugin $NAME $inputs_short $concatened_conn \n"
+          $STK apply plugin $NAME $inputs_short $concatened_conn
       
       - name: Show Error Log
         if: failure()
