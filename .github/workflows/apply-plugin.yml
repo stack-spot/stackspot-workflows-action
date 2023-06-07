@@ -93,7 +93,7 @@ jobs:
         uses:  ./github-actions/clone-external-repo
         with:
           github_org: $GITHUB_ORG
-          default_branch: stackspot/merge-apply
+          default_branch: stackspot-$(date +%s)
           app_name: $APP_NAME
           path: user_repo
           secret_git_token: ${{ fromJson(secrets.secrets).scm_token }}
@@ -111,12 +111,6 @@ jobs:
           CI: ${{ toJson(fromJson(inputs.inputs).plugin_connectors) }}
         working-directory: user_repo
         run: |
-          app-dir=$(pwd)
-
-          cd ../.github/workflows/scripts/
-          source enable-colors.sh
-
-          cd "$app_dir"
 
           conn=()
           if [ "${CI}" != "null" ]; then 
@@ -138,6 +132,44 @@ jobs:
           echo -e "\n${green}⚡ Applying plugin: ${u_cyan}$NAME"
           echo -e "$STK apply plugin $NAME $inputs_short $concatened_conn \n"
           $STK apply plugin $NAME $inputs_short $concatened_conn
+
+      - name: Commit and Push.
+        working-directory: user_repo
+        env:
+          name: ${{ fromJson(inputs.create).name }}
+          description: ${{ fromJson(inputs.create).description }}
+          token: ${{ secrets.git }}
+          default_branch: ${{ fromJson(inputs.config).default_branch }}
+          repo: ${{ steps.checkout_user_repo.outputs.repo }}
+        run: |
+         if [[ `git status --porcelain` ]]; then
+            bname=stackspot-$(date +%s)
+
+            git checkout -b $bname
+            git add -A
+            git commit -am "stackspot initial commit"
+            git push origin $bname
+
+            echo "https://api.github.com/repos/${repo}/pulls"
+            echo "{
+              \"title\": \"Create ${name}\",
+              \"body\": \"${description}\",
+              \"head\": \"${bname}\",
+              \"base\": \"${default_branch}\"
+            }"
+
+            curl --location "https://api.github.com/repos/${repo}/pulls" \
+              --header "Authorization: Bearer ${token}" \
+              --header "Accept: application/vnd.github+json" \
+              --header "X-GitHub-Api-Version: 2022-11-28" \
+              --header "Content-Type: application/json" \
+              --data "{
+                \"title\": \"Create ${name}\",
+                \"body\": \"${description}\",
+                \"head\": \"${bname}\",
+                \"base\": \"${default_branch}\"
+              }"
+         fi
       
       - name: Show Error Log
         if: failure()
