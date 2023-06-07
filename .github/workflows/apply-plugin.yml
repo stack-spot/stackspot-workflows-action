@@ -56,35 +56,35 @@ jobs:
          echo "ERROR: 'workspace_slug' field not found in json."
          exit 1
 
-  # apply-plugin-using-stk-cli:
-  #   name: Apply Stackspot Plugin
-  #   needs: validate-inputs
-  #   env:
-  #     INPUTS: '${{ inputs.action_inputs }}'
-  #   runs-on: ${{ fromJson(inputs.workflow_config).runner }}
-  #   steps:
-  #     - name: Checkout workflows repo
-  #       uses: actions/checkout@v3
-  #       with:
-  #         repository: ${{ fromJson(inputs.workflow_config).origin_repository }}
-  #         ref: ${{ fromJson(inputs.workflow_config).origin_branch }}
+  apply-plugin-using-stk-cli:
+    name: Apply Stackspot Plugin
+    needs: validate-inputs
+    env:
+      INPUTS: '${{ inputs.inputs }}'
+    runs-on: ${{ fromJson(inputs.workflow_config).runner }}
+    steps:
+      - name: Checkout workflows repo
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ fromJson(inputs.workflow_config).origin_repository }}
+          ref: ${{ fromJson(inputs.workflow_config).origin_branch }}
 
-  #     - name: Install STK
-  #       uses: ./github-actions/install-stk-cli
-  #       with: 
-  #         stk: ${{ fromJson(inputs.workflow_config).stk }}
+      - name: Install STK
+        uses: ./github-actions/install-stk-cli
+        with: 
+          stk: ${{ fromJson(inputs.workflow_config).stk }}
       
-  #     - name: Login STK
-  #       uses: ./github-actions/login-stk
-  #       with: 
-  #         stk: ${{ fromJson(inputs.workflow_config).stk }}
-  #         email: ${{ fromJson(inputs.cli_login).email }}
-  #         pat: ${{ fromJson(secrets.secrets).cli_token }}
-  #         realm: ${{ fromJson(inputs.cli_login).realm }}
+      - name: Login STK
+        uses: ./github-actions/login-stk
+        with: 
+          stk: ${{ fromJson(inputs.workflow_config).stk }}
+          email: ${{ fromJson(inputs.inputs).cli_login_email }}
+          pat: ${{ fromJson(secrets.secrets).cli_token }}
+          realm: ${{ fromJson(inputs.inputs).cli_login_realm }}
       
-  #     - name: Use workspace
-  #       run: |
-  #        $STK use workspace ${{ inputs.workspace_slug }}
+      - name: Use workspace
+        run: |
+         $STK use workspace ${{ inputs.workspace_slug }}
       
   #     - name: Run action
   #       env:
