@@ -61,10 +61,17 @@ jobs:
     needs: validate-inputs
     env:
       INPUTS: '${{ inputs.inputs }}'
-      GITHUB_ORG: ${{ (echo "$repo_url" | sed 's|.*github.com/\([^/]*\)/.*|\1|') }}
-      APP_NAME: ${{ (echo "$repo_url" | sed 's|.*github.com/[^/]*/\([^/]*\)$|\1|') }}
+      REPO: ${{ fromJson(inputs.inputs).repo }}
     runs-on: ${{ fromJson(inputs.workflow_config).runner }}
     steps:
+      - name: Extract values from repo
+        id: extract_values
+        run: |
+          GITHUB_ORG=$(echo "$repo_url" | sed 's|.*github.com/\([^/]*\)/.*|\1|')
+          APP_NAME=$(echo "$repo_url" | sed 's|.*github.com/[^/]*/\([^/]*\)$|\1|')
+          echo "::set-output name=github_org::$GITHUB_ORG"
+          echo "::set-output name=app_name::$APP_NAME"
+
       - name: Checkout workflows repo
         uses: actions/checkout@v3
         with:
@@ -92,12 +99,12 @@ jobs:
         id: checkout_user_repo
         uses:  ./github-actions/clone-external-repo
         with:
-          github_org: $GITHUB_ORG
+          github_org: ${{ steps.extract_values.outputs.github_org }}
           default_branch: stackspot-$(date +%s)
-          app_name: $APP_NAME
+          app_name: ${{ steps.extract_values.outputs.app_name }}
           path: user_repo
           secret_git_token: ${{ fromJson(secrets.secrets).scm_token }}
-          github_url: ${{ fromJson(inputs.inputs).repo }}
+          github_url: $REPO
 
       - name: Set git username
         run: |
@@ -151,10 +158,10 @@ jobs:
 
             description="Applying the plugin ${NAME}"
 
-            echo $GITHUB_ORG
-            echo $APP_NAME
+            echo ${{ steps.extract_values.outputs.github_org }}
+            echo ${{ steps.extract_values.outputs.app_name }}
 
-            echo "https://api.github.com/repos/$GITHUB_ORG/$APP_NAME/pulls"
+            echo "https://api.github.com/repos/${{ steps.extract_values.outputs.github_org }}/${{ steps.extract_values.outputs.app_name }}/pulls"
             echo "{
               \"title\": \"Apply ${NAME}\",
               \"body\": \"${description}\",
@@ -162,7 +169,7 @@ jobs:
               \"base\": \"${DEFAULT_BRANCH}\"
             }"
 
-            curl --location "https://api.github.com/repos/${{GITHUB_ORG}}/${{APP_NAME}}/pulls" \
+            curl --location "https://api.github.com/repos/${{ steps.extract_values.outputs.github_org }}/${{ steps.extract_values.outputs.app_name }}/pulls" \
               --header "Authorization: Bearer ${TOKEN}" \
               --header "Accept: application/vnd.github+json" \
               --header "X-GitHub-Api-Version: 2022-11-28" \
