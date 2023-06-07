@@ -88,7 +88,6 @@ jobs:
         run: |
          $STK use workspace ${{ fromJson(inputs.inputs).workspace_slug }}
 
-
       - name: Checkout the user repo
         id: checkout_user_repo
         uses:  ./github-actions/clone-external-repo
@@ -99,36 +98,34 @@ jobs:
           path: user_repo
           secret_git_token: ${{ fromJson(secrets.secrets).scm_token }}
           github_url: ${{ fromJson(inputs.inputs).repo }}
+
+      - name: Set git username
+        run: |
+          git config --global user.email "${{ fromJson(inputs.cli_login).email }}"
+          git config --global user.name "${{ fromJson(inputs.cli_login).email }}"
+
+      - name: Apply plugin ${{ fromJson(inputs.inputs).plugin_name }}
+        env:
+          NAME: ${{ fromJson(inputs.inputs).plugin_name }}
+          INPUTS: ${{ toJson(fromJson(inputs.inputs).plugin_inputs) }}
+          CI: ${{ toJson(fromJson(inputs.inputs).plugin_connectors) }}
+        run: |
+          source .github/workflows/scripts/enable_colors.sh
+          conn=""
+          if [ "${CI}" != "null" ]; then 
+              conn=" --connection-interfaces $(echo $CI | jq . -c)"
+          fi
+          
+          if [ "${INPUTS}" != "null" ]; then 
+              inputs_short=" --inputs-json $(echo $INPUTS | jq . -c)"
+              echo $inputs_short
+          fi
+
+          echo -e "\n${green}⚡ Applying plugin: ${u_cyan}$NAME"
+          echo -e "$STK apply plugin $NAME $inputs_short $conn \n"
+          $STK apply plugin $NAME $inputs_short $conn
       
-      # - name: Run action
-        # env:
-        #   NAME: ${{ fromJson(inputs.inputs).plugin_name }}
-        #   INPUTS: ${{ toJson(fromJson(inputs.inputs).plugin_inputs) }}
-        #   CI: ${{ toJson(fromJson(inputs.inputs).plugin_connectors) }}
-
-      
-  #       run: |
-  #         source .github/workflows/scripts/enable_colors.sh
-  #         conn=""
-  #         if [ "${CI}" != "null" ]; then 
-  #             conn=" --connection-interfaces $(echo $CI | jq . -c)"
-  #         fi
-  #         env=""
-
-  #         if [ "${ACTION_ENV}" != "null" ]; then
-  #           env=" --env $ACTION_ENV"
-  #         fi
-
-  #         if [ "${INPUTS}" != "null" ]; then 
-  #             inputs_short=" --inputs-json $(echo $INPUTS | jq . -c)"
-  #             echo $inputs_short
-  #         fi
-
-  #         echo -e "\n${green}⚡ Running Action: ${u_cyan}$NAME"
-  #         echo -e "$STK run action $NAME $inputs_short $conn $env \n" 
-  #         $STK run action $NAME $inputs_short $conn $env
-      
-  #     - name: Show Error Log
-  #       if: failure()
-  #       run: |
-  #         cat ~/.$STK/logs/*
+      - name: Show Error Log
+        if: failure()
+        run: |
+          cat ~/.$STK/logs/*
