@@ -59,6 +59,9 @@ jobs:
   apply-plugin-using-stk-cli:
     name: Apply Stackspot Plugin
     needs: validate-inputs
+    if: |
+      always() &&
+      needs.validate-inputs.result == 'success'
     env:
       INPUTS: '${{ inputs.inputs }}'
       REPO: ${{ fromJson(inputs.inputs).repo }}
@@ -122,6 +125,12 @@ jobs:
           CI: ${{ toJson(fromJson(inputs.inputs).plugin_connectors) }}
         working-directory: user_repo
         run: |
+
+          if $DEBUG
+          then
+            export APPLY_PLUGIN_ENABLE_DEBUG=true
+            export COMMAND_ARGS_ENABLE_DEBUG=true
+          fi
 
           conn=()
           if [ "${CI}" != "null" ]; then 
