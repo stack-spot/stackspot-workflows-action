@@ -85,13 +85,26 @@ jobs:
       - name: Use workspace
         run: |
          $STK use workspace ${{ fromJson(inputs.inputs).workspace_slug }}
+
+
+      - name: Checkout the user repo
+        id: checkout_user_repo
+        uses:  ./workflow_repo/github-actions/clone-external-repo
+        with:
+          github_org: stack-spot
+          default_branch: main
+          app_name: stackspot-workflows-action
+          path: user_repo
+          secret_git_token: ${{ fromJson(secrets.secrets).scm_token }}
+          github_url: https://github.com/stack-spot/stackspot-workflows-action
       
-  #     - name: Run action
-  #       env:
-  #         NAME: ${{ fromJson(inputs.action).name }}
-  #         INPUTS: ${{ toJson(fromJson(inputs.action).inputs) }}
-  #         CI: ${{ toJson(fromJson(inputs.action).connectors) }}
-  #         ACTION_ENV: ${{ fromJson(inputs.action).env }}
+      # - name: Run action
+        # env:
+        #   NAME: ${{ fromJson(inputs.inputs).plugin_name }}
+        #   INPUTS: ${{ toJson(fromJson(inputs.inputs).plugin_inputs) }}
+        #   CI: ${{ toJson(fromJson(inputs.inputs).plugin_connectors) }}
+
+      
   #       run: |
   #         source .github/workflows/scripts/enable_colors.sh
   #         conn=""
