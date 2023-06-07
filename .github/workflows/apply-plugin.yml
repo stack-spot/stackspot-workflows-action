@@ -101,8 +101,8 @@ jobs:
 
       - name: Set git username
         run: |
-          git config --global user.email "${{ fromJson(inputs.cli_login).email }}"
-          git config --global user.name "${{ fromJson(inputs.cli_login).email }}"
+          git config --global user.email "${{ fromJson(inputs.inputs).cli_login_email }}"
+          git config --global user.name "${{ fromJson(inputs.inputs).cli_login_email }}"
 
       - name: Apply plugin ${{ fromJson(inputs.inputs).plugin_name }}
         env:
