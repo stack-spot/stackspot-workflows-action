@@ -3,7 +3,7 @@ schema-version: v1
 kind: action
 metadata:
   name: setup-stackspot-workflows
-  display-name: StackSpot Setup Workflows
+  display-name: StackSpot Setup Workflows.
   description: Action to configure Stackspot workflows in SCM provider
   version: 0.0.1
 spec: 
