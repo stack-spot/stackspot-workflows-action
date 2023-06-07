@@ -121,7 +121,7 @@ jobs:
               done
           fi
 
-          concatened_conn = $(IFS=' ' && echo "${conn[*]}")
+          concatened_conn=$(IFS=' ' && echo "${conn[*]}")
           
           if [ "${INPUTS}" != "null" ]; then 
               inputs_short=" --inputs-json $(echo $INPUTS | jq . -c)"
