@@ -109,6 +109,7 @@ jobs:
           NAME: ${{ fromJson(inputs.inputs).plugin_name }}
           INPUTS: ${{ toJson(fromJson(inputs.inputs).plugin_inputs) }}
           CI: ${{ toJson(fromJson(inputs.inputs).plugin_connectors) }}
+        working-directory: user_repo
         run: |
           source .github/workflows/scripts/enable_colors.sh
           conn=()
@@ -129,8 +130,8 @@ jobs:
           fi
 
           echo -e "\n${green}⚡ Applying plugin: ${u_cyan}$NAME"
-          echo -e "$STK apply plugin $NAME $inputs_short $concatened_conn \n"
-          $STK apply plugin $NAME $inputs_short $concatened_conn
+          echo -e "$STK apply plugin $NAME $inputs_short $concatened_conn --non-interactive \n"
+          $STK apply plugin $NAME $inputs_short $concatened_conn --non-interactive
       
       - name: Show Error Log
         if: failure()
