@@ -111,13 +111,6 @@ jobs:
           CI: ${{ toJson(fromJson(inputs.inputs).plugin_connectors) }}
         working-directory: user_repo
         run: |
-          pwd
-          ls -a
-          cd ..
-          pwd
-          ls -a
-
-          source ../.github/workflows/scripts/enable_colors.sh
           conn=()
           if [ "${CI}" != "null" ]; then 
               for json_object in $(echo "$CI" | jq -c '.[]'); do
