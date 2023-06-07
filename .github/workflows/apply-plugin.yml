@@ -134,17 +134,17 @@ jobs:
             export COMMAND_ARGS_ENABLE_DEBUG=true
           fi
 
-          conn=()
+          connectors=()
           if [ "${CI}" != "null" ]; then 
               for json_object in $(echo "$CI" | jq -c '.[]'); do
                 name=$(echo "$json_object" | jq -r '.name')
                 type=$(echo "$json_object" | jq -r '.type')
                 conn="--connectors.$type $name"
-                conn+=("$conn")
+                connectors+=("$conn")
               done
           fi
 
-          concatened_conn=$(IFS=' ' && echo "${conn[*]}")
+          concatened_conn=$(IFS=' ' && echo "${connectors[*]}")
           
           if [ "${INPUTS}" != "null" ]; then 
               inputs_short=" --inputs-json $(echo $INPUTS | jq . -c)"
