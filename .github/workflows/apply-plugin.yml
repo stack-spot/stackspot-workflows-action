@@ -67,8 +67,12 @@ jobs:
       - name: Extract values from repo
         id: extract_values
         run: |
-          org=$(echo "$repo_url" | sed 's|.*github.com/\([^/]*\)/.*|\1|')
-          app=$(echo "$repo_url" | sed 's|.*github.com/[^/]*/\([^/]*\)$|\1|')
+          org=$(echo "$REPO" | sed 's|.*github.com/\([^/]*\)/.*|\1|')
+          app=$(echo "$REPO" | sed 's|.*github.com/[^/]*/\([^/]*\)$|\1|')
+
+          echo $org
+          echo $app
+
           echo "GITHUB_ORG=$org" >> $GITHUB_OUTPUT
           echo "APP_NAME=$app" >> $GITHUB_OUTPUT
 
