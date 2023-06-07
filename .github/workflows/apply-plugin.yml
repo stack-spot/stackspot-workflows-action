@@ -111,10 +111,12 @@ jobs:
           CI: ${{ toJson(fromJson(inputs.inputs).plugin_connectors) }}
         working-directory: user_repo
         run: |
-          cd ../.github/workflows/scripts/
-          pwd
-          ls -a
+          app-dir=$(pwd)
 
+          cd ../.github/workflows/scripts/
+          source enable-colors.sh
+
+          cd "$app_dir"
 
           conn=()
           if [ "${CI}" != "null" ]; then 
