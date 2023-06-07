@@ -151,7 +151,10 @@ jobs:
 
             description="Applying the plugin ${NAME}"
 
-            echo "https://api.github.com/repos/${GITHUB_ORG}/${APP_NAME}/pulls"
+            echo ${GITHUB_ORG}
+            echo ${APP_NAME}
+
+            echo "https://api.github.com/repos/${{GITHUB_ORG}}/${{APP_NAME}}/pulls"
             echo "{
               \"title\": \"Apply ${NAME}\",
               \"body\": \"${description}\",
@@ -159,7 +162,7 @@ jobs:
               \"base\": \"${DEFAULT_BRANCH}\"
             }"
 
-            curl --location "https://api.github.com/repos/${GITHUB_ORG}/${APP_NAME}/pulls" \
+            curl --location "https://api.github.com/repos/${{GITHUB_ORG}}/${{APP_NAME}}/pulls" \
               --header "Authorization: Bearer ${TOKEN}" \
               --header "Accept: application/vnd.github+json" \
               --header "X-GitHub-Api-Version: 2022-11-28" \
