@@ -2,6 +2,8 @@ import base64
 import logging
 import requests
 from typing import Mapping
+
+from .handle_errors import handle_api_response_errors
 from .provider import Provider, Inputs
 from .errors import NotFoundError
 
@@ -65,7 +67,7 @@ class AzureProvider(Provider):
                 }
             }
         )
-        self._handle_api_response_errors(response)
+        handle_api_response_errors(response)
 
     def __setup_github_connection(self, inputs: Inputs):
         logging.info("Setting up github service connection...")
@@ -100,7 +102,7 @@ class AzureProvider(Provider):
             params=self.default_params,
             json=body
         )
-        self._handle_api_response_errors(response)
+        handle_api_response_errors(response)
         endpoint_id = response.json()["id"]
         url = UrlBuilder(inputs).path(inputs.repo_name).path("_apis").path("pipelines").path(
             "pipelinePermissions").path("endpoint").path(endpoint_id).build()
@@ -125,7 +127,7 @@ class AzureProvider(Provider):
             },
             json=body
         )
-        self._handle_api_response_errors(response)
+        handle_api_response_errors(response)
 
     def __get_repo_id(self, inputs: Inputs) -> str:
         url = UrlBuilder(inputs).path(inputs.repo_name).path("_apis").path("git").path("repositories").path(
@@ -135,7 +137,7 @@ class AzureProvider(Provider):
             headers=self.__default_headers(inputs),
             params=self.default_params,
         )
-        self._handle_api_response_errors(response)
+        handle_api_response_errors(response)
         return response.json()["id"]
 
     def __get_project_id(self, inputs: Inputs) -> str:
@@ -145,7 +147,7 @@ class AzureProvider(Provider):
             headers=self.__default_headers(inputs),
             params=self.default_params
         )
-        self._handle_api_response_errors(response)
+        handle_api_response_errors(response)
         return response.json()["id"]
 
     def execute_pre_setup_provider(self, inputs: Inputs):
@@ -173,7 +175,7 @@ class AzureProvider(Provider):
             params=self.default_params,
             json=body
         )
-        self._handle_api_response_errors(response)
+        handle_api_response_errors(response)
 
     def repo_exists(self, inputs: Inputs) -> bool:
         try:

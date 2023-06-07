@@ -15,6 +15,7 @@ logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
 PROVIDER_BITBUCKET_LOWERED = "bitbucket"
 
+
 class Metadata(Protocol):
     component_path: str
     target_path: str
@@ -37,6 +38,7 @@ def __ask_self_hosted_pool_names(inputs):
     provider = inputs.get("provider", "").lower()
     use_self_hosted_pool = inputs.get("use_self_hosted_pool", False)
     self_hosted_pool_name = __get_self_hosted_pool_name(inputs)
+
     if provider == PROVIDER_BITBUCKET_LOWERED:
         if __should_ask_self_hosted_pool_name(use_self_hosted_pool, self_hosted_pool_name):
             inputs["self_hosted_pool_name"] = questionary.text(

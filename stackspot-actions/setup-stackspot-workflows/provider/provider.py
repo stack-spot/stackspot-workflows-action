@@ -106,16 +106,7 @@ class Provider(ABC):
         logging.info("Commiting and pushing workflow files to repo...")
         os.system('git branch -m main && git add . && git commit -m "Initial commit" && git push origin main')
 
-    def _handle_api_response_errors(self, response: requests.Response) -> bool:
-        if response.ok:
-            return True
-        match response.status_code:
-            case requests.codes.not_found:
-                raise NotFoundError()
-            case requests.codes.unauthorized:
-                raise UnauthorizedError()
-        logging.error("Error response body: %s", response.text)
-        response.raise_for_status()
+
 
     def _remove_all_files_generated_on_apply_plugin(self, workdir: str, inputs: Inputs):
         workflow_template_provider_path = Path(inputs.component_path) / "workflow-templates" / inputs.provider.lower()

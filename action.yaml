@@ -32,7 +32,7 @@ spec:
         variable: provider
         operator: ==
         value: BitBucket
-    - label: Project Key
+    - label: Project Name
       name: project_name
       type: text
       help: 'Informe your Project Name'

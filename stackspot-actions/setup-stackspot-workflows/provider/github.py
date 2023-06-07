@@ -1,6 +1,7 @@
 import requests
 import logging
 from .errors import NotFoundError
+from .handle_errors import handle_api_response_errors
 from .provider import Provider, Inputs
 
 
@@ -41,7 +42,7 @@ class GithubProvider(Provider):
             headers=self.__default_headers(inputs),
             verify=False,
         )
-        self._handle_api_response_errors(response)
+        handle_api_response_errors(response)
         return response.json()
 
     def __post(self, url_builder: UrlBuilder, inputs: Inputs, body: dict) -> dict:
@@ -51,7 +52,7 @@ class GithubProvider(Provider):
             json=body,
             verify=False,
         )
-        self._handle_api_response_errors(response)
+        handle_api_response_errors(response)
         return response.json()
 
     def execute_pre_setup_provider(self, inputs: Inputs):
