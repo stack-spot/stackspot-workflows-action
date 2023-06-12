@@ -54,7 +54,7 @@ class Provider(ABC):
         workdir = tempfile.mkdtemp()
         try:
             self.clone_created_repo(workdir, inputs)
-            self.create_workflow_files(workdir, inputs)
+            self.create_workflow_files(inputs)
             self.commit_and_push()
         finally:
             os.chdir(cwd)
