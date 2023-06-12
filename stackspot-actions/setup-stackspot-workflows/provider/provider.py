@@ -110,7 +110,7 @@ class Provider(ABC):
                 file_to_be_applied_path = Path(os.path.join(subdir, file))
                 relative_path_file_to_be_applied = file_to_be_applied_path.relative_to(workflow_template_provider_path)
 
-                file_path = Path(workdir) / inputs.repo_name / relative_path_file_to_be_applied
+                file_path = Path(workdir) / relative_path_file_to_be_applied
                 if file_path.exists():
                     file_path.unlink(missing_ok=True)
 
