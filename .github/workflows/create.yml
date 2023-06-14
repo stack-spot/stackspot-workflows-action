@@ -286,7 +286,7 @@ jobs:
           fi
           register_id=$(sudo cat .stk/stk.yaml | grep $type | cut -d : -f 2 | tr -d '[:space:]')
           account_slug=$(echo $correlation_id | cut -d "|" -f 1)
-          execution_id=$(echo $correlation_id | cut -d "|" -f 4)
+          execution_id=$(echo $correlation_id | cut -d "|" -f 2)
 
           echo "${workflow_api}/accounts/${account_slug}/executions/${execution_id}"
           echo "{
