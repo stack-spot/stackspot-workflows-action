@@ -14,17 +14,26 @@ definitions:
     - step: &install-stk-login-use-workspace
         name: 'Install stk, login and use workspace'{{runners}}
         script:
+          # ------------------------- CONFIGURE DEBUG -------------------------
+          - echo "Step [1/9] Configure DEBUG MODE.";
+            if [ $debugHttp == "true" ]; then
+              export HTTP_ENABLE_DEBUG=true;
+              echo -e "$green DEBUG HTTP MODE ENABLED";
+            else
+              echo -e "$green DEBUG HTTP MODE DISABLED";
+            fi;
+
           # ------------------------- DOWNLOAD CLI -------------------------
-          - echo "Step [1/8] Download CLI";
+          - echo "Step [2/9] Download CLI";
             curl -O -s https://stk.stackspot.com/installer/linux/$workflow_config;
             chmod +x $workflow_config;
 
-          - echo "Step [2/8] CLI init";
+          - echo "Step [3/9] CLI init";
             ./$workflow_config init;
             rm $workflow_config;
 
           # - Download .env file of QA env when $workflow_config is 'stk-alpha'
-          - echo "Step [3/8] Download .env";
+          - echo "Step [4/9] Download .env";
             chmod +x $BITBUCKET_CLONE_DIR/scripts/download-qa-env.sh;
             $BITBUCKET_CLONE_DIR/scripts/download-qa-env.sh $debug $workflow_config;
             exit_code_of_command=$?;
@@ -32,26 +41,26 @@ definitions:
               exit $exit_code_of_command;
             fi;
 
-          - echo "Step [4/8] Upgrade CLI";
+          - echo "Step [5/9] Upgrade CLI";
             ~/.$workflow_config/bin/$workflow_config --version;
             ~/.$workflow_config/bin/$workflow_config upgrade;
 
           # - Add stk or stk-alpha to PATH environment variable
-          - echo "Step [5/8] Add CLI to PATH environment variable";
+          - echo "Step [6/9] Add CLI to PATH environment variable";
             export PATH="$PATH:~/.$workflow_config/bin";
 
           # -------------------- LOGIN AND USE WORKSPACE -------------------
-          - echo "Step [6/8] Execute login";
+          - echo "Step [7/9] Execute login";
             echo $workflow_config login $(echo $cli_login | jq -r .email) --realm $(echo $cli_login | jq -r .realm);
             $workflow_config login $(echo $cli_login | jq -r .email) --realm $(echo $cli_login | jq -r .realm) --pat $(echo $secrets | jq -r .secret_stk_login);
           
-          - echo "Step [7/8] Use workspace";
+          - echo "Step [8/9] Use workspace";
             echo $workflow_config use workspace $workspace_slug;
             $workflow_config use workspace $workspace_slug
 
           # -------------- MOVE TO FOLDER TO SAVE AS ARTIFACT --------------
           # - Create .gitkeep inside ~/.$workflow_config/stacks to avoid init execution more than one time
-          - echo "Step [8/8] Move to folder '$BITBUCKET_CLONE_DIR' to save as artifact";
+          - echo "Step [9/9] Move to folder '$BITBUCKET_CLONE_DIR' to save as artifact";
             touch ~/.$workflow_config/stacks/.gitkeep;
             rm -rf .$workflow_config;
             cp -rf ~/.$workflow_config .
@@ -61,6 +70,7 @@ definitions:
         artifacts:
           - .stk/**
           - .stk-alpha/**
+          - .stk-dev/**
 
     - step: &run-action-validate-inputs
         name: 'Valdiate JSON Inputs'{{runners}}
