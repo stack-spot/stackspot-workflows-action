@@ -21,3 +21,11 @@ class NotFoundError(Exception):
 
 class GitUserSetupError(Exception):
     pass
+
+
+class WorkspaceShouldNotInUseError(Exception):
+    pass
+
+
+class ApplyPluginSetupRepositoryError(Exception):
+    pass
