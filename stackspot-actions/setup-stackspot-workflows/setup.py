@@ -99,7 +99,7 @@ def run(metadata: Metadata):
     except WorkspaceShouldNotInUseError:
         logging.error("Workspace should not be in use!")
     except ApplyPluginSetupRepositoryError:
-        logging.error("Applying plugin error!")
+        pass
     except GitUserSetupError:
         logging.error(GIT_USER_SETUP_ERROR_MESSAGE)
     except:
