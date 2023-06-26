@@ -129,7 +129,9 @@ class Provider(ABC):
 
     def _check_workspace_in_use(self):
         logging.info("Validating workspace is use...")
-        stk_folder = Path(os.path.dirname(self.stk)).parent.parent
+        home_path = Path.home()
+        stk_binary_name = Path(self.stk).stem
+        stk_folder = Path(home_path) / f".{stk_binary_name}"
         workspace_config_path = stk_folder / "workspaces" / "workspace-config.json"
 
         if workspace_config_path.exists():
