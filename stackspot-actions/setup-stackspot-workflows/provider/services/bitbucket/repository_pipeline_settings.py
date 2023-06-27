@@ -21,10 +21,6 @@ def enable_repository_pipelines(inputs: Inputs, bitbucket_access_token: str):
 
 
 def create_or_update_repository_variables(inputs: Inputs, bitbucket_access_token: str):
-    if inputs.create_repo:
-        __create_repository_variables(bitbucket_access_token, inputs)
-        return
-
     repository_variables = __get_repository_variables(bitbucket_access_token, inputs)
 
     for pipeline_variable in PIPELINE_VARIABLES:
@@ -39,11 +35,6 @@ def create_or_update_repository_variables(inputs: Inputs, bitbucket_access_token
                 logging.info(f"Repository Variable Already Updated '{pipeline_variable.key}'")
             continue
 
-        __create_repository_variable(bitbucket_access_token, inputs, pipeline_variable)
-
-
-def __create_repository_variables(bitbucket_access_token: str, inputs: Inputs):
-    for pipeline_variable in PIPELINE_VARIABLES:
         __create_repository_variable(bitbucket_access_token, inputs, pipeline_variable)
 
 

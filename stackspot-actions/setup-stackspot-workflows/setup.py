@@ -7,7 +7,8 @@ from templateframework.prompt.validation import NotEmpty
 
 from provider.bitbucket import BitBucketProvider
 from provider import Inputs, Provider
-from provider.errors import RepoAlreadyExistsError, UnauthorizedError, RepoDoesNotExistError, GitUserSetupError
+from provider.errors import RepoAlreadyExistsError, UnauthorizedError, RepoDoesNotExistError, GitUserSetupError, \
+    WorkspaceShouldNotInUseError, ApplyPluginSetupRepositoryError
 from provider.github import GithubProvider
 from provider.azure import AzureProvider
 
@@ -95,6 +96,12 @@ def run(metadata: Metadata):
         logging.error("Repository already exists!")
     except RepoDoesNotExistError:
         logging.error("Repository provided doesn't exist and creation was not requested!")
+    except WorkspaceShouldNotInUseError:
+        logging.error("Workspace should not be in use!")
+    except ApplyPluginSetupRepositoryError:
+        # Exception handling is ignored due to
+        # apply plugin command has already generated an output message
+        pass
     except GitUserSetupError:
         logging.error(GIT_USER_SETUP_ERROR_MESSAGE)
     except:

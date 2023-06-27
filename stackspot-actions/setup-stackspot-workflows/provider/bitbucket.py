@@ -25,6 +25,7 @@ class BitBucketProvider(Provider):
     def execute_provider_setup(self, inputs: Inputs):
         enable_repository_pipelines(inputs, self.bitbucket_access_token)
         create_or_update_repository_variables(inputs, self.bitbucket_access_token)
+        print(f"\nSetup configured successfully on repository: {self.get_repository_url(inputs)}")
 
     def execute_repo_creation(self, inputs: Inputs):
         body = {
@@ -40,6 +41,9 @@ class BitBucketProvider(Provider):
             return True
         except NotFoundError:
             return False
+
+    def get_repository_url(self, inputs: Inputs) -> str:
+        return f"https://bitbucket.org/{inputs.org_name}/{inputs.repo_name}"  # noqa E501
 
     def clone_url(self, inputs: Inputs) -> str:
         return f"https://x-token-auth:{self.bitbucket_access_token}@bitbucket.org/{inputs.org_name}/{inputs.repo_name}.git"  # noqa E501

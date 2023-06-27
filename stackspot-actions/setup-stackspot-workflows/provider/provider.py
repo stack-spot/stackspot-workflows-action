@@ -9,7 +9,11 @@ from pathlib import Path
 from typing import Optional
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from .errors import RepoAlreadyExistsError, RepoDoesNotExistError, CloningRepoError, GitUserSetupError
+
+from questionary import confirm
+
+from .errors import RepoAlreadyExistsError, RepoDoesNotExistError, CloningRepoError, GitUserSetupError, \
+    WorkspaceShouldNotInUseError, ApplyPluginSetupRepositoryError
 
 
 # This handler is necessary to make remove_stack_dir in Windows
@@ -41,8 +45,14 @@ class Inputs:
 
 
 class Provider(ABC):
+    def __init__(self):
+        self.stk = Optional[str]
+
     def setup(self, inputs: Inputs):
+        self.stk = sys.argv[0]
         self.check_git_configuration()
+        self._check_workspace_in_use()
+
         logging.info("Setting up %s SCM...", inputs.provider)
         cwd = os.getcwd()
         self.execute_pre_setup_provider(inputs)
@@ -83,19 +93,22 @@ class Provider(ABC):
         os.chdir(inputs.repo_name)
 
     def create_workflow_files(self, inputs: Inputs):
-        logging.info("Creating workflow files...")
-        stk = sys.argv[0]
-        self._remove_all_files_generated_on_apply_plugin(inputs)
-        stk_apply_plugin_cmd = (
-            f"{stk} apply plugin {inputs.component_path} --skip-warning "
-            f"--provider {inputs.provider} "
-        )
-        if inputs.use_self_hosted_pool is not None:
-            stk_apply_plugin_cmd += f"--use_self_hosted_pool {inputs.use_self_hosted_pool} "
-        if inputs.self_hosted_pool_name is not None:
-            stk_apply_plugin_cmd += f"--self_hosted_pool_name {inputs.self_hosted_pool_name} "
-        os.system(stk_apply_plugin_cmd)
-        shutil.rmtree(".stk", onerror=on_delete_error)
+        try:
+            logging.info("Creating workflow files...")
+            self._remove_all_files_generated_on_apply_plugin(inputs)
+            stk_apply_plugin_cmd = (
+                f"{self.stk} apply plugin {inputs.component_path} --skip-warning "
+                f"--provider {inputs.provider} "
+            )
+            if inputs.use_self_hosted_pool is not None:
+                stk_apply_plugin_cmd += f"--use_self_hosted_pool {inputs.use_self_hosted_pool} "
+            if inputs.self_hosted_pool_name is not None:
+                stk_apply_plugin_cmd += f"--self_hosted_pool_name {inputs.self_hosted_pool_name} "
+            result = os.system(stk_apply_plugin_cmd)
+            if result != 0:
+                raise ApplyPluginSetupRepositoryError()
+        finally:
+            shutil.rmtree(".stk", onerror=on_delete_error, ignore_errors=True)
 
     def commit_and_push(self):
         logging.info("Commiting and pushing workflow files to repo...")
@@ -113,6 +126,20 @@ class Provider(ABC):
                 file_path = Path(workdir) / relative_path_file_to_be_applied
                 if file_path.exists():
                     file_path.unlink(missing_ok=True)
+
+    def _check_workspace_in_use(self):
+        logging.info("Validating workspace is use...")
+        home_path = Path.home()
+        stk_binary_name = Path(self.stk).stem
+        stk_folder = Path(home_path) / f".{stk_binary_name}"
+        workspace_config_path = stk_folder / "workspaces" / "workspace-config.json"
+
+        if workspace_config_path.exists():
+            should_exit_workspace = confirm(
+                message="You need to be outside workspace, do you agree to exit current workspace?").unsafe_ask()
+            if not should_exit_workspace:
+                raise WorkspaceShouldNotInUseError()
+            os.system(f"{self.stk} exit workspace")
 
     @abstractmethod
     def execute_pre_setup_provider(self, inputs: Inputs):
