@@ -463,6 +463,160 @@ definitions:
           - chmod +x $BITBUCKET_CLONE_DIR/scripts/show_stk_logs_file.sh;
             $BITBUCKET_CLONE_DIR/scripts/show_stk_logs_file.sh $BITBUCKET_EXIT_CODE $workflow_config
 
+    - step: &apply-plugin-validate-inputs
+        name: 'Valdiate JSON Inputs'{{runners}}
+        script:
+          # Add variable colors
+          - echo "Step [1/11] Configure pipeline.";
+            source $BITBUCKET_CLONE_DIR/scripts/enable_colors.sh
+
+          - echo "Step [2/11] Validating Input secrets";
+            if [ -z "$secrets" ]; then
+              echo -e "$red✖ ERROR⇾ 'secrets' field not found in json";
+              exit 1;
+            fi
+
+          - echo "Step [3/11] Validating Input secret_stk_login of secrets";
+            pat=$(echo $secrets | jq -r .secret_stk_login);
+            if [ -z "$pat" ] || [ "$pat" == "null" ]; then
+              echo -e "$red✖ ERROR⇾ 'secret_stk_login' field not found in json for 'secrets' input";
+              exit 1;
+            fi
+
+          - echo "Step [4/11] Validating Input workspace_slug";
+            if [ -z "$workspace_slug" ]; then
+              echo -e "$red✖ ERROR⇾ 'workspace_slug' field not found in json";
+              exit 1;
+            fi
+
+          - echo "Step [5/11] Validating Input plugin";
+            if [ -z "$plugin" ]; then
+              echo -e "$red✖ ERROR⇾ 'plugin' field not found in json";
+              exit 1;
+            fi
+
+          - echo "Step [6/11] Validating Input name of plugin";
+            plugin_name=$(echo $plugin | jq -r .name);
+            if [ -z "$plugin_name" ] || [ "$plugin_name" == "null" ]; then
+              echo -e "$red✖ ERROR⇾ 'name' field not found in json for 'plugin' input";
+              exit 1;
+            fi
+
+          - echo "Step [7/11] Validating Input repo";
+            repo=$(echo $plugin | jq -r .repo);
+            if [ -z "$repo" ] || [ "$repo" == "null" ]; then
+              echo -e "$red✖ ERROR⇾ 'repo' field not found in json for 'plugin' input";
+              exit 1;
+            fi
+
+          - echo "Step [8/11] Validating Input cli_login";
+            if [ -z "$cli_login" ]; then
+              echo -e "$red✖ ERROR⇾ 'cli_login' field not found in json";
+              exit 1;
+            fi
+
+          - echo "Step [9/11] Validating Input email of cli_login";
+            email=$(echo $cli_login | jq -r .email);
+            if [ -z "$email" ] || [ "$email" == "null" ]; then
+              echo -e "$red✖ ERROR⇾ 'email' field not found in json for 'cli_login' input";
+              exit 1;
+            fi;
+
+          - echo "Step [10/11] Validating Input realm of cli_login";
+            realm=$(echo $cli_login | jq -r .realm);
+            if [ -z "$realm" ] || [ "$realm" == "null" ]; then
+              echo -e "$red✖ ERROR⇾ 'realm' field not found in json for 'cli_login' input";
+              exit 1;
+            fi;
+
+          - echo -e "Step [11/11] $green⚡Validation successfully"
+
+    - step: &apply-plugin
+        name: 'Apply Plugin'{{runners}}
+        script:
+          # Copy to home directory .stk or .stk-alpha, update PATH with binary path and add variable colors
+          - echo "Step [1/6] Configure pipeline.";
+            mv .$workflow_config ~/;
+            export PATH="$PATH:~/.$workflow_config/bin";
+            source $BITBUCKET_CLONE_DIR/scripts/enable_colors.sh
+          
+          - echo "Step [2/6] Parse inputs.";
+            plugin_name=$(echo $plugin | jq -r .name);
+            plugin_inputs="$(echo $plugin | jq -cM .inputs)";
+            plugin_connection_interfaces=$(echo $plugin | jq -cM .connectors);
+            repo_url=$(echo $plugin | jq -r .repo);
+            repo_name="${repo_url##*/}";
+            if [ -z "$repo_name" ] || [ "$repo_name" == "null" ]; then
+              repo_name=$name;
+            fi;
+            email=$(echo $cli_login | jq -r .email);
+            workspace_pat=$(echo $secrets | jq -r .secret_git);
+            workspace_name=$BITBUCKET_WORKSPACE;
+
+            if [ $debug == "true" ]; then
+            
+              echo -e "$green➤ DEBUG$two_dots_unicode Plugin name$two_dots_unicode $u_cyan$plugin_name";
+
+              echo -e "$green➤ DEBUG$two_dots_unicode Repo url$two_dots_unicode $u_cyan$repo_url";
+
+              echo -e "$green➤ DEBUG$two_dots_unicode Repo name$two_dots_unicode $u_cyan$repo_name";
+
+              if [ -z "$plugin_inputs" ] || [ "$plugin_inputs" == "null" ]; then
+                  echo -e "$green➤ DEBUG$two_dots_unicode no inputs-json found.";
+              else
+                  plugin_inputs_print=$(echo $plugin_inputs | jq -Rc);
+                  echo -e "$green➤ DEBUG$two_dots_unicode '--inputs-json $plugin_inputs_print'";
+              fi;
+
+              if [ -z "$plugin_connection_interfaces" ] || [ "$plugin_connection_interfaces" == "null" ]; then
+                  echo -e "$green➤ DEBUG$two_dots_unicode no connection-interfaces found";
+              else
+                  plugin_connection_interfaces_print=$(echo $plugin_connection_interfaces | jq -Rc);
+                  echo -e "$green➤ DEBUG$two_dots_unicode '--connection-interfaces $plugin_connection_interfaces_print'";
+              fi;
+
+            fi;
+
+          # ----------------------- CLONE REPOSITORY -----------------------
+          - echo "Step [3/6] Clone repository";
+            chmod +x $BITBUCKET_CLONE_DIR/scripts/clone-repository.sh;
+            $BITBUCKET_CLONE_DIR/scripts/clone-repository.sh $repo_name $workspace_pat $email $workspace_name "project_cloned";
+            exit_code_of_command=$?;
+            if [ "$exit_code_of_command" != "0" ]; then
+              exit $exit_code_of_command;
+            fi;
+            cd project_cloned;
+          
+          # ----------------------- APPLY PLUGIN -----------------------
+          - echo "Step [4/6] Apply plugin.";
+            chmod +x $BITBUCKET_CLONE_DIR/scripts/apply-plugin.sh;
+            $BITBUCKET_CLONE_DIR/scripts/apply-plugin.sh $debug $workflow_config "$plugin_name" "$plugin_inputs" "$plugin_connection_interfaces";
+            exit_code_of_command=$?;
+            if [ "$exit_code_of_command" != "0" ]; then
+              exit $exit_code_of_command;
+            fi
+          
+          # ------------------------- COMMIT/PUSH --------------------------
+          - echo "Step [5/6] Commit and push";
+            echo -e "\n$green Commit and push\n";
+            branch_name=stackspot-$(date +%s);
+            git checkout -b $branch_name;
+            git add -A;
+            git commit -am "stackspot initial commit";
+            git push origin $branch_name;
+
+          # --------------------- CREATE PULL REQUEST ----------------------
+          - echo "Step [6/6] Create pull request";
+            chmod +x $BITBUCKET_CLONE_DIR/scripts/create-pull-request.sh;
+            $BITBUCKET_CLONE_DIR/scripts/create-pull-request.sh $workspace_name $repo_name $workspace_pat $plugin_name $branch_name $default_branch "Applying the plugin ${plugin_name}";
+            exit_code_of_command=$?;
+            if [ "$exit_code_of_command" != "0" ]; then
+              exit $exit_code_of_command;
+            fi
+        after-script:
+          - chmod +x $BITBUCKET_CLONE_DIR/scripts/show_stk_logs_file.sh;
+            $BITBUCKET_CLONE_DIR/scripts/show_stk_logs_file.sh $BITBUCKET_EXIT_CODE $workflow_config
+
 pipelines:
   custom:
     create-app:
@@ -512,3 +666,15 @@ pipelines:
       - step: *run-action-validate-inputs
       - step: *install-stk-login-use-workspace
       - step: *run-action
+    apply-plugin:
+      - variables:
+        - name: plugin
+        - name: correlation_id
+        - name: cli_login
+        - name: workspace_slug
+        - name: secrets
+        - name: default_branch
+          default: main
+      - step: *apply-plugin-validate-inputs
+      - step: *install-stk-login-use-workspace
+      - step: *apply-plugin
