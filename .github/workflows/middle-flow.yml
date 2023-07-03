@@ -1,0 +1,49 @@
+name: Middle Flow
+
+on: 
+  workflow_call:
+    inputs:
+      correlation_id:
+        description: Correlation id
+        required: true
+      workflow_name:
+        description: Workflow path
+        required: true
+      api_inputs:
+        description: Workflow inputs (json)
+        required: true
+      config:
+        description: Workflow config
+        required: true
+    secrets:
+      secrets:
+        description: Secrets info (json)
+        required: true
+
+jobs:
+  apply:
+    if: ${{ inputs.workflow_name == 'apply-plugin' }}
+    uses: stack-spot/stackspot-workflows-action/.github/workflows/apply-plugin.yml@main
+    with:
+      api_inputs: ${{ github.event.inputs.api_inputs }}
+      config: ${{ github.event.inputs.config }}
+    secrets:
+      secrets: ${{ github.event.secrets.secrets }}
+
+  create:
+    if: ${{ inputs.workflow_name == 'create' }}
+    uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@main
+    with:
+      api_inputs: ${{ github.event.inputs.api_inputs }}
+      config: ${{ github.event.inputs.config }}
+    secrets:
+      secrets: ${{ github.event.secrets.secrets }}
+
+  run:
+    if: ${{ inputs.workflow_name == 'run-action' }}
+    uses: stack-spot/stackspot-workflows-action/.github/workflows/run-action.yml@main
+    with:
+      api_inputs: ${{ github.event.inputs.api_inputs }}
+      config: ${{ github.event.inputs.config }}
+    secrets:
+      secrets: ${{ github.event.secrets.secrets }}
