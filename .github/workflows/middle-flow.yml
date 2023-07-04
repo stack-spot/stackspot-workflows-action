@@ -26,7 +26,7 @@ on:
 
 jobs:
   debug-inputs:
-    name: Validate JSON Inputs
+    name: Debug inputs
     runs-on: ubuntu-latest
     steps:
       - name: Debug inputs
