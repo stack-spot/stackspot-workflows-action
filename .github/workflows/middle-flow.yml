@@ -23,7 +23,7 @@ on:
 jobs:
   apply:
     if: ${{ inputs.workflow_name == 'apply-plugin' }}
-    uses: stack-spot/stackspot-workflows-action/.github/workflows/apply-plugin.yml@main
+    uses: stack-spot/stackspot-workflows-action/.github/workflows/apply-plugin.yml@release/july-2023
     with:
       api_inputs: ${{ github.event.inputs.api_inputs }}
       config: ${{ github.event.inputs.config }}
@@ -32,7 +32,7 @@ jobs:
 
   create:
     if: ${{ inputs.workflow_name == 'create' }}
-    uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@main
+    uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@release/july-2023
     with:
       api_inputs: ${{ github.event.inputs.api_inputs }}
       config: ${{ github.event.inputs.config }}
@@ -41,7 +41,7 @@ jobs:
 
   run:
     if: ${{ inputs.workflow_name == 'run-action' }}
-    uses: stack-spot/stackspot-workflows-action/.github/workflows/run-action.yml@main
+    uses: stack-spot/stackspot-workflows-action/.github/workflows/run-action.yml@release/july-2023
     with:
       api_inputs: ${{ github.event.inputs.api_inputs }}
       config: ${{ github.event.inputs.config }}

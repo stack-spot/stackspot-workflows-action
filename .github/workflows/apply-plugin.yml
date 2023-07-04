@@ -1,17 +1,13 @@
 name: Apply Plugin
-run-name: ${{ inputs.correlation_id }}
+
 on: 
   workflow_call:
     inputs:
-      correlation_id:
-        description: Correlation id
-        type: string
-        required: true
-      inputs:
+      api_inputs:
         description: Workflow inputs (json)
         type: string
         required: true
-      workflow_config:
+      config:
         description: Workflow config (json)
         type: string
         required: true
@@ -20,8 +16,8 @@ on:
         description: Secrets info (json)
         required: true
 env:
-  STK: ${{ fromJson(inputs.workflow_config).stk }}
-  DEBUG: ${{ fromJson(inputs.workflow_config).debug }}
+  STK: ${{ fromJson(inputs.config).stk }}
+  DEBUG: ${{ fromJson(inputs.config).debug }}
 jobs:
 
   validate-inputs:
@@ -31,27 +27,27 @@ jobs:
       - name: Debug inputs
         if: env.DEBUG
         run: |
-          echo "plugin_name: ${{ fromJson(inputs.inputs).plugin_name }}"
-          echo "cli_login_realm: ${{ fromJson(inputs.inputs).cli_login_realm }}"
-          echo "cli_login_email: ${{ fromJson(inputs.inputs).cli_login_email }}"
-          echo "workspace_slug: ${{ fromJson(inputs.inputs).workspace_slug}}"
+          echo "plugin_name: ${{ fromJson(inputs.api_inputs).plugin_name }}"
+          echo "cli_login_realm: ${{ fromJson(inputs.api_inputs).cli_login_realm }}"
+          echo "cli_login_email: ${{ fromJson(inputs.api_inputs).cli_login_email }}"
+          echo "workspace_slug: ${{ fromJson(inputs.api_inputs).workspace_slug}}"
       - name: "Validate Input: 'name'"
-        if: fromJson(inputs.inputs).plugin_name == ''
+        if: fromJson(inputs.api_inputs).plugin_name == ''
         run: |
          echo "ERROR: 'plugin_name' field not found in json."
          exit 1
       - name: "Validate Input: 'cli_login_realm'"
-        if: fromJson(inputs.inputs).cli_login_realm == ''
+        if: fromJson(inputs.api_inputs).cli_login_realm == ''
         run: |
          echo "ERROR: 'realm' field not found in json."
          exit 1
       - name: "Validate Input: 'cli_login_email'"
-        if: fromJson(inputs.inputs).cli_login_email == ''
+        if: fromJson(inputs.api_inputs).cli_login_email == ''
         run: |
          echo "ERROR: 'cli_login_email' field not found in json."
          exit 1
       - name: "Validate Input: 'workspace_slug'"
-        if: fromJson(inputs.inputs).workspace_slug == ''
+        if: fromJson(inputs.api_inputs).workspace_slug == ''
         run: |
          echo "ERROR: 'workspace_slug' field not found in json."
          exit 1
@@ -63,9 +59,9 @@ jobs:
       always() &&
       needs.validate-inputs.result == 'success'
     env:
-      INPUTS: '${{ inputs.inputs }}'
-      REPO: ${{ fromJson(inputs.inputs).repo }}
-    runs-on: ${{ fromJson(inputs.workflow_config).runner }}
+      INPUTS: '${{ inputs.api_inputs }}'
+      REPO: ${{ fromJson(inputs.api_inputs).repo }}
+    runs-on: ${{ fromJson(inputs.config).runner }}
     steps:
       - name: Extract values from repo
         id: extract_values
@@ -82,25 +78,25 @@ jobs:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
         with:
-          repository: ${{ fromJson(inputs.workflow_config).origin_repository }}
-          ref: ${{ fromJson(inputs.workflow_config).origin_branch }}
+          repository: ${{ fromJson(inputs.config).origin_repository }}
+          ref: ${{ fromJson(inputs.config).origin_branch }}
 
       - name: Install STK
         uses: ./github-actions/install-stk-cli
         with: 
-          stk: ${{ fromJson(inputs.workflow_config).stk }}
+          stk: ${{ fromJson(inputs.config).stk }}
       
       - name: Login STK
         uses: ./github-actions/login-stk
         with: 
-          stk: ${{ fromJson(inputs.workflow_config).stk }}
-          email: ${{ fromJson(inputs.inputs).cli_login_email }}
+          stk: ${{ fromJson(inputs.config).stk }}
+          email: ${{ fromJson(inputs.api_inputs).cli_login_email }}
           pat: ${{ fromJson(secrets.secrets).cli_token }}
-          realm: ${{ fromJson(inputs.inputs).cli_login_realm }}
+          realm: ${{ fromJson(inputs.api_inputs).cli_login_realm }}
       
       - name: Use workspace
         run: |
-         $STK use workspace ${{ fromJson(inputs.inputs).workspace_slug }}
+         $STK use workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
 
       - name: Checkout the user repo
         id: checkout_user_repo
@@ -115,14 +111,14 @@ jobs:
 
       - name: Set git username
         run: |
-          git config --global user.email "${{ fromJson(inputs.inputs).cli_login_email }}"
-          git config --global user.name "${{ fromJson(inputs.inputs).cli_login_email }}"
+          git config --global user.email "${{ fromJson(inputs.api_inputs).cli_login_email }}"
+          git config --global user.name "${{ fromJson(inputs.api_inputs).cli_login_email }}"
 
-      - name: Apply plugin ${{ fromJson(inputs.inputs).plugin_name }}
+      - name: Apply plugin ${{ fromJson(inputs.api_inputs).plugin_name }}
         env:
-          NAME: ${{ fromJson(inputs.inputs).plugin_name }}
-          INPUTS: ${{ toJson(fromJson(inputs.inputs).plugin_inputs) }}
-          CI: ${{ toJson(fromJson(inputs.inputs).plugin_connectors) }}
+          NAME: ${{ fromJson(inputs.api_inputs).plugin_name }}
+          INPUTS: ${{ toJson(fromJson(inputs.api_inputs).plugin_inputs) }}
+          CI: ${{ toJson(fromJson(inputs.api_inputs).plugin_connectors) }}
         working-directory: user_repo
         run: |
 
@@ -158,9 +154,9 @@ jobs:
       - name: Commit and Push.
         working-directory: user_repo
         env:
-          NAME: ${{ fromJson(inputs.inputs).plugin_name }}
+          NAME: ${{ fromJson(inputs.api_inputs).plugin_name }}
           TOKEN: ${{ fromJson(secrets.secrets).scm_token }}
-          DEFAULT_BRANCH: ${{ fromJson(inputs.workflow_config).default_branch }}
+          DEFAULT_BRANCH: ${{ fromJson(inputs.config).default_branch }}
           REPO: ${{ steps.checkout_user_repo.outputs.repo }}
         run: |
          if [[ `git status --porcelain` ]]; then
