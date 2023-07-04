@@ -29,10 +29,10 @@ jobs:
     if: ${{ inputs.workflow_name == 'apply-plugin' }}
     uses: stack-spot/stackspot-workflows-action/.github/workflows/apply-plugin.yml@release/july-2023
     with:
-      api_inputs: ${{ github.event.inputs.api_inputs }}
-      config: ${{ github.event.inputs.config }}
+      api_inputs: ${{ inputs.api_inputs }}
+      config: ${{ inputs.config }}
     secrets:
-      secrets: ${{ github.event.secrets.secrets }}
+      secrets: ${{ secrets.secrets }}
 
   # create:
   #   if: ${{ inputs.workflow_name == 'create' }}
