@@ -25,6 +25,17 @@ on:
         required: true
 
 jobs:
+  debug-inputs:
+    name: Validate JSON Inputs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug inputs
+        run: |
+          echo "${{ inputs.correlation_id }}"
+          echo "${{ inputs.api_inputs }}"
+          echo "${{ inputs.workflow_name }}"
+          echo "${{ inputs.config }}"
+
   apply:
     if: ${{ inputs.workflow_name == 'apply-plugin' }}
     uses: stack-spot/stackspot-workflows-action/.github/workflows/apply-plugin.yml@release/july-2023
