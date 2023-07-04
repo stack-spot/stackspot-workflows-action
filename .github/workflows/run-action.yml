@@ -72,7 +72,7 @@ jobs:
       
       - name: Use workspace
         run: |
-         $STK use workspace ${{ inputs.workspace_slug }}
+         $STK use workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
       
       - name: Run action
         env:
