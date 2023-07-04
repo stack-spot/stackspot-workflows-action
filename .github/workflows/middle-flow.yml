@@ -5,19 +5,24 @@ on:
     inputs:
       correlation_id:
         description: Correlation id
+        type: string
         required: true
       workflow_name:
         description: Workflow path
+        type: string
         required: true
       api_inputs:
         description: Workflow inputs (json)
+        type: string
         required: true
       config:
         description: Workflow config
+        type: string
         required: true
     secrets:
       secrets:
         description: Secrets info (json)
+        type: string
         required: true
 
 jobs:
