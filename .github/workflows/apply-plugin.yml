@@ -27,6 +27,7 @@ jobs:
       - name: Debug inputs
         if: env.DEBUG
         run: |
+          echo ${{ inputs.inputs }}
           echo "plugin_name: ${{ fromJson(inputs.api_inputs).plugin_name }}"
           echo "cli_login_realm: ${{ fromJson(inputs.api_inputs).cli_login_realm }}"
           echo "cli_login_email: ${{ fromJson(inputs.api_inputs).cli_login_email }}"
