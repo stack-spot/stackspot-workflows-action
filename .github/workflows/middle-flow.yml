@@ -22,7 +22,6 @@ on:
     secrets:
       secrets:
         description: Secrets info (json)
-        type: string
         required: true
 
 jobs:
