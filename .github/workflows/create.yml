@@ -127,11 +127,11 @@ jobs:
           TOKEN: ${{ fromJson(secrets.secrets).scm_token }}
           GITHUB_ORG: ${{ github.repository_owner }}
         run: |
-          before_actions_raw="${{ fromJson(inputs.api_inputs).before_actions }}"
+          before_actions_raw=$(echo "${{ inputs.api_inputs }}" | jq -r .before_actions)
           echo "before_actions_raw:"
           echo $before_actions_raw
 
-          create_repo_action="${{ fromJson(inputs.api_inputs).create_repo_action }}"
+          create_repo_action=$(echo "${{ inputs.api_inputs }}" | jq -r .create_repo_action)
           echo "create_repo_action:"
           echo $create_repo_action
 
@@ -139,7 +139,7 @@ jobs:
           echo "inputs_repo:"
           echo $inputs_repo
 
-          action_inputs=$(echo $create_repo_action | jq -cr .inputs)
+          action_inputs=$(echo "$create_repo_action" | jq -cr .inputs)
           echo "action_inputs:"
           echo $action_inputs
           
