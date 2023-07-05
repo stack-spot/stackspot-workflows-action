@@ -70,7 +70,7 @@ jobs:
           echo $inputs_short
           echo "------------------||------------------"
 
-          action_name=$$(echo '{{ inputs.api_inputs }}' | jq -r .action_name)
+          action_name=$(echo '{{ inputs.api_inputs }}' | jq -r .action_name)
           echo "action name:"
           echo $action_name
           echo "------------------||------------------"
