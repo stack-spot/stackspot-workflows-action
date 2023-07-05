@@ -60,7 +60,7 @@ jobs:
          exit 1
 
   use-workspace:
-    name: Use Workspace
+    name: Use Workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
     runs-on: ${{ fromJson(inputs.config).runner }}
     needs: validate-inputs
     env: 
@@ -94,6 +94,7 @@ jobs:
       - name: Use Workspace
         run: |
           $STK use workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
+
       - name: Show Error Log
         if: failure()
         run: |
