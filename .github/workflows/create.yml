@@ -73,13 +73,18 @@ jobs:
           ref: ${{ fromJson(inputs.config).origin_branch }}   
           token: ${{ fromJson(secrets.secrets).scm_token }}
 
+      - name: Cache
+        uses: ./github-actions/restore-stk-cache
+        with: 
+          stk: ${{ env.STK }}
+
       - name: Install STK
         uses: ./github-actions/install-stk-cli
         with: 
           stk: ${{ env.STK }}
 
   stk-login:
-    name: Use Workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
+    name: Login ${{ fromJson(inputs.api_inputs).cli_login_email }}
     runs-on: ${{ fromJson(inputs.config).runner }}
     needs: stk-install
     env: 

@@ -1,5 +1,5 @@
 name: Middle Flow
-
+run-name: ${{ inputs.workflow_name }}
 on: 
   workflow_call:
     inputs:
