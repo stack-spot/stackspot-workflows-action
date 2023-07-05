@@ -34,14 +34,14 @@ jobs:
     secrets:
       secrets: ${{ secrets.secrets }}
 
-  # create:
-  #   if: ${{ inputs.workflow_name == 'create' }}
-  #   uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@release/july-2023
-  #   with:
-  #     api_inputs: ${{ github.event.inputs.api_inputs }}
-  #     config: ${{ github.event.inputs.config }}
-  #   secrets:
-  #     secrets: ${{ github.event.secrets.secrets }}
+  create:
+    if: ${{ inputs.workflow_name == 'create' }}
+    uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@release/july-2023
+    with:
+      api_inputs: ${{ inputs.api_inputs }}
+      config: ${{ inputs.config }}
+    secrets:
+      secrets: ${{ secrets.secrets }}
 
   run:
     if: ${{ inputs.workflow_name == 'run-action' }}
