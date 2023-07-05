@@ -59,8 +59,8 @@ jobs:
          echo "ERROR: 'runner' field not found in json for 'config' input"
          exit 1
 
-  stk-install:
-    name: Install Stk
+  use-workspace:
+    name: Use Workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
     runs-on: ${{ fromJson(inputs.config).runner }}
     needs: validate-inputs
     env: 
@@ -83,26 +83,7 @@ jobs:
         with: 
           stk: ${{ env.STK }}
 
-  use-workspace:
-    name: Use Workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
-    runs-on: ${{ fromJson(inputs.config).runner }}
-    needs: stk-login
-    env: 
-      STK: ${{ fromJson(inputs.config).stk }}
-    steps:
-      - name: Checkout workflows repo
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ fromJson(inputs.config).origin_repository }}
-          ref: ${{ fromJson(inputs.config).origin_branch }}   
-          token: ${{ fromJson(secrets.secrets).scm_token }}
-
-      - name: Cache
-        uses: ./github-actions/restore-stk-cache
-        with: 
-          stk: ${{ env.STK }}
-
-      - name: Login ${{ fromJson(inputs.api_inputs).cli_login_email }}
+      - name: Login STK
         uses: ./github-actions/login-stk
         with: 
           stk: ${{ env.STK }}
@@ -113,7 +94,6 @@ jobs:
       - name: Use Workspace
         run: |
           $STK use workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
-
       - name: Show Error Log
         if: failure()
         run: |
