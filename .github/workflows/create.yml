@@ -312,7 +312,7 @@ jobs:
   run-after-actions:
     name: Run after actions
     runs-on: ${{ fromJson(inputs.config).runner }}
-    needs: use-workspace
+    needs: create
     env:
       STK: ${{ fromJson(inputs.config).stk }}
     steps:
@@ -336,11 +336,16 @@ jobs:
           TOKEN: ${{ fromJson(secrets.secrets).scm_token }}
           GITHUB_ORG: ${{ fromJson(inputs.config).github_org }}
         run: |
-          after_actions=$(echo '${{ inputs.api_inputs }}' | jq -r .after_actions)
+          after_actions_raw=$(echo '${{ inputs.api_inputs }}' | jq -r .after_actions)
+          echo "after_actions_raw:"
+          echo $after_actions_raw
+          echo "------------------||------------------"
+
+          after_actions=$(echo "[]" | jq ". + $after_actions_raw")
           echo "after_actions:"
           echo $after_actions
           echo "------------------||------------------"
-
+          
           $STK run actions --actions "$after_actions" --when after --execution-id $EXECUTION_ID
       - name: Show Error Log
         if: failure()
