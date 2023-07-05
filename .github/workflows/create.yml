@@ -125,7 +125,7 @@ jobs:
           CREATE_NAME: ${{ fromJson(inputs.api_inputs).create_name }}
           CREATE_DESCRIPTION: ${{ fromJson(inputs.api_inputs).create_description }}
           TOKEN: ${{ fromJson(secrets.secrets).scm_token }}
-          GITHUB_ORG: ${{ github.repository_owner }}
+          GITHUB_ORG: ${{ fromJson(inputs.config).github_org }}
         run: |
           before_actions_raw=$(echo '${{ inputs.api_inputs }}' | jq -r .before_actions)
           echo "before_actions_raw:"
@@ -199,7 +199,7 @@ jobs:
         id: checkout_user_repo
         uses:  ./workflow_repo/github-actions/clone-external-repo
         with:
-          github_org: ${{ github.repository_owner }}
+          github_org: ${{ fromJson(inputs.config).github_org }}
           default_branch: ${{ fromJson(inputs.config).default_branch }}
           app_name: ${{ fromJson(inputs.api_inputs).create_name }}
           path: user_repo
@@ -338,7 +338,7 @@ jobs:
         id: checkout_user_repo
         uses: ./workflow_repo/github-actions/clone-external-repo
         with:
-          github_org: ${{ github.repository_owner }}
+          github_org: ${{ fromJson(inputs.config).github_org }}
           app_name: ${{ fromJson(inputs.api_inputs).create_name }}
           path: user_repo
           secret_git_token: ${{ fromJson(secrets.secrets).scm_token }}
