@@ -100,26 +100,37 @@ jobs:
         run: |
           cat ~/.$STK/logs/*
 
-  run-before-actions:
-    name: Run before actions
+  create:
+    name: Create ${{ fromJson(inputs.api_inputs).create_entity_type }}
     runs-on: ${{ fromJson(inputs.config).runner }}
-    needs: use-workspace
+    needs: run-before-actions
+    if: |
+      always() &&
+      needs.use-workspace.result == 'success' &&
+      (needs.run-before-actions.result == 'success' || needs.run-before-actions.result == 'skipped')
     env:
+      DEBUG: ${{ fromJson(inputs.config).debug }}
       STK: ${{ fromJson(inputs.config).stk }}
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
         with:
+          persist-credentials: false
+          path: workflow_repo
           repository: ${{ fromJson(inputs.config).origin_repository }}
           ref: ${{ fromJson(inputs.config).origin_branch }}
           token: ${{ fromJson(secrets.secrets).scm_token }}
 
       - name: Restore STK Cache
-        uses: ./github-actions/restore-stk-cache
+        uses: ./workflow_repo/github-actions/restore-stk-cache 
         with: 
           stk: ${{ env.STK }}
+      - name: Set git username
+        run: |
+          git config --global user.email "${{ fromJson(inputs.api_inputs).cli_login_email }}"
+          git config --global user.name "${{ fromJson(inputs.api_inputs).cli_login_email }}"
 
-      - name: Run actions
+      - name: Run before actions
         env:
           EXECUTION_ID: ${{ fromJson(inputs.api_inputs).execution_id }}
           CREATE_NAME: ${{ fromJson(inputs.api_inputs).create_name }}
@@ -169,32 +180,6 @@ jobs:
 
           $STK run actions --actions "$before_actions" --when before --execution-id $EXECUTION_ID
 
-      - name: Show Error Log
-        if: failure()
-        run: |
-          cat ~/.$STK/logs/*
-
-  create:
-    name: Create ${{ fromJson(inputs.api_inputs).create_entity_type }}
-    runs-on: ${{ fromJson(inputs.config).runner }}
-    needs: run-before-actions
-    if: |
-      always() &&
-      needs.use-workspace.result == 'success' &&
-      (needs.run-before-actions.result == 'success' || needs.run-before-actions.result == 'skipped')
-    env:
-      DEBUG: ${{ fromJson(inputs.config).debug }}
-      STK: ${{ fromJson(inputs.config).stk }}
-    steps:
-      - name: Checkout workflows repo
-        uses: actions/checkout@v3
-        with:
-          persist-credentials: false
-          path: workflow_repo
-          repository: ${{ fromJson(inputs.config).origin_repository }}
-          ref: ${{ fromJson(inputs.config).origin_branch }}
-          token: ${{ fromJson(secrets.secrets).scm_token }}
-
       - name: Checkout the user repo
         id: checkout_user_repo
         uses:  ./workflow_repo/github-actions/clone-external-repo
@@ -205,15 +190,6 @@ jobs:
           path: user_repo
           secret_git_token: ${{ fromJson(secrets.secrets).scm_token }}
           github_url: ${{ fromJson(inputs.api_inputs).create_repo }}
-
-      - name: Restore STK Cache
-        uses: ./workflow_repo/github-actions/restore-stk-cache 
-        with: 
-          stk: ${{ env.STK }}
-      - name: Set git username
-        run: |
-          git config --global user.email "${{ fromJson(inputs.api_inputs).cli_login_email }}"
-          git config --global user.name "${{ fromJson(inputs.api_inputs).cli_login_email }}"
 
       - name: Create ${{ fromJson(inputs.api_inputs).create_entity_type }}
         env: 
@@ -268,7 +244,7 @@ jobs:
         env:
           name: ${{ fromJson(inputs.api_inputs).create_name }}
           description: ${{ fromJson(inputs.api_inputs).create_description }}
-          token: ${{ secrets.git }}
+          token: ${{ fromJson(secrets.secrets).scm_token }}
           default_branch: ${{ fromJson(inputs.config).default_branch }}
           repo: ${{ steps.checkout_user_repo.outputs.repo }}
         run: |
@@ -329,6 +305,9 @@ jobs:
         run: |
          if [[ `git status --porcelain` ]]; then
             branch=$(git symbolic-ref --short HEAD)
+            echo $branch
+            echo "------------------||------------------"
+
             git add -A
             git commit -am "stackspot commit after actions"
             git push origin $branch
