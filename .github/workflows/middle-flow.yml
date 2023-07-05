@@ -25,8 +25,73 @@ on:
         required: true
 
 jobs:
+  validate-inputs:
+    name: Validate Inputs/Config
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print inputs
+        run: |
+          echo "Inputs from api: ${{ inputs.api_inputs }}"
+
+      - name: Print config
+        run: |
+          echo "Config: ${{ inputs.config }}"
+
+      - name: "Validate config: 'config.stk'"
+        if: fromJson(inputs.config).stk == ''
+        run: |
+         echo "ERROR: 'stk' field not found in json for 'config' input"
+         exit 1
+
+      - name: "Validate config: 'config.runner'"
+        if: fromJson(inputs.config).runner == ''
+        run: |
+         echo "ERROR: 'runner' field not found in json for 'config' input"
+         exit 1
+
+  use-workspace:
+    name: Prepare STK
+    runs-on: ${{ fromJson(inputs.config).runner }}
+    needs: validate-inputs
+    env: 
+      STK: ${{ fromJson(inputs.config).stk }}
+    steps:
+      - name: Checkout workflows repo
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ fromJson(inputs.config).origin_repository }}
+          ref: ${{ fromJson(inputs.config).origin_branch }}   
+          token: ${{ fromJson(secrets.secrets).scm_token }}
+
+      - name: Cache
+        uses: ./github-actions/restore-stk-cache
+        with: 
+          stk: ${{ env.STK }}
+
+      - name: Install STK
+        uses: ./github-actions/install-stk-cli
+        with: 
+          stk: ${{ env.STK }}
+
+      - name: Login ${{ fromJson(inputs.api_inputs).cli_login_email }}
+        uses: ./github-actions/login-stk
+        with: 
+          stk: ${{ env.STK }}
+          email: ${{ fromJson(inputs.api_inputs).cli_login_email }}
+          pat: ${{ fromJson(secrets.secrets).cli_token }}
+          realm: ${{ fromJson(inputs.api_inputs).cli_login_realm }}
+
+      - name: Use workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
+        run: |
+          $STK use workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
+      - name: Show Error Log
+        if: failure()
+        run: |
+          cat ~/.$STK/logs/*
+
   apply:
     if: ${{ inputs.workflow_name == 'apply-plugin' }}
+    needs: use-workspace
     uses: stack-spot/stackspot-workflows-action/.github/workflows/apply-plugin.yml@release/july-2023
     with:
       api_inputs: ${{ inputs.api_inputs }}
@@ -36,6 +101,7 @@ jobs:
 
   create:
     if: ${{ inputs.workflow_name == 'create' }}
+    needs: use-workspace
     uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@release/july-2023
     with:
       api_inputs: ${{ inputs.api_inputs }}
@@ -45,6 +111,7 @@ jobs:
 
   run:
     if: ${{ inputs.workflow_name == 'run-action' }}
+    needs: use-workspace
     uses: stack-spot/stackspot-workflows-action/.github/workflows/run-action.yml@release/july-2023
     with:
       api_inputs: ${{ inputs.api_inputs }}
