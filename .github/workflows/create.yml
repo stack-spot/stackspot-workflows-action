@@ -128,27 +128,35 @@ jobs:
           GITHUB_ORG: ${{ github.repository_owner }}
         run: |
           before_actions_raw="${{ fromJson(inputs.api_inputs).before_actions }}"
+          echo "before_actions_raw:"
           echo $before_actions_raw
 
           create_repo_action="${{ fromJson(inputs.api_inputs).create_repo_action }}"
+          echo "create_repo_action:"
           echo $create_repo_action
 
           inputs_repo=$(echo "{\"org\": \"$GITHUB_ORG\",\"token\": \"$TOKEN\", \"name\": \"$CREATE_NAME\", \"description\": \"$CREATE_DESCRIPTION\"}")
+          echo "inputs_repo:"
           echo $inputs_repo
 
           action_inputs=$(echo $create_repo_action | jq -cr .inputs)
+          echo "action_inputs:"
           echo $action_inputs
           
           merged_inputs=$(echo $action_inputs $inputs_repo | jq -cs add)
+          echo "merged_inputs:"
           echo $merged_inputs
           
           parsed_inputs=$(echo "{ \"inputs\": $merged_inputs }")
+          echo "parsed_inputs:"
           echo $parsed_inputs
 
           reposi_action=$(echo $create_repo_action | jq ". + $parsed_inputs")
+          echo "reposi_action:"
           echo $reposi_action
 
           before_actions=$(echo "[ $reposi_action ]" | jq ". + $before_actions_raw")
+          echo "before_actions:"
           echo $before_actions
 
           $STK run actions "$before_actions" --when before --execution-id $EXECUTION_ID
