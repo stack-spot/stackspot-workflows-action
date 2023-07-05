@@ -122,7 +122,7 @@ jobs:
             env=" --env $ACTION_ENV"
           fi
 
-          INPUTS=${{ inputs.api_inputs | js . -cr .plugin_inputs }}
+          INPUTS=${{ inputs.api_inputs }} | js . -cr .action_inputs
           if [ "$INPUTS" != "" ]; then 
               inputs_short=" --inputs-json $(echo $INPUTS | jq . -c)"
               echo $inputs_short
