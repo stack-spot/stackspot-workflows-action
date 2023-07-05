@@ -76,6 +76,7 @@ jobs:
           echo "------------------||------------------"
 
           echo "Running Action..."
+          echo "$STK run action $action_name $inputs_short $conn $env"
           $STK run action $action_name $inputs_short $conn $env
 
       - name: Show Error Log
