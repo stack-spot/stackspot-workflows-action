@@ -20,7 +20,7 @@ env:
   DEBUG: ${{ fromJson(inputs.config).debug }}
 jobs:
   run-action:
-    name: Run Stackspot Action
+    name: Run ${{ fromJson(inputs.api_inputs).action_name }}
     runs-on: ${{ fromJson(inputs.config).runner }}
     steps:
       - name: Checkout workflows repo

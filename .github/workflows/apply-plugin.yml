@@ -20,7 +20,7 @@ env:
   DEBUG: ${{ fromJson(inputs.config).debug }}
 jobs:
   apply-plugin-using-stk-cli:
-    name: Apply Stackspot Plugin
+    name: Apply ${{ fromJson(inputs.api_inputs).plugin_name }}
     if: |
       always() &&
       needs.validate-inputs.result == 'success'
