@@ -48,7 +48,6 @@ jobs:
           CI: ${{ toJson(fromJson(inputs.api_inputs).action_connectors) }}
           ACTION_ENV: ${{ fromJson(inputs.api_inputs).action_env }}
         run: |
-          source .github/workflows/scripts/enable_colors.sh
           conn=""
           if [ "${CI}" != "null" ]; then 
               conn=" --connection-interfaces $(echo $CI | jq . -c)"
@@ -68,7 +67,7 @@ jobs:
           echo -e "\n${green}⚡ Running Action: ${u_cyan}$NAME"
           echo -e "$STK run action $NAME $inputs_short $conn $env \n" 
           $STK run action $NAME $inputs_short $conn $env
-      
+
       - name: Show Error Log
         if: failure()
         run: |
