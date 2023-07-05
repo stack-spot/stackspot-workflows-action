@@ -43,30 +43,41 @@ jobs:
       
       - name: Run action
         env:
-          NAME: ${{ fromJson(inputs.api_inputs).action_name }}
-          INPUTS: ${{ toJson(fromJson(inputs.api_inputs).action_inputs) }}
-          CI: ${{ toJson(fromJson(inputs.api_inputs).action_connectors) }}
-          ACTION_ENV: ${{ fromJson(inputs.api_inputs).action_env }}
         run: |
+          CI=${{ inputs.api_inputs }} | js . -cr .action_connectors
           conn=""
           if [ "${CI}" != "null" ]; then 
               conn=" --connection-interfaces $(echo $CI | jq . -c)"
           fi
-          env=""
+          echo "connection interfaces arg:"
+          echo $conn
+          echo "------------------||------------------"
 
-          if [ "${ACTION_ENV}" != "" ]; then
-            env=" --env $ACTION_ENV"
+          ENV=${{ inputs.api_inputs }} | js . -cr .action_env
+          env=""
+          if [ "$ENV" != "" ]; then
+            env=" --env $ENV"
           fi
+          echo "environment arg:"
+          echo $env
+          echo "------------------||------------------"
 
           INPUTS=${{ inputs.api_inputs }} | js . -cr .action_inputs
+          inputs_short=""
           if [ "$INPUTS" != "" ]; then 
               inputs_short=" --inputs-json $(echo $INPUTS | jq . -c)"
-              echo $inputs_short
           fi
+          echo "inputs arg:"
+          echo $inputs_short
+          echo "------------------||------------------"
 
-          echo -e "\n${green}⚡ Running Action: ${u_cyan}$NAME"
-          echo -e "$STK run action $NAME $inputs_short $conn $env \n" 
-          $STK run action $NAME $inputs_short $conn $env
+          action_name=${{ inputs.api_inputs }} | js . -cr .action_name
+          echo "action name:"
+          echo $action_name
+          echo "------------------||------------------"
+
+          echo -e "\n${green}⚡ Running Action: ${u_cyan}$action_name"
+          $STK run action $action_name $inputs_short $conn $env
 
       - name: Show Error Log
         if: failure()

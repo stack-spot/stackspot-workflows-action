@@ -19,14 +19,11 @@ env:
   STK: ${{ fromJson(inputs.config).stk }}
   DEBUG: ${{ fromJson(inputs.config).debug }}
 jobs:
-  apply-plugin-using-stk-cli:
+  apply-plugin:
     name: Apply ${{ fromJson(inputs.api_inputs).plugin_name }}
-    if: |
-      always() &&
-      needs.validate-inputs.result == 'success'
+    runs-on: ${{ fromJson(inputs.config).runner }}
     env:
       REPO: ${{ fromJson(inputs.api_inputs).repo }}
-    runs-on: ${{ fromJson(inputs.config).runner }}
     steps:
       - name: Extract values from repo
         id: extract_values
