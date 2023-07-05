@@ -103,21 +103,16 @@ jobs:
   run-before-actions:
     name: Run before actions
     runs-on: ${{ fromJson(inputs.config).runner }}
-    if: toJson(fromJson(inputs.api_inputs).actions_before) != '[]'
     needs: use-workspace
     env:
-      DEBUG: ${{ fromJson(inputs.config).debug }}
       STK: ${{ fromJson(inputs.config).stk }}
-      ACTIONS: ${{ fromJson(inputs.api_inputs).actions_before }}
-      EXECUTION_ID: ${{ fromJson(inputs.api_inputs).execution_id }}
     steps:
       - name: Restore STK Cache
         uses: ./github-actions/restore-stk-cache
         with: 
           stk: ${{ env.STK }}
 
-      - name: Run actions before
-        if: ${{ fromJson(inputs.api_inputs).create_repo_action }}
+      - name: Run actions
         env:
           EXECUTION_ID: ${{ fromJson(inputs.api_inputs).execution_id }}
           CREATE_REPO_ACTION: ${{ fromJson(inputs.api_inputs).create_repo_action }}
@@ -136,6 +131,7 @@ jobs:
           before_actions=$(echo "[ $reposi_action ]" | jq ". + $BEFORE_ACTIONS")
       
           $STK run actions "$before_actions" --when before --execution-id $EXECUTION_ID
+
       - name: Show Error Log
         if: failure()
         run: |
