@@ -218,14 +218,15 @@ jobs:
       - name: Create ${{ fromJson(inputs.api_inputs).create_entity_type }}
         env: 
           NAME: ${{ fromJson(inputs.api_inputs).create_name }}
-          INPUTS: ${{ fromJson(inputs.api_inputs).create_inputs }}
-          CI: ${{ fromJson(inputs.api_inputs).create_connectors }}
           DESCRIPTION: ${{ fromJson(inputs.api_inputs).create_description }}
-          S: ${{ fromJson(inputs.api_inputs).create_stack }}${{ fromJson(inputs.api_inputs).create_starter }}
-          PLUGINS: ${{ fromJson(inputs.api_inputs).plugins }}
+          S: ${{ fromJson(inputs.api_inputs).stack }}${{ fromJson(inputs.api_inputs).starter }}
           CREATE_TYPE: ${{ fromJson(inputs.api_inputs).create_entity_type }}
         working-directory: user_repo
         run: |
+          INPUTS=$(echo '${{ inputs.api_inputs }}' | jq -r .create_inputs)
+          CI=$(echo '${{ inputs.api_inputs }}' | jq -r .create_connectors)
+          PLUGINS=$(echo '${{ inputs.api_inputs }}' | jq -r .plugins)
+
           source ../workflow_repo/.github/workflows/scripts/enable_colors.sh
           if $DEBUG
           then
@@ -235,14 +236,14 @@ jobs:
 
           conn=""
           connPrint=""
-          if [ "${CI}" != "null" ]; then 
+          if [ "$CI" != "" ]; then 
              conn="--connection-interfaces $(echo $CI | jq . -c)"
              connPrint=" --connection-interfaces '$(echo $CI | jq )'" 
           fi
 
           inputsValue="{}"
           inputsPrint=""
-          if [ "${INPUTS}" != "null" ]; then 
+          if [ "$INPUTS" != "" ]; then 
              inputsValue=$(echo $INPUTS | jq . -c)
              inputsPrint="--inputs-json '$(echo $INPUTS | jq )'" 
           fi
@@ -253,8 +254,8 @@ jobs:
           fi
 
           plugins=""
-          if [ "$CREATE_TYPE" == "infra" ]; then 
-            plugins="--plugins $PLUGINS"
+          if [ "$CREATE_TYPE" == "infra" ]; then
+            plugins="--plugins \"$PLUGINS\""
           fi
 
           echo -e "\n${green}⚡ Running create $CREATE_TYPE: ${u_cyan}$NAME"
