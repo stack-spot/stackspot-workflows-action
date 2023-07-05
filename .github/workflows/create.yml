@@ -83,38 +83,6 @@ jobs:
         with: 
           stk: ${{ env.STK }}
 
-  stk-login:
-    name: Login ${{ fromJson(inputs.api_inputs).cli_login_email }}
-    runs-on: ${{ fromJson(inputs.config).runner }}
-    needs: stk-install
-    env: 
-      STK: ${{ fromJson(inputs.config).stk }}
-    steps:
-      - name: Checkout workflows repo
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ fromJson(inputs.config).origin_repository }}
-          ref: ${{ fromJson(inputs.config).origin_branch }}   
-          token: ${{ fromJson(secrets.secrets).scm_token }}
-
-      - name: Cache
-        uses: ./github-actions/restore-stk-cache
-        with: 
-          stk: ${{ env.STK }}
-
-      - name: Login STK
-        uses: ./github-actions/login-stk
-        with: 
-          stk: ${{ env.STK }}
-          email: ${{ fromJson(inputs.api_inputs).cli_login_email }}
-          pat: ${{ fromJson(secrets.secrets).cli_token }}
-          realm: ${{ fromJson(inputs.api_inputs).cli_login_realm }}
-
-      - name: Show Error Log
-        if: failure()
-        run: |
-          cat ~/.$STK/logs/*
-
   use-workspace:
     name: Use Workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
     runs-on: ${{ fromJson(inputs.config).runner }}
@@ -133,6 +101,14 @@ jobs:
         uses: ./github-actions/restore-stk-cache
         with: 
           stk: ${{ env.STK }}
+
+      - name: Login ${{ fromJson(inputs.api_inputs).cli_login_email }}
+        uses: ./github-actions/login-stk
+        with: 
+          stk: ${{ env.STK }}
+          email: ${{ fromJson(inputs.api_inputs).cli_login_email }}
+          pat: ${{ fromJson(secrets.secrets).cli_token }}
+          realm: ${{ fromJson(inputs.api_inputs).cli_login_realm }}
 
       - name: Use Workspace
         run: |
