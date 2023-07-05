@@ -304,31 +304,7 @@ jobs:
               }"
          fi
 
-      - name: Show Error Log
-        if: failure()
-        run: |
-          cat ~/.$STK/logs/*
-
-  run-after-actions:
-    name: Run after actions
-    runs-on: ${{ fromJson(inputs.config).runner }}
-    needs: create
-    env:
-      STK: ${{ fromJson(inputs.config).stk }}
-    steps:
-      - name: Checkout workflows repo
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ fromJson(inputs.config).origin_repository }}
-          ref: ${{ fromJson(inputs.config).origin_branch }}
-          token: ${{ fromJson(secrets.secrets).scm_token }}
-
-      - name: Restore STK Cache
-        uses: ./github-actions/restore-stk-cache
-        with: 
-          stk: ${{ env.STK }}
-
-      - name: Run actions
+      - name: Run after actions
         env:
           EXECUTION_ID: ${{ fromJson(inputs.api_inputs).execution_id }}
           CREATE_NAME: ${{ fromJson(inputs.api_inputs).create_name }}
@@ -347,11 +323,7 @@ jobs:
           echo "------------------||------------------"
           
           $STK run actions --actions "$after_actions" --when after --execution-id $EXECUTION_ID
-      - name: Show Error Log
-        if: failure()
-        run: |
-          cat ~/.$STK/logs/*
-
+      
       - name: Commit and Push.
         working-directory: user_repo
         run: |
