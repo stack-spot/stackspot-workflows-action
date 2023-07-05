@@ -26,8 +26,11 @@ jobs:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
         with:
+          persist-credentials: false
+          path: workflow_repo
           repository: ${{ fromJson(inputs.config).origin_repository }}
           ref: ${{ fromJson(inputs.config).origin_branch }}
+          token: ${{ fromJson(secrets.secrets).scm_token }}
 
       - name: Restore STK Cache
         uses: ./workflow_repo/github-actions/restore-stk-cache 
