@@ -59,7 +59,6 @@ jobs:
          echo "ERROR: 'runner' field not found in json for 'config' input"
          exit 1
 
-
   use-workspace:
     name: Use Workspace
     runs-on: ${{ fromJson(inputs.config).runner }}
@@ -103,7 +102,7 @@ jobs:
   create:
     name: Create ${{ fromJson(inputs.api_inputs).create_entity_type }}
     runs-on: ${{ fromJson(inputs.config).runner }}
-    needs: run-before-actions
+    needs: use-workspace
     if: |
       always() &&
       needs.use-workspace.result == 'success' &&
