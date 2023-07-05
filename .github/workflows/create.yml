@@ -103,10 +103,6 @@ jobs:
     name: Create ${{ fromJson(inputs.api_inputs).create_entity_type }}
     runs-on: ${{ fromJson(inputs.config).runner }}
     needs: use-workspace
-    if: |
-      always() &&
-      needs.use-workspace.result == 'success' &&
-      (needs.run-before-actions.result == 'success' || needs.run-before-actions.result == 'skipped')
     env:
       DEBUG: ${{ fromJson(inputs.config).debug }}
       STK: ${{ fromJson(inputs.config).stk }}
