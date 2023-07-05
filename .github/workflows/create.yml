@@ -60,7 +60,7 @@ jobs:
          exit 1
 
   use-workspace:
-    name: Use Workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
+    name: Prepare environment
     runs-on: ${{ fromJson(inputs.config).runner }}
     needs: validate-inputs
     env: 
@@ -83,7 +83,7 @@ jobs:
         with: 
           stk: ${{ env.STK }}
 
-      - name: Login STK
+      - name: stk login ${{ fromJson(inputs.api_inputs).cli_login_email }}
         uses: ./github-actions/login-stk
         with: 
           stk: ${{ env.STK }}
@@ -91,7 +91,7 @@ jobs:
           pat: ${{ fromJson(secrets.secrets).cli_token }}
           realm: ${{ fromJson(inputs.api_inputs).cli_login_realm }}
 
-      - name: Use Workspace
+      - name: stk use workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
         run: |
           $STK use workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
       - name: Show Error Log
