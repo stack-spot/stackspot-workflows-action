@@ -43,7 +43,7 @@ jobs:
       
       - name: Run action
         run: |
-          CI=${{ inputs.api_inputs }} | js . -cr .action_connectors
+          CI=$(echo '${{ inputs.api_inputs }}' | jq . -cr .action_connectors)
           conn=""
           if [ "${CI}" != "null" ]; then 
               conn=" --connection-interfaces $(echo $CI | jq . -c)"
@@ -52,7 +52,7 @@ jobs:
           echo $conn
           echo "------------------||------------------"
 
-          ENV=${{ inputs.api_inputs }} | js . -cr .action_env
+          ENV=$(echo '${{ inputs.api_inputs }}' | jq . -cr .action_env)
           env=""
           if [ "$ENV" != "" ]; then
             env=" --env $ENV"
@@ -61,7 +61,7 @@ jobs:
           echo $env
           echo "------------------||------------------"
 
-          INPUTS=${{ inputs.api_inputs }} | js . -cr .action_inputs
+          INPUTS=$(echo '${{ inputs.api_inputs }}' | jq . -cr .action_inputs)
           inputs_short=""
           if [ "$INPUTS" != "" ]; then 
               inputs_short=" --inputs-json $(echo $INPUTS | jq . -c)"
@@ -70,7 +70,7 @@ jobs:
           echo $inputs_short
           echo "------------------||------------------"
 
-          action_name=${{ inputs.api_inputs }} | js . -cr .action_name
+          action_name=$$(echo '{{ inputs.api_inputs }}' | jq . -cr .action_name)
           echo "action name:"
           echo $action_name
           echo "------------------||------------------"
