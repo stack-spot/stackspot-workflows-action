@@ -21,35 +21,27 @@ env:
 jobs:
 
   validate-inputs:
-    name: Validate JSON Inputs
-    runs-on: ubuntu-latest
+    name: Validate Inputs/Config
+    runs-on: ${{ fromJson(inputs.config).runner }}
     steps:
-      - name: Debug inputs
-        if: env.DEBUG
+      - name: Print inputs
         run: |
-          echo "plugin_name: ${{ fromJson(inputs.api_inputs).plugin_name }}"
-          echo "cli_login_realm: ${{ fromJson(inputs.api_inputs).cli_login_realm }}"
-          echo "cli_login_email: ${{ fromJson(inputs.api_inputs).cli_login_email }}"
-          echo "workspace_slug: ${{ fromJson(inputs.api_inputs).workspace_slug}}"
-      - name: "Validate Input: 'name'"
-        if: fromJson(inputs.api_inputs).plugin_name == ''
+          echo "Inputs from api: ${{ inputs.api_inputs }}"
+
+      - name: Print config
         run: |
-         echo "ERROR: 'plugin_name' field not found in json."
+          echo "Config: ${{ inputs.config }}"
+
+      - name: "Validate config: 'config.stk'"
+        if: fromJson(inputs.config).stk == ''
+        run: |
+         echo "ERROR: 'stk' field not found in json for 'config' input"
          exit 1
-      - name: "Validate Input: 'cli_login_realm'"
-        if: fromJson(inputs.api_inputs).cli_login_realm == ''
+
+      - name: "Validate config: 'config.runner'"
+        if: fromJson(inputs.config).runner == ''
         run: |
-         echo "ERROR: 'realm' field not found in json."
-         exit 1
-      - name: "Validate Input: 'cli_login_email'"
-        if: fromJson(inputs.api_inputs).cli_login_email == ''
-        run: |
-         echo "ERROR: 'cli_login_email' field not found in json."
-         exit 1
-      - name: "Validate Input: 'workspace_slug'"
-        if: fromJson(inputs.api_inputs).workspace_slug == ''
-        run: |
-         echo "ERROR: 'workspace_slug' field not found in json."
+         echo "ERROR: 'runner' field not found in json for 'config' input"
          exit 1
 
   use-workspace:
@@ -94,7 +86,7 @@ jobs:
 
   apply-plugin-using-stk-cli:
     name: Apply Stackspot Plugin
-    needs: validate-inputs
+    needs: use-workspace
     if: |
       always() &&
       needs.validate-inputs.result == 'success'
@@ -176,7 +168,7 @@ jobs:
           concatened_conn=$(IFS=' ' && echo "${connectors[*]}")
 
           INPUTS=${{ inputs.api_inputs | js . -cr .plugin_inputs }}
-          if [ "${INPUTS}" != "null" ]; then 
+          if [ "$INPUTS" != "" ]; then 
               inputs_short=" --inputs-json $(echo $INPUTS | jq . -c)"
               echo $inputs_short
           fi

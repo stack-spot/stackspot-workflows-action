@@ -21,34 +21,72 @@ env:
 jobs:
 
   validate-inputs:
-    name: Validate JSON Inputs
-    runs-on: ubuntu-latest
+    name: Validate Inputs/Config
+    runs-on: ${{ fromJson(inputs.config).runner }}
     steps:
-      - name: Debug inputs
-        if: env.DEBUG
+      - name: Print inputs
         run: |
-          echo "action: ${{ inputs.api_inputs }}"
-      - name: "Validate Input: 'action.name'"
-        if: fromJson(inputs.api_inputs).action_name == ''
+          echo "Inputs from api: ${{ inputs.api_inputs }}"
+
+      - name: Print config
         run: |
-         echo "ERROR: 'name' field not found in json for 'action' input"
+          echo "Config: ${{ inputs.config }}"
+
+      - name: "Validate config: 'config.stk'"
+        if: fromJson(inputs.config).stk == ''
+        run: |
+         echo "ERROR: 'stk' field not found in json for 'config' input"
          exit 1
-      - name: "Validate Input: 'cli_login.email'"
-        if: fromJson(inputs.api_inputs).cli_login_email == ''
+
+      - name: "Validate config: 'config.runner'"
+        if: fromJson(inputs.config).runner == ''
         run: |
-         echo "ERROR: 'email' field not found in json for 'cli_login' input"
+         echo "ERROR: 'runner' field not found in json for 'config' input"
          exit 1
-      - name: "Validate Input: 'cli_login.realm'"
-        if: fromJson(inputs.api_inputs).cli_login_realm == ''
+
+  use-workspace:
+    name: Prepare STK
+    runs-on: ${{ fromJson(inputs.config).runner }}
+    needs: validate-inputs
+    env: 
+      STK: ${{ fromJson(inputs.config).stk }}
+    steps:
+      - name: Checkout workflows repo
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ fromJson(inputs.config).origin_repository }}
+          ref: ${{ fromJson(inputs.config).origin_branch }}   
+          token: ${{ fromJson(secrets.secrets).scm_token }}
+
+      - name: Cache
+        uses: ./github-actions/restore-stk-cache
+        with: 
+          stk: ${{ env.STK }}
+
+      - name: Install STK
+        uses: ./github-actions/install-stk-cli
+        with: 
+          stk: ${{ env.STK }}
+
+      - name: Login ${{ fromJson(inputs.api_inputs).cli_login_email }}
+        uses: ./github-actions/login-stk
+        with: 
+          stk: ${{ env.STK }}
+          email: ${{ fromJson(inputs.api_inputs).cli_login_email }}
+          pat: ${{ fromJson(secrets.secrets).cli_token }}
+          realm: ${{ fromJson(inputs.api_inputs).cli_login_realm }}
+
+      - name: Use workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
         run: |
-         echo "ERROR: 'realm' field not found in json for 'cli_login' input"
-         exit 1
+          $STK use workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
+      - name: Show Error Log
+        if: failure()
+        run: |
+          cat ~/.$STK/logs/*
 
   run-action-using-stk-cli:
     name: Run Stackspot Action
-    needs: validate-inputs
-    env:
-      INPUTS: '${{ inputs.api_inputs }}'
+    needs: use-workspace
     runs-on: ${{ fromJson(inputs.config).runner }}
     steps:
       - name: Checkout workflows repo
@@ -57,22 +95,14 @@ jobs:
           repository: ${{ fromJson(inputs.config).origin_repository }}
           ref: ${{ fromJson(inputs.config).origin_branch }}
 
-      - name: Install STK
-        uses: ./github-actions/install-stk-cli
+      - name: Restore STK Cache
+        uses: ./workflow_repo/github-actions/restore-stk-cache 
         with: 
-          stk: ${{ fromJson(inputs.config).stk }}
-      
-      - name: Login STK
-        uses: ./github-actions/login-stk
-        with: 
-          stk: ${{ fromJson(inputs.config).stk }}
-          email: ${{ fromJson(inputs.api_inputs).cli_login_email }}
-          pat: ${{ fromJson(secrets.secrets).cli_token }}
-          realm: ${{ fromJson(inputs.api_inputs).cli_login_realm }}
-      
-      - name: Use workspace
+          stk: ${{ env.STK }}
+      - name: Set git username
         run: |
-         $STK use workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
+          git config --global user.email "${{ fromJson(inputs.api_inputs).cli_login_email }}"
+          git config --global user.name "${{ fromJson(inputs.api_inputs).cli_login_email }}"
       
       - name: Run action
         env:
@@ -92,7 +122,8 @@ jobs:
             env=" --env $ACTION_ENV"
           fi
 
-          if [ "${INPUTS}" != "null" ]; then 
+          INPUTS=${{ inputs.api_inputs | js . -cr .plugin_inputs }}
+          if [ "$INPUTS" != "" ]; then 
               inputs_short=" --inputs-json $(echo $INPUTS | jq . -c)"
               echo $inputs_short
           fi
