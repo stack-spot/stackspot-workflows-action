@@ -45,7 +45,7 @@ jobs:
         run: |
           CI=$(echo '${{ inputs.api_inputs }}' | jq -r .action_connectors)
           conn=""
-          if [ "${CI}" != "null" ]; then 
+          if [ "${CI}" != "[]" ]; then 
               conn=" --connection-interfaces $(echo $CI | jq . -c)"
           fi
           echo "connection interfaces arg:"
@@ -54,7 +54,7 @@ jobs:
 
           ENV=$(echo '${{ inputs.api_inputs }}' | jq -r .action_env)
           env=""
-          if [ "$ENV" != "" ]; then
+          if [ "$ENV" != "null" ]; then
             env=" --env $ENV"
           fi
           echo "environment arg:"
@@ -63,7 +63,7 @@ jobs:
 
           INPUTS=$(echo '${{ inputs.api_inputs }}' | jq -r .action_inputs)
           inputs_short=""
-          if [ "$INPUTS" != "" ]; then 
+          if [ "$INPUTS" != "{}" ]; then 
               inputs_short=" --inputs-json $(echo $INPUTS | jq . -c)"
           fi
           echo "inputs arg:"
@@ -75,7 +75,7 @@ jobs:
           echo $action_name
           echo "------------------||------------------"
 
-          echo -e "\n${green}⚡ Running Action: ${u_cyan}$action_name"
+          echo "Running Action..."
           $STK run action $action_name $inputs_short $conn $env
 
       - name: Show Error Log
