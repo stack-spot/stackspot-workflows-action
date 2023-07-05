@@ -262,12 +262,6 @@ jobs:
           echo -e "$STK create $CREATE_TYPE $NAME $starter_stack $plugins $connPrint --remote https://github.com/${{ steps.checkout_user_repo.outputs.repo }} --description '$DESCRIPTION' $inputsPrint --non-interactive\n" 
 
           $STK create $CREATE_TYPE $NAME $starter_stack $plugins $conn --remote https://github.com/${{ steps.checkout_user_repo.outputs.repo }} --description "$DESCRIPTION" --inputs-json "$inputsValue" --non-interactive
-      
-      - name: Register ${{ fromJson(inputs.api_inputs).create_entity_type }}
-        working-directory: user_repo
-        run: |
-          cd ${{ fromJson(inputs.api_inputs).create_name }}
-          $STK register ${{ fromJson(inputs.api_inputs).create_entity_type }}
 
       - name: Commit and Push.
         working-directory: user_repo
@@ -318,41 +312,40 @@ jobs:
   run-after-actions:
     name: Run after actions
     runs-on: ${{ fromJson(inputs.config).runner }}
-    needs: create
+    needs: use-workspace
     env:
-      WHEN: after
       STK: ${{ fromJson(inputs.config).stk }}
-      DEBUG: ${{ fromJson(inputs.config).debug }}
-      ACTIONS: ${{ fromJson(inputs.api_inputs).actions_after }}
-      EXECUTION_ID: ${{ fromJson(inputs.api_inputs).execution_id }}
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
         with:
-          persist-credentials: false
-          path: workflow_repo
           repository: ${{ fromJson(inputs.config).origin_repository }}
           ref: ${{ fromJson(inputs.config).origin_branch }}
           token: ${{ fromJson(secrets.secrets).scm_token }}
-
-      - name: Checkout the user repo
-        id: checkout_user_repo
-        uses: ./workflow_repo/github-actions/clone-external-repo
-        with:
-          github_org: ${{ fromJson(inputs.config).github_org }}
-          app_name: ${{ fromJson(inputs.api_inputs).create_name }}
-          path: user_repo
-          secret_git_token: ${{ fromJson(secrets.secrets).scm_token }}
-          github_url: ${{ fromJson(inputs.api_inputs).create_repo }}
 
       - name: Restore STK Cache
         uses: ./github-actions/restore-stk-cache
         with: 
           stk: ${{ env.STK }}
-      
-      - name: Run actions after
+
+      - name: Run actions
+        env:
+          EXECUTION_ID: ${{ fromJson(inputs.api_inputs).execution_id }}
+          CREATE_NAME: ${{ fromJson(inputs.api_inputs).create_name }}
+          CREATE_DESCRIPTION: ${{ fromJson(inputs.api_inputs).create_description }}
+          TOKEN: ${{ fromJson(secrets.secrets).scm_token }}
+          GITHUB_ORG: ${{ fromJson(inputs.config).github_org }}
         run: |
-          $STK run actions $ACTIONS --when $WHEN --execution-id $EXECUTION_ID
+          after_actions=$(echo '${{ inputs.api_inputs }}' | jq -r .after_actions)
+          echo "after_actions:"
+          echo $after_actions
+          echo "------------------||------------------"
+
+          $STK run actions --actions "$after_actions" --when after --execution-id $EXECUTION_ID
+      - name: Show Error Log
+        if: failure()
+        run: |
+          cat ~/.$STK/logs/*
 
       - name: Commit and Push.
         working-directory: user_repo
