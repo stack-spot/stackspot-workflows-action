@@ -59,10 +59,29 @@ jobs:
          echo "ERROR: 'runner' field not found in json for 'config' input"
          exit 1
 
-  use-workspace:
-    name: Use Workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
+  stk-install:
+    name: Install Stk
     runs-on: ${{ fromJson(inputs.config).runner }}
     needs: validate-inputs
+    env: 
+      STK: ${{ fromJson(inputs.config).stk }}
+    steps:
+      - name: Checkout workflows repo
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ fromJson(inputs.config).origin_repository }}
+          ref: ${{ fromJson(inputs.config).origin_branch }}   
+          token: ${{ fromJson(secrets.secrets).scm_token }}
+
+      - name: Install STK
+        uses: ./github-actions/install-stk-cli
+        with: 
+          stk: ${{ env.STK }}
+
+  stk-login:
+    name: Use Workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
+    runs-on: ${{ fromJson(inputs.config).runner }}
+    needs: stk-install
     env: 
       STK: ${{ fromJson(inputs.config).stk }}
     steps:
@@ -78,11 +97,6 @@ jobs:
         with: 
           stk: ${{ env.STK }}
 
-      - name: Install STK
-        uses: ./github-actions/install-stk-cli
-        with: 
-          stk: ${{ env.STK }}
-
       - name: Login STK
         uses: ./github-actions/login-stk
         with: 
@@ -90,6 +104,30 @@ jobs:
           email: ${{ fromJson(inputs.api_inputs).cli_login_email }}
           pat: ${{ fromJson(secrets.secrets).cli_token }}
           realm: ${{ fromJson(inputs.api_inputs).cli_login_realm }}
+
+      - name: Show Error Log
+        if: failure()
+        run: |
+          cat ~/.$STK/logs/*
+
+  use-workspace:
+    name: Use Workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
+    runs-on: ${{ fromJson(inputs.config).runner }}
+    needs: stk-login
+    env: 
+      STK: ${{ fromJson(inputs.config).stk }}
+    steps:
+      - name: Checkout workflows repo
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ fromJson(inputs.config).origin_repository }}
+          ref: ${{ fromJson(inputs.config).origin_branch }}   
+          token: ${{ fromJson(secrets.secrets).scm_token }}
+
+      - name: Cache
+        uses: ./github-actions/restore-stk-cache
+        with: 
+          stk: ${{ env.STK }}
 
       - name: Use Workspace
         run: |
