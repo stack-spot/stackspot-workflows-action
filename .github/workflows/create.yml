@@ -18,41 +18,42 @@ on:
 
 jobs:
   validate-inputs:
-
-    name: Validate Inputs
+    name: Validate Inputs/Config
     runs-on: ${{ fromJson(inputs.config).runner }}
     steps:
-      - name: Debug inputs
-        if: ${{ fromJson(inputs.config).debug }}
+      - name: Print inputs
         run: |
-          echo "cli_login: ${{ inputs.api_inputs }}"
-          echo "config: ${{ inputs.config }}"
+          echo "Inputs from api: ${{ inputs.api_inputs }}"
 
-      - name: "Validate Input: 'config.default_branch'"
+      - name: Print config
+        run: |
+          echo "Config: ${{ inputs.config }}"
+
+      - name: "Validate config: 'config.default_branch'"
         if: fromJson(inputs.config).default_branch == ''
         run: |
          echo "ERROR: 'default_branch' field not found in json for 'config' input"
          exit 1
 
-      - name: "Validate Input: 'config.stk'"
+      - name: "Validate config: 'config.stk'"
         if: fromJson(inputs.config).stk == ''
         run: |
          echo "ERROR: 'stk' field not found in json for 'config' input"
          exit 1
 
-      - name: "Validate Input: 'config.origin_repository'"
+      - name: "Validate config: 'config.origin_repository'"
         if: fromJson(inputs.config).origin_repository == ''
         run: |
          echo "ERROR: 'origin_repository' field not found in json for 'config' input"
          exit 1
 
-      - name: "Validate Input: 'config.origin_branch'"
+      - name: "Validate config: 'config.origin_branch'"
         if: fromJson(inputs.config).origin_branch == ''
         run: |
          echo "ERROR: 'origin_branch' field not found in json for 'config' input"
          exit 1
 
-      - name: "Validate Input: 'config.runner'"
+      - name: "Validate config: 'config.runner'"
         if: fromJson(inputs.config).runner == ''
         run: |
          echo "ERROR: 'runner' field not found in json for 'config' input"
@@ -114,11 +115,27 @@ jobs:
         uses: ./github-actions/restore-stk-cache
         with: 
           stk: ${{ env.STK }}
-      
-      - name: Run actions before
-        run: |
-          $STK run actions $ACTIONS --when before --execution-id $EXECUTION_ID
 
+      - name: Run actions before
+        if: ${{ fromJson(inputs.api_inputs).create_repo_action }}
+        env:
+          EXECUTION_ID: ${{ fromJson(inputs.api_inputs).execution_id }}
+          CREATE_REPO_ACTION: ${{ fromJson(inputs.api_inputs).create_repo_action }}
+          BEFORE_ACTIONS: ${{ fromJson(inputs.api_inputs).before_actions }}
+          CREATE_NAME: ${{ fromJson(inputs.api_inputs).create_name }}
+          CREATE_DESCRIPTION: ${{ fromJson(inputs.api_inputs).create_description }}
+          TOKEN: ${{ fromJson(secrets.secrets).scm_token }}
+          GITHUB_ORG: ${{ github.repository_owner }}
+        run: |
+          inputsRepo=$(echo "{\"org\": \"$GITHUB_ORG\",\"token\": \"$TOKEN\", \"name\": \"$CREATE_NAME\", \"description\": \"$CREATE_DESCRIPTION\"}")
+          action_inputs=$(echo $CREATE_REPO_ACTION | jq -cr .inputs)
+          merged_inputs=$(echo $action_inputs $inputsRepo | jq -cs add)
+          parsed_inputs=$(echo "{ \"inputs\": $merged_inputs }")
+          reposi_action=$(echo $CREATE_REPO_ACTION | jq ". + $parsed_inputs")
+
+          before_actions=$(echo "[ $reposi_action ]" | jq ". + $BEFORE_ACTIONS")
+      
+          $STK run actions "$before_actions" --when before --execution-id $EXECUTION_ID
       - name: Show Error Log
         if: failure()
         run: |
