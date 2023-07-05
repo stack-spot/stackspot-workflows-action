@@ -146,7 +146,6 @@ jobs:
           CI: ${{ toJson(fromJson(inputs.api_inputs).plugin_connectors) }}
         working-directory: user_repo
         run: |
-
           source ../.github/workflows/scripts/enable_colors.sh
 
           if $DEBUG
