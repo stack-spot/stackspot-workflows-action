@@ -60,7 +60,7 @@ jobs:
          exit 1
 
   use-workspace:
-    name: Prepare environment
+    name: Prepare STK
     runs-on: ${{ fromJson(inputs.config).runner }}
     needs: validate-inputs
     env: 
@@ -83,7 +83,7 @@ jobs:
         with: 
           stk: ${{ env.STK }}
 
-      - name: stk login ${{ fromJson(inputs.api_inputs).cli_login_email }}
+      - name: Login ${{ fromJson(inputs.api_inputs).cli_login_email }}
         uses: ./github-actions/login-stk
         with: 
           stk: ${{ env.STK }}
@@ -91,7 +91,7 @@ jobs:
           pat: ${{ fromJson(secrets.secrets).cli_token }}
           realm: ${{ fromJson(inputs.api_inputs).cli_login_realm }}
 
-      - name: stk use workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
+      - name: Use workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
         run: |
           $STK use workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
       - name: Show Error Log
@@ -174,6 +174,7 @@ jobs:
           echo "------------------||------------------"
 
           $STK run actions --actions "$before_actions" --when before --execution-id $EXECUTION_ID
+          cat ~/.$STK/logs/*
 
       - name: Checkout the user repo
         id: checkout_user_repo
