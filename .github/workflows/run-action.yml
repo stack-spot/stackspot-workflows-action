@@ -42,7 +42,6 @@ jobs:
           git config --global user.name "${{ fromJson(inputs.api_inputs).cli_login_email }}"
       
       - name: Run action
-        env:
         run: |
           CI=${{ inputs.api_inputs }} | js . -cr .action_connectors
           conn=""
