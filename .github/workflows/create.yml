@@ -129,14 +129,24 @@ jobs:
           TOKEN: ${{ fromJson(secrets.secrets).scm_token }}
           GITHUB_ORG: ${{ github.repository_owner }}
         run: |
-          inputsRepo=$(echo "{\"org\": \"$GITHUB_ORG\",\"token\": \"$TOKEN\", \"name\": \"$CREATE_NAME\", \"description\": \"$CREATE_DESCRIPTION\"}")
+          inputs_repo=$(echo "{\"org\": \"$GITHUB_ORG\",\"token\": \"$TOKEN\", \"name\": \"$CREATE_NAME\", \"description\": \"$CREATE_DESCRIPTION\"}")
+          echo $inputs_repo
+
           action_inputs=$(echo $CREATE_REPO_ACTION | jq -cr .inputs)
-          merged_inputs=$(echo $action_inputs $inputsRepo | jq -cs add)
+          echo $action_inputs
+          
+          merged_inputs=$(echo $action_inputs $inputs_repo | jq -cs add)
+          echo $merged_inputs
+          
           parsed_inputs=$(echo "{ \"inputs\": $merged_inputs }")
+          echo $parsed_inputs
+
           reposi_action=$(echo $CREATE_REPO_ACTION | jq ". + $parsed_inputs")
+          echo $reposi_action
 
           before_actions=$(echo "[ $reposi_action ]" | jq ". + $BEFORE_ACTIONS")
-      
+          echo $before_actions
+
           $STK run actions "$before_actions" --when before --execution-id $EXECUTION_ID
 
       - name: Show Error Log
