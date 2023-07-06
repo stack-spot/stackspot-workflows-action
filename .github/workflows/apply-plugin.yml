@@ -25,18 +25,6 @@ jobs:
     env:
       REPO: ${{ fromJson(inputs.api_inputs).repo }}
     steps:
-      - name: Extract values from repo
-        id: extract_values
-        run: |
-          org=$(echo "$REPO" | sed 's|.*github.com/\([^/]*\)/.*|\1|')
-          app=$(echo "$REPO" | sed 's|.*github.com/[^/]*/\([^/]*\)$|\1|')
-
-          echo $org
-          echo $app
-
-          echo "GITHUB_ORG=$org" >> $GITHUB_OUTPUT
-          echo "APP_NAME=$app" >> $GITHUB_OUTPUT
-
       - name: Checkout workflows repo
         uses: actions/checkout@v3
         with:
@@ -54,6 +42,18 @@ jobs:
         run: |
           git config --global user.email "${{ fromJson(inputs.api_inputs).cli_login_email }}"
           git config --global user.name "${{ fromJson(inputs.api_inputs).cli_login_email }}"
+      
+      - name: Extract values from repo
+        id: extract_values
+        run: |
+          org=$(echo "$REPO" | sed 's|.*github.com/\([^/]*\)/.*|\1|')
+          app=$(echo "$REPO" | sed 's|.*github.com/[^/]*/\([^/]*\)$|\1|')
+
+          echo $org
+          echo $app
+
+          echo "GITHUB_ORG=$org" >> $GITHUB_OUTPUT
+          echo "APP_NAME=$app" >> $GITHUB_OUTPUT
 
       - name: Checkout the user repo
         id: checkout_user_repo
@@ -74,7 +74,6 @@ jobs:
       - name: Apply plugin ${{ fromJson(inputs.api_inputs).plugin_name }}
         env:
           NAME: ${{ fromJson(inputs.api_inputs).plugin_name }}
-          CI: ${{ toJson(fromJson(inputs.api_inputs).plugin_connectors) }}
         working-directory: user_repo
         run: |
           source ../.github/workflows/scripts/enable_colors.sh
@@ -85,8 +84,9 @@ jobs:
             export COMMAND_ARGS_ENABLE_DEBUG=true
           fi
 
+          CI=$(echo '${{ inputs.api_inputs }}' | jq -r .plugin_connectors)
           connectors=()
-          if [ "${CI}" != "null" ]; then 
+          if [ "$CI" != "null" ]; then 
               for json_object in $(echo "$CI" | jq -c '.[]'); do
                 name=$(echo "$json_object" | jq -r '.name')
                 type=$(echo "$json_object" | jq -r '.type')
@@ -97,15 +97,23 @@ jobs:
 
           concatened_conn=$(IFS=' ' && echo "${connectors[*]}")
 
-          INPUTS=${{ inputs.api_inputs }} | js . -cr .plugin_inputs
-          if [ "$INPUTS" != "" ]; then 
+          INPUTS=$(echo '${{ inputs.api_inputs }}' | jq -r .plugin_inputs)
+          inputs_short=""
+          if [ "$INPUTS" != "{}" ]; then 
               inputs_short=" --inputs-json $(echo $INPUTS | jq . -c)"
-              echo $inputs_short
           fi
+          echo "inputs arg:"
+          echo $inputs_short
+          echo "------------------||------------------"
 
-          echo -e "\n${green}⚡ Applying plugin: ${u_cyan}$NAME"
-          echo -e "$STK apply plugin $NAME $inputs_short $concatened_conn \n"
-          $STK apply plugin $NAME $inputs_short $concatened_conn
+          plugin_name=$(echo '${{ inputs.api_inputs }}' | jq -r .plugin_name)
+          echo "plugin name:"
+          echo $plugin_name
+          echo "------------------||------------------"
+
+          echo -e "\n${green}⚡ Applying plugin: ${u_cyan}$plugin_name"
+          echo -e "$STK apply plugin $plugin_name $inputs_short $concatened_conn \n"
+          $STK apply plugin $plugin_name $inputs_short $concatened_conn
 
       - name: Commit and Push.
         working-directory: user_repo
