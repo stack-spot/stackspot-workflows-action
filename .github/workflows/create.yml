@@ -91,7 +91,6 @@ jobs:
           echo "------------------||------------------"
 
           $STK run actions --actions "$before_actions" --when before --execution-id $EXECUTION_ID
-          cat ~/.$STK/logs/*
 
       - name: Checkout the user repo
         id: checkout_user_repo
