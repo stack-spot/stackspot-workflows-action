@@ -166,7 +166,7 @@ jobs:
 
           plugins=""
           if [ "$CREATE_TYPE" == "infra" ]; then
-            plugins="--plugins \"$PLUGINS\""
+            plugins="--plugins $PLUGINS"
           fi
 
           echo -e "\n${green}⚡ Running create $CREATE_TYPE: ${u_cyan}$NAME"
