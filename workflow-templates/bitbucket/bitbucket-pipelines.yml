@@ -412,19 +412,17 @@ definitions:
             echo -e "$green $create_type created successfully\n";
             cd $name;
         
-          # ---------------------- REGISTER APP/INFRA ----------------------
-          - echo "Step [8/12] Register $create_type";
-            echo -e "\n$green Registering $create_type $u_cyan$name\n";
-            echo $workflow_config register $create_type;
-            $workflow_config register $create_type;
-            echo -e "$green $create_type registered successfully\n";
-
-            secret_stk_login=$(echo $secrets | jq -r .secret_stk_login);
-            chmod +x $BITBUCKET_CLONE_DIR/scripts/register-app-infra-created-to-dispatch-event.sh;
-            $BITBUCKET_CLONE_DIR/scripts/register-app-infra-created-to-dispatch-event.sh $create_type $workflow_api "$correlation_id" $secret_stk_login;
-            exit_code_of_command=$?;
-            if [ "$exit_code_of_command" != "0" ]; then
-              exit $exit_code_of_command;
+          # ---------------------- UPDATE APP/INFRA ----------------------
+          - echo "Step [8/12] Config update $create_type";
+            if [ -z "$register_id" ]; then
+              $workflow_config update $create_type --id $register_id
+              echo -e "$green $create_type updated.\n";
+              exit_code_of_command=$?;
+              if [ "$exit_code_of_command" != "0" ]; then
+                exit $exit_code_of_command;
+              fi;
+            else
+              echo -e "$green register_id not found, not updating $create_type\n";
             fi;
 
           # ------------------------- COMMIT/PUSH --------------------------
