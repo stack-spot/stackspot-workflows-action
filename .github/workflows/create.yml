@@ -170,7 +170,7 @@ jobs:
           $STK create $CREATE_TYPE $NAME $starter_stack $plugins $conn --remote https://github.com/${{ steps.checkout_user_repo.outputs.repo }} --description "$DESCRIPTION" --inputs-json "$inputsValue" --non-interactive
 
       - name: Update ${{ fromJson(inputs.api_inputs).create_entity_type }} ${{ fromJson(inputs.api_inputs).register_id }}
-        if: toJson(fromJson(inputs.actions).register_id) != ''
+        if: toJson(fromJson(inputs.api_inputs).register_id) != ''
         working-directory: user_repo
         run: |
           $STK update--id ${{ fromJson(inputs.api_inputs).create_entity_type }} ${{ fromJson(inputs.api_inputs).register_id }}
