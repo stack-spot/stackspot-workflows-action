@@ -414,7 +414,7 @@ definitions:
         
           # ---------------------- UPDATE APP/INFRA ----------------------
           - echo "Step [8/12] Config update $create_type";
-            if [ -z "$register_id" ]; then
+            if [ -n "$register_id" ]; then
               $workflow_config update $create_type --id $register_id
               echo -e "$green $create_type updated.\n";
               exit_code_of_command=$?;
