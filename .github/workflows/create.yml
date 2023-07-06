@@ -67,46 +67,50 @@ jobs:
             echo "------------------||------------------"
           fi
 
-          inputs_repo=$(echo "{\"org\": \"$GITHUB_ORG\",\"token\": \"$TOKEN\", \"name\": \"$CREATE_NAME\", \"description\": \"$CREATE_DESCRIPTION\"}")
-          if $DEBUG
-          then
-            echo "inputs_repo:"
-            echo $inputs_repo
-            echo "------------------||------------------"
-          fi
+          reposi_action=null
+          if ["$create_repo_action"] != "null"; then
 
-          action_inputs=$(echo "$create_repo_action" | jq -cr .inputs)
-          if $DEBUG
-          then
-            echo "action_inputs:"
-            echo $action_inputs
-            echo "------------------||------------------"
+            inputs_repo=$(echo "{\"org\": \"$GITHUB_ORG\",\"token\": \"$TOKEN\", \"name\": \"$CREATE_NAME\", \"description\": \"$CREATE_DESCRIPTION\"}")
+            if $DEBUG
+            then
+              echo "inputs_repo:"
+              echo $inputs_repo
+              echo "------------------||------------------"
+            fi
+
+            action_inputs=$(echo "$create_repo_action" | jq -cr .inputs)
+            if $DEBUG
+            then
+              echo "action_inputs:"
+              echo $action_inputs
+              echo "------------------||------------------"
+            fi
+            
+            merged_inputs=$(echo $action_inputs $inputs_repo | jq -cs add)
+            if $DEBUG
+            then
+              echo "merged_inputs:"
+              echo $merged_inputs
+              echo "------------------||------------------"
+            fi
+              
+            parsed_inputs=$(echo "{ \"inputs\": $merged_inputs }")
+            if $DEBUG
+            then
+              echo "parsed_inputs:"
+              echo $parsed_inputs
+              echo "------------------||------------------"
+            fi
+
+            reposi_action=$(echo $create_repo_action | jq ". + $parsed_inputs")
+            if $DEBUG
+            then
+              echo "reposi_action:"
+              echo $reposi_action
+              echo "------------------||------------------"
+            fi
           fi
           
-          merged_inputs=$(echo $action_inputs $inputs_repo | jq -cs add)
-          if $DEBUG
-          then
-            echo "merged_inputs:"
-            echo $merged_inputs
-            echo "------------------||------------------"
-          fi
-            
-          parsed_inputs=$(echo "{ \"inputs\": $merged_inputs }")
-          if $DEBUG
-          then
-            echo "parsed_inputs:"
-            echo $parsed_inputs
-            echo "------------------||------------------"
-          fi
-
-          reposi_action=$(echo $create_repo_action | jq ". + $parsed_inputs")
-          if $DEBUG
-          then
-            echo "reposi_action:"
-            echo $reposi_action
-            echo "------------------||------------------"
-          fi
-
           before_actions=$(echo "[ $reposi_action ]" | jq ". + $before_actions_raw")
           if $DEBUG
           then
