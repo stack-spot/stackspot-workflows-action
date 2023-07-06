@@ -95,7 +95,7 @@ jobs:
 
           echo -e "\n${green}⚡ Applying plugin: ${u_cyan}$plugin_name"
           echo -e "$STK apply plugin $plugin_name $inputs_short $connectors \n"
-          $STK apply plugin $plugin_name $inputs_short $connectors
+          $STK apply plugin $plugin_name $inputs_short $connectors --skip-warning
 
       - name: Commit and Push.
         working-directory: user_repo
