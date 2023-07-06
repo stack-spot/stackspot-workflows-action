@@ -57,7 +57,7 @@ jobs:
 
       - name: Checkout the user repo
         id: checkout_user_repo
-        uses:  ./github-actions/clone-external-repo
+        uses:  ./workflow_repo/github-actions/clone-external-repo
         with:
           github_org: ${{ steps.extract_values.outputs.GITHUB_ORG }}
           default_branch: stackspot-$(date +%s)
