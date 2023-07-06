@@ -43,6 +43,7 @@ jobs:
           git config --global user.name "${{ fromJson(inputs.api_inputs).cli_login_email }}"
 
       - name: Run before actions
+        if: toJson(fromJson(inputs.api_inputs).before_actions) != null || toJson(fromJson(inputs.api_inputs).create_repo_action) != null
         env:
           EXECUTION_ID: ${{ fromJson(inputs.api_inputs).execution_id }}
           CREATE_NAME: ${{ fromJson(inputs.api_inputs).create_name }}
