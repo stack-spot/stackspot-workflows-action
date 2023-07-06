@@ -51,6 +51,7 @@ jobs:
           GITHUB_ORG: ${{ fromJson(inputs.config).github_org }}
         run: |
           before_actions_raw=$(echo '${{ inputs.api_inputs }}' | jq -r .before_actions)
+          before_actions_raw=$(echo "$before_actions_raw" | jq ". + []")
           if $DEBUG
           then
             echo "before_actions_raw:"
@@ -166,7 +167,7 @@ jobs:
 
           echo -e "\n${green}⚡ Running create $CREATE_TYPE: ${u_cyan}$NAME"
           echo -e "$STK create $CREATE_TYPE $NAME $starter_stack $plugins $connPrint --remote https://github.com/${{ steps.checkout_user_repo.outputs.repo }} --description '$DESCRIPTION' $inputsPrint --non-interactive\n" 
-
+  
           $STK create $CREATE_TYPE $NAME $starter_stack $plugins $conn --remote https://github.com/${{ steps.checkout_user_repo.outputs.repo }} --description "$DESCRIPTION" --inputs-json "$inputsValue" --non-interactive
 
       # - name: Update ${{ fromJson(inputs.api_inputs).create_entity_type }} ${{ fromJson(inputs.api_inputs).register_id }}
