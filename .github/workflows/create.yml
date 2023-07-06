@@ -68,7 +68,7 @@ jobs:
           fi
 
           reposi_action="[]"
-          if [ ["$create_repo_action" != ""] ]; then
+          if [ [$create_repo_action != "null"] ]; then
 
             inputs_repo=$(echo "{\"org\": \"$GITHUB_ORG\",\"token\": \"$TOKEN\", \"name\": \"$CREATE_NAME\", \"description\": \"$CREATE_DESCRIPTION\"}")
             if $DEBUG
