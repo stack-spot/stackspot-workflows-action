@@ -288,13 +288,13 @@ definitions:
         name: 'Create'{{runners}}
         script:
           # Copy to home directory .stk or .stk-alpha, update PATH with binary path and add variable colors
-          - echo "Step [1/11] Configure pipeline.";
+          - echo "Step [1/12] Configure pipeline.";
             mv .$workflow_config ~/;
             export PATH="$PATH:~/.$workflow_config/bin";
             source $BITBUCKET_CLONE_DIR/scripts/enable_colors.sh
 
           # ------------------------- PARSE INPUTS -------------------------
-          - echo "Step [3/11] Parse inputs of 'create $create_type'.";
+          - echo "Step [2/12] Parse inputs of 'create $create_type'.";
             workspace_pat=$(echo $secrets | jq -r .secret_git);
             workspace_name=$BITBUCKET_WORKSPACE;
             name=$(echo $fields | jq -r .name);
@@ -356,19 +356,29 @@ definitions:
               z="1";
             fi
 
+          # ---------------------- RUN ACTION CREATE REPO ----------------------
+          - echo "Step [3/12] Run action create repo.";
+            chmod +x $BITBUCKET_CLONE_DIR/scripts/run-create-repo-action.sh;
+            $BITBUCKET_CLONE_DIR/scripts/run-create-repo-action.sh "$debug" "$workflow_config" "$workspace_pat" "$workspace_name" "$name" "$description" "$create_repo_action"
+
           # ---------------------- RUN ACTIONS BEFORE ----------------------
-          - echo "Step [2/11] Run actions before.";
+          - echo "Step [4/12] Run actions before.";
             actions_before=$(echo $actions | jq -cM .before);
-            echo -e "$green➤ DEBUG$two_dots_unicode Actions Before$two_dots_unicode $actions_before";
-            chmod +x $BITBUCKET_CLONE_DIR/scripts/run-actions.sh;
-            $BITBUCKET_CLONE_DIR/scripts/run-actions.sh $debug "$BITBUCKET_CLONE_DIR" "$workflow_config" "$actions_before" "$workspace_pat" "$workspace_name" "$name" "$description";
-            exit_code_of_command=$?;
-            if [ "$exit_code_of_command" != "0" ]; then
-              exit $exit_code_of_command;
+            if [ -n "$actions_before" ]; then
+              echo -e "$green➤ DEBUG$two_dots_unicode Actions Before$two_dots_unicode $actions_before";
+              echo -e "$green➤ DEBUG$two_dots_unicode Actions Execution Id$two_dots_unicode $execution_id";
+              echo -e $yellow $workflow_config run actions -a "$(echo $actions_before)" -e $execution_id -w before"\n";
+              $workflow_config run actions -a "$(echo $actions_before)" -e $execution_id -w before;
+              exit_code_of_command=$?;
+              if [ "$exit_code_of_command" != "0" ]; then
+                exit $exit_code_of_command;
+              fi
+            else
+              echo -e "$green➤ DEBUG$two_dots_unicode No Action to run";
             fi
 
           # ------------------------- CONFIGURE DEBUG -------------------------
-          - echo "Step [4/11] Configure DEBUG MODE.";
+          - echo "Step [5/12] Configure DEBUG MODE.";
             if [ $debug == "true" ]; then
               export APPLY_PLUGIN_ENABLE_DEBUG=true;
               export COMMAND_ARGS_ENABLE_DEBUG=true;
@@ -385,7 +395,7 @@ definitions:
             fi;
 
           # ----------------------- CLONE REPOSITORY -----------------------
-          - echo "Step [5/11] Clone repository";
+          - echo "Step [6/12] Clone repository";
             chmod +x $BITBUCKET_CLONE_DIR/scripts/clone-repository.sh;
             $BITBUCKET_CLONE_DIR/scripts/clone-repository.sh $repo_name $workspace_pat $email $workspace_name "project_cloned";
             exit_code_of_command=$?;
@@ -395,30 +405,28 @@ definitions:
             cd project_cloned;
           
           # ----------------------- CREATE APP/INFRA -----------------------
-          - echo "Step [6/11] Create $create_type";
+          - echo "Step [7/12] Create $create_type";
             echo -e "\n$green Creating $create_type $u_cyan$name\n";
             echo -e $yellow $workflow_config create $create_type $name --non-interactive $(echo "${args[@]}") "\n";
             $workflow_config create $create_type $name --non-interactive "${args[@]}";
             echo -e "$green $create_type created successfully\n";
             cd $name;
         
-          # ---------------------- REGISTER APP/INFRA ----------------------
-          - echo "Step [7/11] Register $create_type";
-            echo -e "\n$green Registering $create_type $u_cyan$name\n";
-            echo $workflow_config register $create_type;
-            $workflow_config register $create_type;
-            echo -e "$green $create_type registered successfully\n";
-
-            secret_stk_login=$(echo $secrets | jq -r .secret_stk_login);
-            chmod +x $BITBUCKET_CLONE_DIR/scripts/register-app-infra-created-to-dispatch-event.sh;
-            $BITBUCKET_CLONE_DIR/scripts/register-app-infra-created-to-dispatch-event.sh $create_type $workflow_api "$correlation_id" $secret_stk_login;
-            exit_code_of_command=$?;
-            if [ "$exit_code_of_command" != "0" ]; then
-              exit $exit_code_of_command;
+          # ---------------------- UPDATE APP/INFRA ----------------------
+          - echo "Step [8/12] Config update $create_type";
+            if [ -n "$register_id" ]; then
+              $workflow_config update $create_type --id $register_id
+              echo -e "$green $create_type updated.\n";
+              exit_code_of_command=$?;
+              if [ "$exit_code_of_command" != "0" ]; then
+                exit $exit_code_of_command;
+              fi;
+            else
+              echo -e "$green register_id not found, not updating $create_type\n";
             fi;
 
           # ------------------------- COMMIT/PUSH --------------------------
-          - echo "Step [8/11] Commit and push";
+          - echo "Step [9/12] Commit and push";
             echo -e "\n$green Commit and push\n";
             cd ..;
             rm -rf $name/.git;
@@ -431,7 +439,7 @@ definitions:
             git push origin $branch_name;
 
           # --------------------- CREATE PULL REQUEST ----------------------
-          - echo "Step [9/11] Create pull request";
+          - echo "Step [10/12] Create pull request";
             chmod +x $BITBUCKET_CLONE_DIR/scripts/create-pull-request.sh;
             $BITBUCKET_CLONE_DIR/scripts/create-pull-request.sh $workspace_name $repo_name $workspace_pat $name $branch_name $default_branch "$description";
             exit_code_of_command=$?;
@@ -440,7 +448,7 @@ definitions:
             fi
 
           # ----------------------- RUN ACTIONS AFTER ----------------------
-          - echo "Step [10/11] Run actions after";
+          - echo "Step [11/12] Run actions after";
             actions_after=$(echo $actions | jq -cM .after);
             echo -e "$green➤ DEBUG$two_dots_unicode Actions After$two_dots_unicode $actions_after\n";
             chmod +x $BITBUCKET_CLONE_DIR/scripts/run-actions.sh;
@@ -450,7 +458,7 @@ definitions:
               exit $exit_code_of_command;
             fi
 
-          - echo "Step [11/11] Commit and push";
+          - echo "Step [12/12] Commit and push";
             if [[ `git status --porcelain` ]]; then
               branch=$(git symbolic-ref --short HEAD);
               git add -A;
@@ -627,6 +635,9 @@ pipelines:
         - name: cli_login
         - name: workspace_slug
         - name: secrets
+        - name: execution_id
+        - name: register_id
+        - name: create_repo_action
         - name: create_type
           default: app
         - name: default_branch
@@ -644,6 +655,9 @@ pipelines:
         - name: cli_login
         - name: workspace_slug
         - name: secrets
+        - name: execution_id
+        - name: register_id
+        - name: create_repo_action
         - name: create_type
           default: infra
         - name: default_branch
