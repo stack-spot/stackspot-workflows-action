@@ -178,7 +178,7 @@ jobs:
         if: toJson(fromJson(inputs.api_inputs).register_id) != ''
         working-directory: user_repo
         run: |
-          ls -a
+          cd ${{ fromJson(inputs.api_inputs).create_name }}
           $STK update ${{ fromJson(inputs.api_inputs).create_entity_type }} --id ${{ fromJson(inputs.api_inputs).register_id }}
 
       - name: Commit and Push.
