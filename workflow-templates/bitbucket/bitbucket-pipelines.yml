@@ -408,7 +408,7 @@ definitions:
           - echo "Step [7/12] Create $create_type";
             echo -e "\n$green Creating $create_type $u_cyan$name\n";
             echo -e $yellow $workflow_config create $create_type $name --non-interactive $(echo "${args[@]}") "\n";
-            $workflow_config create $create_type $name --non-interactive "${args[@]}";
+            $workflow_config create $create_type $name --skip-validate-existing --non-interactive "${args[@]}";
             echo -e "$green $create_type created successfully\n";
             cd $name;
         
