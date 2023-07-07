@@ -1,0 +1,37 @@
+{%- raw -%}
+name: Stackspot workflow dispatch
+run-name: ${{ inputs.correlation_id }}
+on: 
+  workflow_dispatch:
+    inputs:
+      correlation_id:
+        description: Correlation id
+        required: true
+      workflow_name:
+        description: Workflow path
+        required: true
+      secrets:
+        description: Secrets info (json)
+        required: true
+      api_inputs:
+        description: Workflow inputs (json)
+        required: true
+jobs:
+  redirect:
+    uses: stack-spot/stackspot-workflows-action/.github/workflows/middle-flow.yml@main
+    with:
+      api_inputs: ${{ github.event.inputs.api_inputs }}
+      workflow_name: ${{ github.event.inputs.workflow_name }}
+      correlation_id: ${{ github.event.inputs.correlation_id }}
+      config: "{
+        \"runner\": \"ubuntu-latest\",
+        \"github_org\": \"${{ github.repository_owner }}\",
+        \"debug\": false,
+        \"stk\": \"stk\",
+        \"origin_repository\": \"stack-spot/stackspot-workflows-action\",
+        \"origin_branch\": \"main\",
+        \"default_branch\": \"main\"
+      }"
+    secrets:
+      secrets: ${{ github.event.inputs.secrets }}
+{% endraw %}

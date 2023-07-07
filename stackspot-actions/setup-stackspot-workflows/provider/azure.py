@@ -191,7 +191,5 @@ class AzureProvider(Provider):
 
     def execute_provider_setup(self, inputs: Inputs):
         repo_id = self.__get_repo_id(inputs)
-        self.__setup_pipeline("create-app", inputs, repo_id)
-        self.__setup_pipeline("create-infra", inputs, repo_id)
-        self.__setup_pipeline("run-action", inputs, repo_id)
+        self.__setup_pipeline("middle-flow", inputs, repo_id)
         self.__setup_github_connection(inputs)

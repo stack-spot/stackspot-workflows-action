@@ -3,23 +3,11 @@ run-name: ${{ inputs.correlation_id }}
 on: 
   workflow_call:
     inputs:
-      correlation_id:
-        description: Correlation id
-        type: string
-        required: true
-      action:
+      api_inputs:
         description: Action info (json)
         type: string
         required: true
-      cli_login:
-        description: CLI login info (json)
-        type: string
-        required: true
-      workspace_slug:
-        description: Workspace identifier
-        type: string
-        required: true
-      workflow_config:
+      config:
         description: Workflow config (json)
         type: string
         required: true
@@ -28,93 +16,69 @@ on:
         description: Secrets info (json)
         required: true
 env:
-  STK: ${{ fromJson(inputs.workflow_config).stk }}
-  DEBUG: ${{ fromJson(inputs.workflow_config).debug }}
+  STK: ${{ fromJson(inputs.config).stk }}
+  DEBUG: ${{ fromJson(inputs.config).debug }}
 jobs:
-
-  validate-inputs:
-    name: Validate JSON Inputs
-    runs-on: ubuntu-latest
-    steps:
-      - name: Debug inputs
-        if: env.DEBUG
-        run: |
-          echo "action: ${{ inputs.action }}"
-          echo "cli_login: ${{ inputs.cli_login }}"
-          echo "workspace_slug: ${{ inputs.workspace_slug }}"
-      - name: "Validate Input: 'action.name'"
-        if: fromJson(inputs.action).name == ''
-        run: |
-         echo "ERROR: 'name' field not found in json for 'action' input"
-         exit 1
-      - name: "Validate Input: 'cli_login.email'"
-        if: fromJson(inputs.cli_login).email == ''
-        run: |
-         echo "ERROR: 'email' field not found in json for 'cli_login' input"
-         exit 1
-      - name: "Validate Input: 'cli_login.realm'"
-        if: fromJson(inputs.cli_login).realm == ''
-        run: |
-         echo "ERROR: 'realm' field not found in json for 'cli_login' input"
-         exit 1
-
-  run-action-using-stk-cli:
-    name: Run Stackspot Action
-    needs: validate-inputs
-    env:
-      INPUTS: '${{ inputs.action_inputs }}'
-    runs-on: ${{ fromJson(inputs.workflow_config).runner }}
+  run-action:
+    name: Run ${{ fromJson(inputs.api_inputs).action_name }}
+    runs-on: ${{ fromJson(inputs.config).runner }}
     steps:
       - name: Checkout workflows repo
         uses: actions/checkout@v3
         with:
-          repository: ${{ fromJson(inputs.workflow_config).origin_repository }}
-          ref: ${{ fromJson(inputs.workflow_config).origin_branch }}
+          persist-credentials: false
+          path: workflow_repo
+          repository: ${{ fromJson(inputs.config).origin_repository }}
+          ref: ${{ fromJson(inputs.config).origin_branch }}
+          token: ${{ fromJson(secrets.secrets).scm_token }}
 
-      - name: Install STK
-        uses: ./github-actions/install-stk-cli
+      - name: Restore STK Cache
+        uses: ./workflow_repo/github-actions/restore-stk-cache 
         with: 
-          stk: ${{ fromJson(inputs.workflow_config).stk }}
-      
-      - name: Login STK
-        uses: ./github-actions/login-stk
-        with: 
-          stk: ${{ fromJson(inputs.workflow_config).stk }}
-          email: ${{ fromJson(inputs.cli_login).email }}
-          pat: ${{ fromJson(secrets.secrets).cli_token }}
-          realm: ${{ fromJson(inputs.cli_login).realm }}
-      
-      - name: Use workspace
+          stk: ${{ env.STK }}
+      - name: Set git username
         run: |
-         $STK use workspace ${{ inputs.workspace_slug }}
+          git config --global user.email "${{ fromJson(inputs.api_inputs).cli_login_email }}"
+          git config --global user.name "${{ fromJson(inputs.api_inputs).cli_login_email }}"
       
       - name: Run action
-        env:
-          NAME: ${{ fromJson(inputs.action).name }}
-          INPUTS: ${{ toJson(fromJson(inputs.action).inputs) }}
-          CI: ${{ toJson(fromJson(inputs.action).connectors) }}
-          ACTION_ENV: ${{ fromJson(inputs.action).env }}
         run: |
-          source .github/workflows/scripts/enable_colors.sh
+          CI=$(echo '${{ inputs.api_inputs }}' | jq -r .action_connectors)
           conn=""
-          if [ "${CI}" != "null" ]; then 
+          if [ "${CI}" != "[]" ]; then 
               conn=" --connection-interfaces $(echo $CI | jq . -c)"
           fi
+          echo "connection interfaces arg:"
+          echo $conn
+          echo "------------------||------------------"
+
+          ENV=$(echo '${{ inputs.api_inputs }}' | jq -r .action_env)
           env=""
-
-          if [ "${ACTION_ENV}" != "null" ]; then
-            env=" --env $ACTION_ENV"
+          if [ "$ENV" != "null" ]; then
+            env=" --env $ENV"
           fi
+          echo "environment arg:"
+          echo $env
+          echo "------------------||------------------"
 
-          if [ "${INPUTS}" != "null" ]; then 
+          INPUTS=$(echo '${{ inputs.api_inputs }}' | jq -r .action_inputs)
+          inputs_short=""
+          if [ "$INPUTS" != "{}" ]; then 
               inputs_short=" --inputs-json $(echo $INPUTS | jq . -c)"
-              echo $inputs_short
           fi
+          echo "inputs arg:"
+          echo $inputs_short
+          echo "------------------||------------------"
 
-          echo -e "\n${green}⚡ Running Action: ${u_cyan}$NAME"
-          echo -e "$STK run action $NAME $inputs_short $conn $env \n" 
-          $STK run action $NAME $inputs_short $conn $env
-      
+          action_name=$(echo '${{ inputs.api_inputs }}' | jq -r .action_name)
+          echo "action name:"
+          echo $action_name
+          echo "------------------||------------------"
+
+          echo "Running Action..."
+          echo "$STK run action $action_name $inputs_short $conn $env"
+          $STK run action $action_name $inputs_short $conn $env
+
       - name: Show Error Log
         if: failure()
         run: |
