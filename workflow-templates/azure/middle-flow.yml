@@ -1,0 +1,43 @@
+{%- raw -%}
+trigger:
+- none
+
+name: ${{ parameters.correlation_id }}
+
+parameters:
+  - name: correlation_id
+    displayName: Correlation id
+    type: string
+  - name: resource_repositories_ref
+    displayName: Resource repository ref
+    type: string
+  - name: job_display_name
+    displayName: Job display name
+    type: string
+  - name: job_template
+    displayName: Job template
+    type: string
+  - name: api_inputs
+    displayName: Json object with api data
+    type: string
+
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: stack-spot/stackspot-workflows-action
+      ref: main
+      endpoint: stackspot_github_connection
+
+pool:
+  name: default
+
+jobs:
+  - job:
+    displayName: ${{ parameters.job_display_name }}
+    steps:
+      - template: ${{ parameters.job_template }}
+        parameters:
+          api_inputs: ${{ parameters.api_inputs }}
+          config: "{\"default_branch\": \"main\", \"debug\": true, \"stk\": \"stk-alpha\"}"
+{% endraw %}
