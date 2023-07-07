@@ -36,6 +36,10 @@ spec:
       name: project_name
       type: text
       help: 'Inform your Project Name'
+      condition:
+        variable: project_name
+        operator: '!='
+        value: Github
     - label: Repository Name
       name: repo_name
       type: text
