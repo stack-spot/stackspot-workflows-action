@@ -103,4 +103,13 @@ class GithubProvider(Provider):
                 "insecure_ssl": "0",
             },
         }
-        self.__post(url_builder, inputs, body)
+        response = requests.post(
+            url_builder.build(),
+            headers=self.__default_headers(inputs),
+            json=body,
+            verify=False,
+        )
+        if response.status_code == 422:
+            logging.warning("Webhook already exists")
+        else:
+            handle_api_response_errors(response)
