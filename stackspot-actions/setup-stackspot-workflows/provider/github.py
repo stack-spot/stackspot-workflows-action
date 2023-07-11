@@ -108,7 +108,7 @@ class GithubProvider(Provider):
         return f"https://git:{inputs.pat}@github.com/{inputs.org_name}/{inputs.repo_name}.git"
 
     def create_pull_request(self, inputs: Inputs) -> str:
-        logging.info("Creating pull request...")
+        logging.info(f"Creating pull request from {inputs.ref_branch} to main brancn.")
         url_builder = (
             UrlBuilder(inputs)
             .path("repos")
@@ -119,8 +119,8 @@ class GithubProvider(Provider):
 
         data = {
             "title": "Stackspot Update workflow configuration.",
-            "head": inputs.ref_branch,
-            "base": "main",
+            "head": "main",
+            "base": inputs.ref_branch,
         }
         response = self.__post(url_builder, inputs, data)
         if response and "html_url" in response:

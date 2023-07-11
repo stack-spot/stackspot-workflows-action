@@ -21,7 +21,22 @@ def __default_post_headers(bitbucket_access_token: str):
 
 
 def get_api_base_url_builder(inputs: Inputs) -> UrlBuilder:
-    return UrlBuilder(inputs).path("repositories").path(inputs.org_name).path(inputs.repo_name)
+    return (
+        UrlBuilder(inputs)
+        .path("repositories")
+        .path(inputs.org_name)
+        .path(inputs.repo_name)
+    )
+
+
+def get_api_pullrequests_url_builder(inputs: Inputs) -> UrlBuilder:
+    return (
+        UrlBuilder(inputs)
+        .path("repositories")
+        .path(inputs.org_name)
+        .path(inputs.repo_name)
+        .path("pullrequests")
+    )
 
 
 def get_api_projects_builder(inputs: Inputs) -> UrlBuilder:

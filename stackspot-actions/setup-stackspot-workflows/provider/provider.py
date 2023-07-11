@@ -72,12 +72,17 @@ class Provider(ABC):
         workdir = tempfile.mkdtemp()
         try:
             self.clone_created_repo(workdir, inputs)
-            self.create_workflow_files(inputs)
             if not self.check_if_main_exists():
+                self.create_workflow_files(inputs)
                 self.commit_and_push("main")
             else:
-                self.commit_and_push(inputs.ref_branch)
-                self.create_pull_request(inputs)
+                self.create_new_branch_from_base(inputs.ref_branch, "main")
+                self.create_workflow_files(inputs)
+                if self.is_workflow_changed():
+                    self.commit_and_push(inputs.ref_branch, True)
+                    self.create_pull_request(inputs)
+                else:
+                    logging.info("Workflow files are up to date.")
         finally:
             os.chdir(cwd)
             shutil.rmtree(workdir, onerror=on_delete_error, ignore_errors=True)
@@ -135,11 +140,29 @@ class Provider(ABC):
         )
         return bool(result.stdout)
 
-    def commit_and_push(self, branch: str):
-        logging.info(f"Commiting and pushing workflow files to branch {branch}")
-        os.system(
-            f'git branch -m {branch} && git add . && git commit -m "Initial commit" && git push origin {branch}'
+    def is_workflow_changed(self):
+        result = subprocess.run(
+            ["git", "status", "--porcelain"],
+            capture_output=True,
+            text=True,
         )
+        return bool(result.stdout)
+
+    def create_new_branch_from_base(self, branch: str, base_branch: str):
+        logging.info(f"Creting new branch {branch}...")
+        os.system(f"git checkout {base_branch} && git pull && git checkout -b {branch}")
+
+    def commit_and_push(self, branch: str, existing: bool = False):
+        logging.info(f"Commiting and pushing workflow files to branch {branch}")
+
+        if existing:
+            os.system(
+                f'git add . && git commit -m "Update commit" && git push origin {branch}'
+            )
+        else:
+            os.system(
+                f'git branch -m {branch} && git add . && git commit -m "Initial commit" && git push origin {branch}'
+            )
 
     def _remove_all_files_generated_on_apply_plugin(self, inputs: Inputs):
         workflow_template_provider_path = (
