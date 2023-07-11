@@ -41,7 +41,13 @@ class AzureProvider(Provider):
 
     def __setup_pipeline(self, name: str, inputs: Inputs, repo_id: str):
         logging.info("Configuring pipeline %s...", name)
-        url = UrlBuilder(inputs).path(inputs.repo_name).path("_apis").path("pipelines").build()
+        url = (
+            UrlBuilder(inputs)
+            .path(inputs.repo_name)
+            .path("_apis")
+            .path("pipelines")
+            .build()
+        )
         response = requests.post(
             url,
             headers=self.__default_headers(inputs),
@@ -53,19 +59,12 @@ class AzureProvider(Provider):
                     "type": "yaml",
                     "path": f"{name}.yml",
                     "variables": {
-                        "secret_git": {
-                            "isSecret": True
-                        },
-                        "secret_stk_login": {
-                            "isSecret": True
-                        }
+                        "secret_git": {"isSecret": True},
+                        "secret_stk_login": {"isSecret": True},
                     },
-                    "repository": {
-                        "id": repo_id,
-                        "type": "azureReposGit"
-                    },
-                }
-            }
+                    "repository": {"id": repo_id, "type": "azureReposGit"},
+                },
+            },
         )
         if response.status_code == 409:
             logging.warning(f"{name} pipeline already exists")
@@ -75,7 +74,14 @@ class AzureProvider(Provider):
     def __setup_github_connection(self, inputs: Inputs):
         logging.info("Setting up github service connection...")
         project_id = self.__get_project_id(inputs)
-        url = UrlBuilder(inputs).path(inputs.repo_name).path("_apis").path("serviceendpoint").path("endpoints").build()
+        url = (
+            UrlBuilder(inputs)
+            .path(inputs.repo_name)
+            .path("_apis")
+            .path("serviceendpoint")
+            .path("endpoints")
+            .build()
+        )
         body = {
             "name": "stackspot_github_connection",
             "description": "Connection to StackSpot github",
@@ -83,51 +89,53 @@ class AzureProvider(Provider):
             "url": "https://github.com",
             "authorization": {
                 "scheme": "Token",
-                "parameters": {
-                    "AccessToken": inputs.github_pat,
-                    "apitoken": ""
-                }
+                "parameters": {"AccessToken": inputs.github_pat, "apitoken": ""},
             },
             "serviceEndpointProjectReferences": [
                 {
-                    "projectReference": {
-                        "id": project_id,
-                        "name": inputs.repo_name
-                    },
+                    "projectReference": {"id": project_id, "name": inputs.repo_name},
                     "name": "stackspot_github_connection",
-                    "description": "Connection to StackSpot github"
+                    "description": "Connection to StackSpot github",
                 }
-            ]
+            ],
         }
         response = requests.post(
             url,
             headers=self.__default_headers(inputs),
             params=self.default_params,
-            json=body
+            json=body,
         )
         response_json = response.json()
-        if response.status_code == 500 and "DuplicateServiceConnectionException" in response_json.get("typeName"):
-            logging.warning("Git connection already exists with name stackspot_github_connection")
+        if (
+            response.status_code == 500
+            and "DuplicateServiceConnectionException" in response_json.get("typeName")
+        ):
+            logging.warning(
+                "Git connection already exists with name stackspot_github_connection"
+            )
             return
         else:
             handle_api_response_errors(response)
 
-
         endpoint_id = response.json()["id"]
-        url = UrlBuilder(inputs).path(inputs.repo_name).path("_apis").path("pipelines").path(
-            "pipelinePermissions").path("endpoint").path(endpoint_id).build()
+        url = (
+            UrlBuilder(inputs)
+            .path(inputs.repo_name)
+            .path("_apis")
+            .path("pipelines")
+            .path("pipelinePermissions")
+            .path("endpoint")
+            .path(endpoint_id)
+            .build()
+        )
         body = {
-            "resource": {
-                "id": endpoint_id,
-                "type": "endpoint",
-                "name": ""
-            },
+            "resource": {"id": endpoint_id, "type": "endpoint", "name": ""},
             "pipelines": [],
             "allPipelines": {
                 "authorized": True,
                 "authorizedBy": None,
-                "authorizedOn": None
-            }
+                "authorizedOn": None,
+            },
         }
         response = requests.patch(
             url,
@@ -135,13 +143,20 @@ class AzureProvider(Provider):
             params={
                 "api-version": "7.0-preview",
             },
-            json=body
+            json=body,
         )
         handle_api_response_errors(response)
 
     def __get_repo_id(self, inputs: Inputs) -> str:
-        url = UrlBuilder(inputs).path(inputs.repo_name).path("_apis").path("git").path("repositories").path(
-            inputs.repo_name).build()
+        url = (
+            UrlBuilder(inputs)
+            .path(inputs.repo_name)
+            .path("_apis")
+            .path("git")
+            .path("repositories")
+            .path(inputs.repo_name)
+            .build()
+        )
         response = requests.get(
             url,
             headers=self.__default_headers(inputs),
@@ -151,11 +166,17 @@ class AzureProvider(Provider):
         return response.json()["id"]
 
     def __get_project_id(self, inputs: Inputs) -> str:
-        get_project_url = UrlBuilder(inputs).path("_apis").path("projects").path(inputs.repo_name).build()
+        get_project_url = (
+            UrlBuilder(inputs)
+            .path("_apis")
+            .path("projects")
+            .path(inputs.repo_name)
+            .build()
+        )
         response = requests.get(
             url=get_project_url,
             headers=self.__default_headers(inputs),
-            params=self.default_params
+            params=self.default_params,
         )
         handle_api_response_errors(response)
         return response.json()["id"]
@@ -166,18 +187,26 @@ class AzureProvider(Provider):
 
     def create_pull_request(self, inputs: Inputs) -> str:
         repo_id = self.__get_repo_id(inputs)
-        pull_request_url = UrlBuilder(inputs).path("_apis").path("git").path("repositories").path(repo_id).path("pullrequests").build()
+        pull_request_url = (
+            UrlBuilder(inputs)
+            .path("_apis")
+            .path("git")
+            .path("repositories")
+            .path(repo_id)
+            .path("pullrequests")
+            .build()
+        )
         body = {
             "sourceRefName": f"refs/heads/{inputs.ref_branch}",
             "targetRefName": "refs/heads/main",
             "title": "Stackspot Update workflow configuration.",
-            "description": "Automatically created pull request."
+            "description": "Automatically created pull request.",
         }
         response = requests.post(
             pull_request_url,
             headers=self.__default_headers(inputs),
             params=self.default_params,
-            json=body
+            json=body,
         )
         handle_api_response_errors(response)
         response_json = response.json()
@@ -191,20 +220,18 @@ class AzureProvider(Provider):
             "description": "StackSpot workflows",
             "visibility": "private",
             "capabilities": {
-                "versioncontrol": {
-                    "sourceControlType": "Git"
-                },
+                "versioncontrol": {"sourceControlType": "Git"},
                 "processTemplate": {
                     "templateTypeId": "6b724908-ef14-45cf-84f8-768b5384da45"
-                }
-            }
+                },
+            },
         }
         logging.info(create_project_url)
         response = requests.post(
             url=create_project_url,
             headers=self.__default_headers(inputs),
             params=self.default_params,
-            json=body
+            json=body,
         )
         handle_api_response_errors(response)
 

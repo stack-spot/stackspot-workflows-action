@@ -38,8 +38,8 @@ spec:
       help: 'Inform your Project Name'
       condition:
         variable: provider
-        operator: "!="
-        value: Github
+        operator: ==
+        value: BitBucket
     - label: Repository Name
       name: repo_name
       type: text
