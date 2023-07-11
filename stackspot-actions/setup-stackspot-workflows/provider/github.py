@@ -1,5 +1,8 @@
+from urllib import response
 import requests
 import logging
+
+from .provider import Inputs
 from .errors import NotFoundError
 from .handle_errors import handle_api_response_errors
 from .provider import Provider, Inputs
@@ -103,6 +106,25 @@ class GithubProvider(Provider):
 
     def clone_url(self, inputs: Inputs) -> str:
         return f"https://git:{inputs.pat}@github.com/{inputs.org_name}/{inputs.repo_name}.git"
+    
+    def create_pull_request(self, inputs: Inputs) -> str:
+        logging.info("Creating pull request...")
+        url_builder = (
+            UrlBuilder(inputs)
+            .path("repos")
+            .path(inputs.org_name)
+            .path(inputs.repo_name)
+            .path("pulls")
+        )
+
+        data = {
+            "title": "Stackspot Update workflow configuration.",
+            "head": inputs.ref_branch,
+            "base": "main",
+        }
+        response = self.__post(url_builder, inputs, data)
+        if response and "html_url" in response:
+            logging.info(f"Pull request created at: {response['html_url']}")
 
     def execute_provider_setup(self, inputs: Inputs):
         callback_url = "https://workflow-api.v1.stackspot.com/workflows/github/callback"

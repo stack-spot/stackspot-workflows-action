@@ -154,6 +154,9 @@ class AzureProvider(Provider):
         #  Ignored due to not needing to perform even a step before the clone
         pass
 
+    def create_pull_request(self, inputs: Inputs) -> str:
+        pass
+
     def execute_repo_creation(self, inputs: Inputs):
         create_project_url = UrlBuilder(inputs).path("_apis").path("projects").build()
         body = {

@@ -47,6 +47,9 @@ class BitBucketProvider(Provider):
 
     def clone_url(self, inputs: Inputs) -> str:
         return f"https://x-token-auth:{self.bitbucket_access_token}@bitbucket.org/{inputs.org_name}/{inputs.repo_name}.git"  # noqa E501
+    
+    def create_pull_request(self, inputs: Inputs) -> str:
+        pass
 
     def __login_with_client_credentials(self, inputs: Inputs):
         response = requests.post(

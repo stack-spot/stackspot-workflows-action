@@ -1,4 +1,5 @@
 import logging
+import subprocess
 import tempfile
 import time
 import os
@@ -42,6 +43,7 @@ class Inputs:
     project_name: Optional[str] = None
     client_key: Optional[str] = None
     client_secret: Optional[str] = None
+    ref_branch: Optional[str] = None
 
 
 class Provider(ABC):
@@ -65,7 +67,11 @@ class Provider(ABC):
         try:
             self.clone_created_repo(workdir, inputs)
             self.create_workflow_files(inputs)
-            self.commit_and_push()
+            if not self.check_if_main_exists():
+                self.commit_and_push("main")
+            else:
+                self.commit_and_push(inputs.ref_branch)
+                self.create_pull_request(inputs)
         finally:
             os.chdir(cwd)
             shutil.rmtree(workdir, onerror=on_delete_error, ignore_errors=True)
@@ -110,9 +116,14 @@ class Provider(ABC):
         finally:
             shutil.rmtree(".stk", onerror=on_delete_error, ignore_errors=True)
 
-    def commit_and_push(self):
-        logging.info("Commiting and pushing workflow files to repo...")
-        os.system('git branch -m main && git add . && git commit -m "Initial commit" && git push origin main')
+    def check_if_main_exists(self) -> bool:
+        logging.info("Checking if the main branch exists...")
+        result = subprocess.run(['git', 'ls-remote', '--heads', 'origin', 'main'], capture_output=True, text=True)
+        return bool(result.stdout)
+
+    def commit_and_push(self, branch: str):
+        logging.info(f"Commiting and pushing workflow files to branch {branch}")
+        os.system(f'git branch -m {branch} && git add . && git commit -m "Initial commit" && git push origin {branch}')
 
     def _remove_all_files_generated_on_apply_plugin(self, inputs: Inputs):
         workflow_template_provider_path = Path(inputs.component_path) / "workflow-templates" / inputs.provider.lower()
@@ -159,4 +170,8 @@ class Provider(ABC):
 
     @abstractmethod
     def clone_url(self, inputs: Inputs) -> str:
+        ...
+    
+    @abstractmethod
+    def create_pull_request(self, inputs: Inputs) -> str:
         ...
