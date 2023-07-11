@@ -165,10 +165,27 @@ class AzureProvider(Provider):
         pass
 
     def create_pull_request(self, inputs: Inputs) -> str:
-        pass
+        repo_id = self.__get_repo_id(inputs)
+        pull_request_url = UrlBuilder(inputs).path("_apis").path("git").path("repositories").path(repo_id).path("pullrequests").build()
+        body = {
+            "sourceRefName": f"refs/heads/{inputs.ref_branch}",
+            "targetRefName": "refs/heads/main",
+            "title": "Stackspot Update workflow configuration.",
+            "description": "Automatically created pull request."
+        }
+        response = requests.post(
+            pull_request_url,
+            headers=self.__default_headers(inputs),
+            params=self.default_params,
+            json=body
+        )
+        handle_api_response_errors(response)
+        response_json = response.json()
+        print(response_json)
 
     def execute_repo_creation(self, inputs: Inputs):
         create_project_url = UrlBuilder(inputs).path("_apis").path("projects").build()
+        print(f"create_project_url: {create_project_url}")
         body = {
             "name": inputs.repo_name,
             "description": "StackSpot workflows",
