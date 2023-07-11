@@ -106,7 +106,7 @@ class GithubProvider(Provider):
 
     def clone_url(self, inputs: Inputs) -> str:
         return f"https://git:{inputs.pat}@github.com/{inputs.org_name}/{inputs.repo_name}.git"
-    
+
     def create_pull_request(self, inputs: Inputs) -> str:
         logging.info("Creating pull request...")
         url_builder = (
