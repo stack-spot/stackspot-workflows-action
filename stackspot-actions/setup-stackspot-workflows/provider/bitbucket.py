@@ -62,7 +62,7 @@ class BitBucketProvider(Provider):
         return f"https://x-token-auth:{self.bitbucket_access_token}@bitbucket.org/{inputs.org_name}/{inputs.repo_name}.git"  # noqa E501
 
     def create_pull_request(self, inputs: Inputs) -> str:
-        logging.info(f"Creating pull request from {inputs.ref_branch} to main brancn.")
+        logging.info(f"Creating pull request from {inputs.ref_branch} to main branch.")
         body = {
             "title": "Stackspot Update workflow configuration.",
             "source": {"branch": {"name": inputs.ref_branch}},

@@ -119,8 +119,8 @@ class GithubProvider(Provider):
 
         data = {
             "title": "Stackspot Update workflow configuration.",
-            "head": "main",
-            "base": inputs.ref_branch,
+            "head": inputs.ref_branch,
+            "base": "main",
         }
         response = self.__post(url_builder, inputs, data)
         if response and "html_url" in response:
