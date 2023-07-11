@@ -67,7 +67,10 @@ class AzureProvider(Provider):
                 }
             }
         )
-        handle_api_response_errors(response)
+        if response.status_code == 409:
+            logging.warning(f"{name} pipeline already exists")
+        else:
+            handle_api_response_errors(response)
 
     def __setup_github_connection(self, inputs: Inputs):
         logging.info("Setting up github service connection...")
@@ -102,7 +105,14 @@ class AzureProvider(Provider):
             params=self.default_params,
             json=body
         )
-        handle_api_response_errors(response)
+        response_json = response.json()
+        if response.status_code == 500 and "DuplicateServiceConnectionException" in response_json.get("typeName"):
+            logging.warning("Git connection already exists with name stackspot_github_connection")
+            return
+        else:
+            handle_api_response_errors(response)
+
+
         endpoint_id = response.json()["id"]
         url = UrlBuilder(inputs).path(inputs.repo_name).path("_apis").path("pipelines").path(
             "pipelinePermissions").path("endpoint").path(endpoint_id).build()
@@ -172,6 +182,7 @@ class AzureProvider(Provider):
                 }
             }
         }
+        logging.info(create_project_url)
         response = requests.post(
             url=create_project_url,
             headers=self.__default_headers(inputs),
