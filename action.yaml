@@ -37,9 +37,9 @@ spec:
       type: text
       help: 'Inform your Project Name'
       condition:
-        variable: project_name
-        operator: '!='
-        value: Github
+        variable: provider
+        operator: ==
+        value: BitBucket
     - label: Repository Name
       name: repo_name
       type: text

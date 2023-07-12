@@ -1,5 +1,6 @@
 import logging
 from dataclasses import fields
+import time
 from typing import Protocol, Mapping
 
 import questionary
@@ -76,10 +77,12 @@ def __parse_inputs(metadata: Metadata) -> Inputs:
     inputs = metadata.inputs
     inputs = __ask_self_hosted_pool_names(inputs)
     field_values = {field.name: inputs.get(field.name) for field in fields(Inputs)}
+    timestamp = int(time.time())
     kwargs = {
         **field_values,
         "component_path": metadata.component_path,
         "target_path": metadata.target_path,
+        "ref_branch": f"stackspot/setup-scm-{timestamp}"
     }
     return Inputs(**kwargs)
 
