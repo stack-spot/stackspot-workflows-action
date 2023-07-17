@@ -38,6 +38,7 @@ jobs:
         uses: ./workflow_repo/github-actions/restore-stk-cache 
         with: 
           stk: ${{ env.STK }}
+      
       - name: Set git username
         run: |
           git config --global user.email "${{ fromJson(inputs.api_inputs).cli_login_email }}"
@@ -66,15 +67,10 @@ jobs:
           secret_git_token: ${{ fromJson(secrets.secrets).scm_token }}
           github_url: $REPO
 
-      - name: Set git username
-        run: |
-          git config --global user.email "${{ fromJson(inputs.api_inputs).cli_login_email }}"
-          git config --global user.name "${{ fromJson(inputs.api_inputs).cli_login_email }}"
-
       - name: Apply plugin ${{ fromJson(inputs.api_inputs).plugin_name }}
         working-directory: user_repo
         run: |
-          apply_plugin_cmd=$(echo '${{ inputs.api_inputs }}' | jq -cr '.apply_plugin_cmd' | base64 --decode)
+          apply_plugin_cmd='${{ inputs.api_inputs }}' | jq -cr '.apply_plugin_cmd' | base64 --decode
           set -x
           $STK $apply_plugin_cmd
 

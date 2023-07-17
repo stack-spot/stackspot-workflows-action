@@ -43,7 +43,7 @@ jobs:
       
       - name: Run action
         run: |
-          run_action_cmd=$(echo '${{ inputs.api_inputs }}' | jq -cr .run_action_cmd | base64 --decode)
+          run_action_cmd='${{ inputs.api_inputs }}' | jq -cr .run_action_cmd | base64 --decode
           set -x
           $STK $run_action_cmd
 
