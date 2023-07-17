@@ -83,7 +83,9 @@ jobs:
 
       - name: Use workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
         run: |
-          $STK use workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
+          use_workspace_cmd=$(echo '${{ inputs.api_inputs }}' | jq -cr '.use_workspace_cmd' | base64 --decode)
+          set -x
+          $STK $use_workspace_cmd
       - name: Show Error Log
         if: failure()
         run: |

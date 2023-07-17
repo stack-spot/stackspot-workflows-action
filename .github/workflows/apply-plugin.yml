@@ -74,28 +74,9 @@ jobs:
       - name: Apply plugin ${{ fromJson(inputs.api_inputs).plugin_name }}
         working-directory: user_repo
         run: |
-          connectors=$(echo '${{ inputs.api_inputs }}' | jq -r .plugin_connectors)
-          echo "connectors arg:"
-          echo $connectors
-          echo "------------------||------------------"
-
-          INPUTS=$(echo '${{ inputs.api_inputs }}' | jq -r .plugin_inputs)
-          inputs_short=""
-          if [ "$INPUTS" != "{}" ]; then 
-              inputs_short=" --inputs-json $(echo $INPUTS | jq . -c)"
-          fi
-          echo "inputs arg:"
-          echo $inputs_short
-          echo "------------------||------------------"
-
-          plugin_name=$(echo '${{ inputs.api_inputs }}' | jq -r .plugin_name)
-          echo "plugin name:"
-          echo $plugin_name
-          echo "------------------||------------------"
-
-          echo -e "\n${green}⚡ Applying plugin: ${u_cyan}$plugin_name"
-          echo -e "$STK apply plugin $plugin_name $inputs_short $connectors \n"
-          $STK apply plugin $plugin_name $inputs_short $connectors --skip-warning
+          apply_plugin_cmd=$(echo '${{ inputs.api_inputs }}' | jq -cr '.apply_plugin_cmd' | base64 --decode)
+          set -x
+          $STK $apply_plugin_cmd
 
       - name: Commit and Push.
         working-directory: user_repo
