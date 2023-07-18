@@ -72,7 +72,7 @@ jobs:
         run: |
           apply_plugin_cmd='${{ inputs.api_inputs }}' | jq -cr '.apply_plugin_cmd' | base64 --decode
           set -x
-          $STK $apply_plugin_cmd
+          eval "$STK $apply_plugin_cmd"
 
       - name: Commit and Push.
         working-directory: user_repo

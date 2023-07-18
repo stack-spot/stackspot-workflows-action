@@ -46,7 +46,7 @@ jobs:
         run: |
           run_actions_before_cmd=$(echo '${{ inputs.api_inputs }}' | jq -cr '.run_actions_before_cmd' | base64 --decode)
           set -x
-          $STK $run_actions_before_cmd
+          eval "$STK $run_actions_before_cmd"
   
       - name: Checkout the user repo
         id: checkout_user_repo
@@ -64,7 +64,7 @@ jobs:
         run: |
           create_cmd=$(echo '${{ inputs.api_inputs }}' | jq -cr '.create_cmd' | base64 --decode)
           set -x
-          $STK $create_cmd --remote https://github.com/${{ steps.checkout_user_repo.outputs.repo }}
+          eval "$STK $create_cmd --remote https://github.com/${{ steps.checkout_user_repo.outputs.repo }}"
 
       - name: Update ${{ fromJson(inputs.api_inputs).create_entity_type }} ${{ fromJson(inputs.api_inputs).register_id }}
         working-directory: user_repo
@@ -72,7 +72,7 @@ jobs:
           update_cmd=$(echo '${{ inputs.api_inputs }}' | jq -cr '.update_cmd' | base64 --decode)
           cd ${{ fromJson(inputs.api_inputs).create_name }}
           set -x
-          $STK $update_cmd
+          eval "$STK $update_cmd"
 
       - name: Commit and Push.
         working-directory: user_repo
@@ -119,7 +119,7 @@ jobs:
         run: |
           run_actions_after_cmd=$(echo '${{ inputs.api_inputs }}' | jq -cr '.run_actions_after_cmd' | base64 --decode)
           set -x
-          $STK $run_actions_after_cmd
+          eval "$STK $run_actions_after_cmd"
 
       - name: Commit and Push.
         working-directory: user_repo

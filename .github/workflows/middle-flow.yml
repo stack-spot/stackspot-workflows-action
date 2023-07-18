@@ -85,7 +85,7 @@ jobs:
         run: |
           use_workspace_cmd=$(echo '${{ inputs.api_inputs }}' | jq -cr '.use_workspace_cmd' | base64 --decode)
           set -x
-          $STK $use_workspace_cmd
+          eval "$STK $use_workspace_cmd"
       - name: Show Error Log
         if: failure()
         run: |
