@@ -70,7 +70,7 @@ jobs:
       - name: Apply plugin ${{ fromJson(inputs.api_inputs).plugin_name }}
         working-directory: user_repo
         run: |
-          apply_plugin_cmd='${{ inputs.api_inputs }}' | jq -cr '.apply_plugin_cmd' | base64 --decode
+          apply_plugin_cmd=$(echo '${{ inputs.api_inputs }}' | jq -cr '.apply_plugin_cmd' | base64 --decode)
           set -x
           eval "$STK $apply_plugin_cmd"
 
