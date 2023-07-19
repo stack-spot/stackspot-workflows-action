@@ -12,9 +12,6 @@ on:
         type: string
         required: true
     secrets:
-      sensitive:
-        descrition: Values which should not be shown
-        required: true
       secrets:
         description: Secrets info (json)
         required: true
