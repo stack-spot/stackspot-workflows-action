@@ -29,16 +29,9 @@ jobs:
     name: Validate inputs
     runs-on: ubuntu-latest
     steps:
-      - name: Sensitive inputs
+      - name: Print inputs
         run: |
-          i=0
-          sensitive=$(echo '${{ inputs.api_inputs }}' | jq -cr '.sensitive' | jq -r '.[]')
-          for s in "${sensitive[@]}"; do
-            i=$((i+1))
-            the_secret="${s}"
-            echo "::add-mask::$the_secret"
-            echo "secret-number=$the_secret" >> "$GITHUB_OUTPUT"
-          done
+          echo "Inputs from api: ${{ inputs.api_inputs }}"
 
       - name: Print config
         run: |
@@ -90,7 +83,7 @@ jobs:
 
       - name: Use workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
         run: |
-          use_workspace_cmd=$(echo '${{ inputs.api_inputs }}' | jq -cr '.use_workspace_cmd' | base64 --decode)
+          use_workspace_cmd=$(echo '${{ secrets.secrets }}' | jq -cr '.use_workspace_cmd' | base64 --decode)
           set -x
           eval "$STK $use_workspace_cmd"
       - name: Show Error Log
@@ -101,7 +94,7 @@ jobs:
   apply:
     if: ${{ inputs.workflow_name == 'apply-plugin' }}
     needs: use-workspace
-    uses: stack-spot/stackspot-workflows-action/.github/workflows/apply-plugin.yml@qa
+    uses: stack-spot/stackspot-workflows-action/.github/workflows/apply-plugin.yml@main
     with:
       api_inputs: ${{ inputs.api_inputs }}
       config: ${{ inputs.config }}

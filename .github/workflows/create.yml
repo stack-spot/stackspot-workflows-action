@@ -24,6 +24,13 @@ jobs:
       DEBUG: ${{ fromJson(inputs.config).debug }}
       STK: ${{ fromJson(inputs.config).stk }}
     steps:
+      - name: Sensitive inputs
+        run: |
+          sensitive=$(echo '${{ secrets.secrets }}' | jq -cr '.sensitive' | jq -r '.[]')
+          for s in "${sensitive[@]}"; do
+            echo "::add-mask::${s}"
+          done
+
       - name: Checkout workflows repo
         uses: actions/checkout@v3
         with:
@@ -44,7 +51,7 @@ jobs:
 
       - name: Run before actions
         run: |
-          run_actions_before_cmd=$(echo '${{ inputs.api_inputs }}' | jq -cr '.run_actions_before_cmd' | base64 --decode)
+          run_actions_before_cmd=$(echo '${{ secrets.secrets }}' | jq -cr '.run_actions_before_cmd' | base64 --decode)
           set -x
           eval "$STK $run_actions_before_cmd"
   
@@ -62,14 +69,14 @@ jobs:
       - name: Create ${{ fromJson(inputs.api_inputs).create_entity_type }}
         working-directory: user_repo
         run: |
-          create_cmd=$(echo '${{ inputs.api_inputs }}' | jq -cr '.create_cmd' | base64 --decode)
+          create_cmd=$(echo '${{ secrets.secrets }}' | jq -cr '.create_cmd' | base64 --decode)
           set -x
           eval "$STK $create_cmd --remote https://github.com/${{ steps.checkout_user_repo.outputs.repo }}"
 
       - name: Update ${{ fromJson(inputs.api_inputs).create_entity_type }} ${{ fromJson(inputs.api_inputs).register_id }}
         working-directory: user_repo
         run: |
-          update_cmd=$(echo '${{ inputs.api_inputs }}' | jq -cr '.update_cmd' | base64 --decode)
+          update_cmd=$(echo '${{ secrets.secrets }}' | jq -cr '.update_cmd' | base64 --decode)
           cd ${{ fromJson(inputs.api_inputs).create_name }}
           set -x
           eval "$STK $update_cmd"
@@ -117,7 +124,7 @@ jobs:
 
       - name: Run after actions
         run: |
-          run_actions_after_cmd=$(echo '${{ inputs.api_inputs }}' | jq -cr '.run_actions_after_cmd' | base64 --decode)
+          run_actions_after_cmd=$(echo '${{ secrets.secrets }}' | jq -cr '.run_actions_after_cmd' | base64 --decode)
           set -x
           eval "$STK $run_actions_after_cmd"
 

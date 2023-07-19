@@ -23,6 +23,13 @@ jobs:
     name: Run ${{ fromJson(inputs.api_inputs).action_name }}
     runs-on: ${{ fromJson(inputs.config).runner }}
     steps:
+      - name: Sensitive inputs
+        run: |
+          sensitive=$(echo '${{ secrets.secrets }}' | jq -cr '.sensitive' | jq -r '.[]')
+          for s in "${sensitive[@]}"; do
+            echo "::add-mask::${s}"
+          done
+
       - name: Checkout workflows repo
         uses: actions/checkout@v3
         with:
@@ -43,7 +50,7 @@ jobs:
       
       - name: Run action
         run: |
-          run_action_cmd=$(echo '${{ inputs.api_inputs }}' | jq -cr .run_action_cmd | base64 --decode)
+          run_action_cmd=$(echo '${{ secrets.secrets }}' | jq -cr .run_action_cmd | base64 --decode)
           set -x
           eval "$STK $run_action_cmd"
 
