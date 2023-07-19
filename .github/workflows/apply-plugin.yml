@@ -28,7 +28,7 @@ jobs:
       - name: Sensitive inputs
         run: |
           sensitive=$(echo '${{ secrets.secrets }}' | jq -cr '.sensitive' | jq -r '.[]')
-          for s in "${sensitive[@]}"; do
+          for s in $sensitive; do
             echo "::add-mask::${s}"
           done
 
