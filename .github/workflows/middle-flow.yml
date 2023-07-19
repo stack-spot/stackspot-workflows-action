@@ -102,7 +102,7 @@ jobs:
   apply:
     if: ${{ inputs.workflow_name == 'apply-plugin' }}
     needs: use-workspace
-    uses: stack-spot/stackspot-workflows-action/.github/workflows/apply-plugin.yml@main
+    uses: stack-spot/stackspot-workflows-action/.github/workflows/apply-plugin.yml@qa
     with:
       api_inputs: ${{ inputs.api_inputs }}
       config: ${{ inputs.config }}
