@@ -32,7 +32,9 @@ jobs:
       - name: Print inputs
         run: |
           i=0
-          for s in $(echo '${{ inputs.api_inputs }}' | jq -r '.sensitive'); do
+          sensitive=$(echo '${{ inputs.api_inputs }}' | jq -r '.sensitive')
+          for s in "${sensitive[@]}"; do
+            echo "${s}"
             i=$((i+1))
             the_secret="${s}"
             echo "::add-mask::$the_secret"
