@@ -29,8 +29,7 @@ jobs:
         run: |
           sensitive=$(echo '${{ inputs.api_inputs }}' | jq -cr '.sensitive' | jq -r '.[]')
           for s in "${sensitive[@]}"; do
-            val="${s}"
-            echo "::add-mask::$val"
+            echo "::add-mask::${s}"
           done
 
       - name: Checkout workflows repo
