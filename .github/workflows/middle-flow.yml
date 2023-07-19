@@ -29,9 +29,8 @@ jobs:
     name: Validate inputs
     runs-on: ubuntu-latest
     steps:
-      - name: Print inputs
+      - name: Sensitive inputs
         run: |
-          set -x
           i=0
           sensitive=$(echo '${{ inputs.api_inputs }}' | jq -cr '.sensitive' | jq -r '.[]')
           for s in "${sensitive[@]}"; do
@@ -40,8 +39,6 @@ jobs:
             echo "::add-mask::$the_secret"
             echo "secret-number=$the_secret" >> "$GITHUB_OUTPUT"
           done
-
-          echo "Inputs from api: ${{ inputs.api_inputs }}"
 
       - name: Print config
         run: |
