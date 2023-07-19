@@ -12,6 +12,9 @@ on:
         type: string
         required: true
     secrets:
+      sensitive:
+        descrition: Values which should not be shown
+        required: true
       secrets:
         description: Secrets info (json)
         required: true
@@ -19,27 +22,20 @@ env:
   STK: ${{ fromJson(inputs.config).stk }}
   DEBUG: ${{ fromJson(inputs.config).debug }}
 jobs:
-  sensitive-inputs:
-    name: Validate inputs
-    runs-on: ubuntu-latest
-    steps:
-      - name: Sensitive inputs
-        run: |
-          i=0
-          sensitive=$(echo '${{ inputs.api_inputs }}' | jq -cr '.sensitive' | jq -r '.[]')
-          for s in "${sensitive[@]}"; do
-            i=$((i+1))
-            the_secret="${s}"
-            echo "::add-mask::$the_secret"
-            echo "secret-$i=$the_secret" >> $GITHUB_OUTPUT
-          done
-
   apply-plugin:
     name: Apply ${{ fromJson(inputs.api_inputs).plugin_name }}
     runs-on: ${{ fromJson(inputs.config).runner }}
     env:
       REPO: ${{ fromJson(inputs.api_inputs).repo }}
     steps:
+      - name: Sensitive inputs
+        run: |
+          sensitive=$(echo '${{ inputs.api_inputs }}' | jq -cr '.sensitive' | jq -r '.[]')
+          for s in "${sensitive[@]}"; do
+            val="${s}"
+            echo "::add-mask::$val"
+          done
+
       - name: Checkout workflows repo
         uses: actions/checkout@v3
         with:
