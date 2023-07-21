@@ -113,19 +113,24 @@ class Provider(ABC):
         try:
             logging.info("Creating workflow files...")
             self._remove_all_files_generated_on_apply_plugin(inputs)
-            stk_apply_plugin_cmd = (
-                f"{self.stk} apply plugin {inputs.component_path} --skip-warning "
-                f"--provider {inputs.provider} "
-            )
+            stk_apply_plugin_cmd = [
+                self.stk,
+                "apply",
+                "plugin",
+                str(inputs.component_path),
+                "--skip-warning",
+                "--provider",
+                inputs.provider,
+            ]
             if inputs.use_self_hosted_pool is not None:
-                stk_apply_plugin_cmd += (
-                    f"--use_self_hosted_pool {inputs.use_self_hosted_pool} "
+                stk_apply_plugin_cmd.extend(
+                    ["--use_self_hosted_pool", str(inputs.use_self_hosted_pool)]
                 )
             if inputs.self_hosted_pool_name is not None:
-                stk_apply_plugin_cmd += (
-                    f"--self_hosted_pool_name {inputs.self_hosted_pool_name} "
+                stk_apply_plugin_cmd.extend(
+                    ["--self_hosted_pool_name", inputs.self_hosted_pool_name]
                 )
-            result = os.system(stk_apply_plugin_cmd)
+            result = subprocess.run(stk_apply_plugin_cmd)
             if result != 0:
                 raise ApplyPluginSetupRepositoryError()
         finally:
@@ -194,7 +199,8 @@ class Provider(ABC):
             ).unsafe_ask()
             if not should_exit_workspace:
                 raise WorkspaceShouldNotInUseError()
-            os.system(f"{self.stk} exit workspace")
+            exit_workspace_cmd = [self.stk, "exit", "workspace"]
+            subprocess.run(exit_workspace_cmd)
 
     @abstractmethod
     def execute_pre_setup_provider(self, inputs: Inputs):
