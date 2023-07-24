@@ -23,6 +23,13 @@ jobs:
     name: Run ${{ fromJson(inputs.api_inputs).action_name }}
     runs-on: ${{ fromJson(inputs.config).runner }}
     steps:
+      - name: Sensitive inputs
+        run: |
+          sensitive=$(echo '${{ secrets.secrets }}' | jq -cr '.sensitive' | jq -r '.[]')
+          for s in $sensitive; do
+            echo "::add-mask::${s}"
+          done
+
       - name: Checkout workflows repo
         uses: actions/checkout@v3
         with:
@@ -43,41 +50,9 @@ jobs:
       
       - name: Run action
         run: |
-          CI=$(echo '${{ inputs.api_inputs }}' | jq -r .action_connectors)
-          conn=""
-          if [ "${CI}" != "[]" ]; then 
-              conn=" --connection-interfaces $(echo $CI | jq . -c)"
-          fi
-          echo "connection interfaces arg:"
-          echo $conn
-          echo "------------------||------------------"
-
-          ENV=$(echo '${{ inputs.api_inputs }}' | jq -r .action_env)
-          env=""
-          if [ "$ENV" != "null" ]; then
-            env=" --env $ENV"
-          fi
-          echo "environment arg:"
-          echo $env
-          echo "------------------||------------------"
-
-          INPUTS=$(echo '${{ inputs.api_inputs }}' | jq -r .action_inputs)
-          inputs_short=""
-          if [ "$INPUTS" != "{}" ]; then 
-              inputs_short=" --inputs-json $(echo $INPUTS | jq . -c)"
-          fi
-          echo "inputs arg:"
-          echo $inputs_short
-          echo "------------------||------------------"
-
-          action_name=$(echo '${{ inputs.api_inputs }}' | jq -r .action_name)
-          echo "action name:"
-          echo $action_name
-          echo "------------------||------------------"
-
-          echo "Running Action..."
-          echo "$STK run action $action_name $inputs_short $conn $env"
-          $STK run action $action_name $inputs_short $conn $env
+          run_action_cmd=$(echo '${{ secrets.secrets }}' | jq -cr .run_action_cmd | base64 --decode)
+          set -x
+          eval "$STK $run_action_cmd"
 
       - name: Show Error Log
         if: failure()

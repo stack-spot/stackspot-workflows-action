@@ -83,7 +83,9 @@ jobs:
 
       - name: Use workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
         run: |
-          $STK use workspace ${{ fromJson(inputs.api_inputs).workspace_slug }}
+          use_workspace_cmd=$(echo '${{ secrets.secrets }}' | jq -cr '.use_workspace_cmd' | base64 --decode)
+          set -x
+          eval "$STK $use_workspace_cmd"
       - name: Show Error Log
         if: failure()
         run: |
@@ -92,7 +94,7 @@ jobs:
   apply:
     if: ${{ inputs.workflow_name == 'apply-plugin' }}
     needs: use-workspace
-    uses: stack-spot/stackspot-workflows-action/.github/workflows/apply-plugin.yml@main
+    uses: stack-spot/stackspot-workflows-action/.github/workflows/apply-plugin.yml@qa
     with:
       api_inputs: ${{ inputs.api_inputs }}
       config: ${{ inputs.config }}
@@ -102,7 +104,7 @@ jobs:
   create:
     if: ${{ inputs.workflow_name == 'create' }}
     needs: use-workspace
-    uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@main
+    uses: stack-spot/stackspot-workflows-action/.github/workflows/create.yml@qa
     with:
       api_inputs: ${{ inputs.api_inputs }}
       config: ${{ inputs.config }}
@@ -112,7 +114,7 @@ jobs:
   run:
     if: ${{ inputs.workflow_name == 'run-action' }}
     needs: use-workspace
-    uses: stack-spot/stackspot-workflows-action/.github/workflows/run-action.yml@main
+    uses: stack-spot/stackspot-workflows-action/.github/workflows/run-action.yml@qa
     with:
       api_inputs: ${{ inputs.api_inputs }}
       config: ${{ inputs.config }}
