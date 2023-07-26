@@ -69,18 +69,26 @@ jobs:
       - name: Create ${{ fromJson(inputs.api_inputs).create_entity_type }}
         working-directory: user_repo
         run: |
+          pwd
+
           create_cmd=$(echo '${{ secrets.secrets }}' | jq -cr '.create_cmd' | base64 --decode)
           set -x
           eval "$STK $create_cmd --remote https://github.com/${{ steps.checkout_user_repo.outputs.repo }}"
 
+          pwd
+          ls -a
+
       - name: Update ${{ fromJson(inputs.api_inputs).create_entity_type }} ${{ fromJson(inputs.api_inputs).register_id }}
         working-directory: user_repo
         run: |
+          pwd
+
           update_cmd=$(echo '${{ secrets.secrets }}' | jq -cr '.update_cmd' | base64 --decode)
           cd ${{ fromJson(inputs.api_inputs).create_name }}
-          
+
+          pwd
           ls -a
-          cat .stk/.stk.yaml
+          cat .stk/stk.yaml
 
           set -x
           eval "$STK $update_cmd"
