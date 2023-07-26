@@ -78,6 +78,7 @@ jobs:
         run: |
           update_cmd=$(echo '${{ secrets.secrets }}' | jq -cr '.update_cmd' | base64 --decode)
           cd ${{ fromJson(inputs.api_inputs).create_name }}
+          
           ls -a
           cat .stk/.stk.yaml
 
