@@ -69,11 +69,15 @@ jobs:
       - name: Create ${{ fromJson(inputs.api_inputs).create_entity_type }}
         working-directory: user_repo
         run: |
-          pwd
+
+          cat create_file.yml
 
           create_cmd=$(echo '${{ secrets.secrets }}' | jq -cr '.create_cmd' | base64 --decode)
+          create_file=$(echo '${{ secrets.secrets }}' | jq -cr '.create_file' | base64 --decode)
           set -x
-          eval "$STK $create_cmd --remote https://github.com/${{ steps.checkout_user_repo.outputs.repo }}"
+          eval "echo $create_file >> create_file.yml"
+          cat create_file.yml
+          eval "$STK $create_cmd --file create_file.yml"
 
           pwd
           ls -a

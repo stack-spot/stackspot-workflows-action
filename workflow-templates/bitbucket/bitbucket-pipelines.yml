@@ -283,7 +283,6 @@ definitions:
 
           - echo -e "Step [13/13] $green⚡Validation successfully"
 
-
     - step: &create-register-run-actions
         name: 'Create'{{runners}}
         script:
@@ -631,17 +630,9 @@ pipelines:
   custom:
     create-app:
       - variables:
-        - name: actions
-        - name: fields
+        - name: api_inputs
         - name: correlation_id
-        - name: cli_login
-        - name: workspace_slug
         - name: secrets
-        - name: execution_id
-        - name: register_id
-        - name: create_repo_action
-        - name: create_type
-          default: app
         - name: default_branch
           default: main
       - step: *create-validate-inputs
@@ -651,17 +642,9 @@ pipelines:
           name: 'Create App'
     create-infra:
       - variables:
-        - name: actions
-        - name: fields
+        - name: api_inputs
         - name: correlation_id
-        - name: cli_login
-        - name: workspace_slug
         - name: secrets
-        - name: execution_id
-        - name: register_id
-        - name: create_repo_action
-        - name: create_type
-          default: infra
         - name: default_branch
           default: main
       - step: *create-validate-inputs
@@ -671,23 +654,16 @@ pipelines:
           name: 'Create Infra'
     run-action:
       - variables:
-        - name: actions
-        - name: fields
+        - name: api_inputs
         - name: correlation_id
-        - name: cli_login
-        - name: workspace_slug
         - name: secrets
-        - name: create_type
-          default: app
       - step: *run-action-validate-inputs
       - step: *install-stk-login-use-workspace
       - step: *run-action
     apply-plugin:
       - variables:
-        - name: plugin
+        - name: api_inputs
         - name: correlation_id
-        - name: cli_login
-        - name: workspace_slug
         - name: secrets
         - name: default_branch
           default: main
