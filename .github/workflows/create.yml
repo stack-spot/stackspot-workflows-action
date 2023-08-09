@@ -77,7 +77,7 @@ jobs:
           set -x
           eval "echo $create_file >> create_file.yml"
           cat create_file.yml
-          eval "$STK $create_cmd --file create_file.yml"
+          eval "$STK $create_cmd --spec create_file.yml"
 
           pwd
           ls -a
