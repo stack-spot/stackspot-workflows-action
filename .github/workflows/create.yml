@@ -69,18 +69,12 @@ jobs:
       - name: Create ${{ fromJson(inputs.api_inputs).create_entity_type }}
         working-directory: user_repo
         run: |
-
-          cat create_file.yml
-
           create_cmd=$(echo '${{ secrets.secrets }}' | jq -cr '.create_cmd' | base64 --decode)
           create_file=$(echo '${{ secrets.secrets }}' | jq -cr '.create_file' | base64 --decode)
           set -x
           eval "echo $create_file >> create_file.yml"
           cat create_file.yml
           eval "$STK $create_cmd --spec create_file.yml"
-
-          pwd
-          ls -a
 
       - name: Update ${{ fromJson(inputs.api_inputs).create_entity_type }} ${{ fromJson(inputs.api_inputs).register_id }}
         working-directory: user_repo
