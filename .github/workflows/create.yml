@@ -72,9 +72,8 @@ jobs:
           set -x
           create_cmd=$(echo '${{ secrets.secrets }}' | jq -cr '.create_cmd' | base64 --decode)
           create_file=$(echo '${{ secrets.secrets }}' | jq -cr '.create_file' | base64 --decode)
-          eval "echo $create_file >> create_file.yml"
-          echo "$STK"
-          echo "$create_cmd"
+          echo $create_file >> create_file.yml
+          cat create_file.yml
           eval "$STK $create_cmd --spec create_file.yml"
 
       - name: Update ${{ fromJson(inputs.api_inputs).create_entity_type }} ${{ fromJson(inputs.api_inputs).register_id }}
