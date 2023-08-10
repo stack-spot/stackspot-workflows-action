@@ -71,7 +71,7 @@ jobs:
         run: |
           set -x
           create_cmd=$(echo '${{ secrets.secrets }}' | jq -cr '.create_cmd' | base64 --decode)
-          $(echo '${{ secrets.secrets }}' | jq -cr '.create_file' | base64 --decode) > create_file.yml
+          (echo '${{ secrets.secrets }}' | jq -cr '.create_file' | base64 --decode) > create_file.yml
           cat create_file.yml
           eval "$STK $create_cmd --spec create_file.yml"
 
