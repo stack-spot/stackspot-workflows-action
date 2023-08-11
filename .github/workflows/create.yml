@@ -69,25 +69,17 @@ jobs:
       - name: Create ${{ fromJson(inputs.api_inputs).create_entity_type }}
         working-directory: user_repo
         run: |
-          set -x
           create_cmd=$(echo '${{ secrets.secrets }}' | jq -cr '.create_cmd' | base64 --decode)
           (echo '${{ secrets.secrets }}' | jq -cr '.create_file' | base64 --decode) > create_file.yml
           cat create_file.yml
-          eval "$STK $create_cmd --spec create_file.yml" --non-interactive
+          eval "$STK $create_cmd --spec create_file.yml" --skip-validate-existing
+          rm -f create_file.yml
 
       - name: Update ${{ fromJson(inputs.api_inputs).create_entity_type }} ${{ fromJson(inputs.api_inputs).register_id }}
         working-directory: user_repo
         run: |
-          pwd
-
           update_cmd=$(echo '${{ secrets.secrets }}' | jq -cr '.update_cmd' | base64 --decode)
           cd ${{ fromJson(inputs.api_inputs).create_name }}
-
-          pwd
-          ls -a
-          cat .stk/stk.yaml
-
-          set -x
           eval "$STK $update_cmd"
 
       - name: Commit and Push.
