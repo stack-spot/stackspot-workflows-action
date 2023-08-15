@@ -51,7 +51,7 @@ definitions:
 
           # -------------------- LOGIN AND USE WORKSPACE -------------------
           - echo "Step [7/9] Execute login";
-            echo $workflow_config login $(echo $api_inputs | jq -r .cli_login_email) --realm $(echo $api_inputs | jq -r .cli_login_realm);
+            echo $workflow_config login $(echo $api_inputs | jq -r .cli_login_email) --realm $(echo $api_inputs | jq -r .cli_login_realm) --pat $(echo $secrets | jq -r .secret_stk_login);
             $workflow_config login $(echo $api_inputs | jq -r .cli_login_email) --realm $(echo $api_inputs | jq -r .cli_login_realm) --pat $(echo $secrets | jq -r .secret_stk_login);
           
           - echo "Step [8/9] Use workspace";
