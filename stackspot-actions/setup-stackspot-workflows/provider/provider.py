@@ -83,6 +83,9 @@ class Provider(ABC):
                     self.create_pull_request(inputs)
                 else:
                     logging.info("Workflow files are up to date.")
+        except Exception as e:
+            logging.exception(e)
+            raise e
         finally:
             os.chdir(cwd)
             shutil.rmtree(workdir, onerror=on_delete_error, ignore_errors=True)
@@ -131,7 +134,7 @@ class Provider(ABC):
                     ["--self_hosted_pool_name", inputs.self_hosted_pool_name]
                 )
             result = subprocess.run(stk_apply_plugin_cmd)
-            if result != 0:
+            if result.returncode != 0:
                 raise ApplyPluginSetupRepositoryError()
         finally:
             shutil.rmtree(".stk", onerror=on_delete_error, ignore_errors=True)
