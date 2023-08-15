@@ -37,8 +37,8 @@ PROVIDERS: Mapping[str, Provider] = {
 
 
 class NotEmptyStripped(NotEmpty):
-    def valid(self, value: str) -> bool:
-        return super().valid(value.strip())
+    def is_valid(self, value: str) -> bool:
+        return super().is_valid(value.strip())
 
 
 def __ask_self_hosted_pool_names(inputs):
@@ -90,6 +90,7 @@ def __parse_inputs(metadata: Metadata) -> Inputs:
 def run(metadata: Metadata):
     print()
     try:
+        print("hello!")
         inputs = __parse_inputs(metadata)
         provider = PROVIDERS[inputs.provider]
         provider.setup(inputs)
