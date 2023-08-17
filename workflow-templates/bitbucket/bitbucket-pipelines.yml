@@ -115,22 +115,23 @@ definitions:
 
           # ------------------------- PARSE INPUTS -------------------------
           - echo "Step [3/11] Parse inputs.";
-            workspace_pat=$(echo $secrets | jq -r .secret_git);
+            workspace_pat=$(echo "$secrets" | jq -cr .secret_git);
             workspace_name=$BITBUCKET_WORKSPACE;
 
-            name=$(echo $fields | jq -r .name);
-            repo_url=$(echo $fields | jq -r .repo);
+            name=$(echo "$api_inputs" | jq -cr .create_name);
+            repo_url=$(echo "$api_inputs" | jq -cr .create_repo);
             repo_name="${repo_url##*/}";
             if [ -z "$repo_name" ] || [ "$repo_name" == "null" ]; then
               repo_name=$name;
             fi;
-            email=$(echo $api_inputs | jq -r .cli_login_email);
-            create_type=$(echo $api_inputs | jq -r .create_type);update_cmd
+            
+            email=$(echo "$api_inputs" | jq -cr .cli_login_email);
+            create_type=$(echo "$api_inputs" | jq -cr .create_type);
 
-            run_actions_before_cmd=$(echo $api_inputs | jq -r .run_actions_before_cmd | base64 --decode);
-            run_actions_after_cmd=$(echo $api_inputs | jq -r .run_actions_after_cmd | base64 --decode);
-            create_cmd=$(echo $api_inputs | jq -r .create_cmd | base64 --decode);
-            update_cmd=$(echo $api_inputs | jq -r .update_cmd | base64 --decode);
+            run_actions_before_cmd=$(echo "$api_inputs" | jq -cr .run_actions_before_cmd | base64 --decode);
+            run_actions_after_cmd=$(echo "$api_inputs" | jq -cr .run_actions_after_cmd | base64 --decode);
+            create_cmd=$(echo "$api_inputs" | jq -cr .create_cmd | base64 --decode);
+            update_cmd=$(echo "$api_inputs" | jq -cr .update_cmd | base64 --decode);
 
           # ---------------------- RUN ACTIONS BEFORE ----------------------
           - echo "Step [4/11] Run actions before.";
@@ -144,7 +145,7 @@ definitions:
           # ----------------------- CLONE REPOSITORY -----------------------
           - echo "Step [5/11] Clone repository.";
             chmod +x $BITBUCKET_CLONE_DIR/scripts/clone-repository.sh;
-            $BITBUCKET_CLONE_DIR/scripts/clone-repository.sh $repo_name $workspace_pat $email $workspace_name "project_cloned";
+            $BITBUCKET_CLONE_DIR/scripts/clone-repository.sh "$repo_name" "$workspace_pat" "$email" "$workspace_name" "project_cloned";
             exit_code_of_command=$?;
             if [ "$exit_code_of_command" != "0" ]; then
               exit $exit_code_of_command;
