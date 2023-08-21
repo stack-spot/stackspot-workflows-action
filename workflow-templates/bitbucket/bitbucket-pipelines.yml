@@ -126,7 +126,7 @@ definitions:
             fi;
             
             email=$(echo "$api_inputs" | jq -cr .cli_login_email);
-            create_type=$(echo "$api_inputs" | jq -cr .create_type);
+            create_type=$(echo "$api_inputs" | jq -cr .create_entity_type);
 
             run_actions_before_cmd=$(echo "$api_inputs" | jq -cr .run_actions_before_cmd | base64 --decode);
             run_actions_after_cmd=$(echo "$api_inputs" | jq -cr .run_actions_after_cmd | base64 --decode);
@@ -153,11 +153,11 @@ definitions:
             cd project_cloned;
           
           # ----------------------- CREATE APP/INFRA -----------------------
-          - echo "Step [6/11] Create $create_type.";
-            (echo $api_inputs | jq -cr '.create_file' | base64 --decode) > create_file.yml
+          - echo "Step [6/11] Create $create_type";
+            (echo "$api_inputs" | jq -cr .create_file | base64 --decode) > create_file.yml;
             echo "$workflow_config $create_cmd --spec create_file.yml";
             $workflow_config $create_cmd --spec create_file.yml;
-            rm -f create_file.yml
+            rm -f create_file.yml;
             exit_code_of_command=$?;
             if [ "$exit_code_of_command" != "0" ]; then
               exit $exit_code_of_command;
