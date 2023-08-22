@@ -165,7 +165,7 @@ class AzureProvider(Provider):
         handle_api_response_errors(response)
         return response.json()["id"]
 
-    def __get_project_id(self, inputs: Inputs) -> str:
+    def __get_project_id(self, inputs: Inputs, log_error: bool = True) -> str:
         get_project_url = (
             UrlBuilder(inputs)
             .path("_apis")
@@ -178,7 +178,7 @@ class AzureProvider(Provider):
             headers=self.__default_headers(inputs),
             params=self.default_params,
         )
-        handle_api_response_errors(response)
+        handle_api_response_errors(response, log_error=log_error)
         return response.json()["id"]
 
     def execute_pre_setup_provider(self, inputs: Inputs):
@@ -214,7 +214,6 @@ class AzureProvider(Provider):
 
     def execute_repo_creation(self, inputs: Inputs):
         create_project_url = UrlBuilder(inputs).path("_apis").path("projects").build()
-        print(f"create_project_url: {create_project_url}")
         body = {
             "name": inputs.repo_name,
             "description": "StackSpot workflows",
@@ -226,7 +225,6 @@ class AzureProvider(Provider):
                 },
             },
         }
-        logging.info(create_project_url)
         response = requests.post(
             url=create_project_url,
             headers=self.__default_headers(inputs),
@@ -234,10 +232,11 @@ class AzureProvider(Provider):
             json=body,
         )
         handle_api_response_errors(response)
+        logging.info(f"Project {inputs.repo_name} created!")
 
     def repo_exists(self, inputs: Inputs) -> bool:
         try:
-            self.__get_project_id(inputs)
+            self.__get_project_id(inputs, False)
             return True
         except NotFoundError:
             return False

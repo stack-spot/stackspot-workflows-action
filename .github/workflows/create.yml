@@ -80,6 +80,7 @@ jobs:
         run: |
           update_cmd=$(echo '${{ secrets.secrets }}' | jq -cr '.update_cmd' | base64 --decode)
           cd ${{ fromJson(inputs.api_inputs).create_name }}
+          echo "$STK $update_cmd"
           eval "$STK $update_cmd"
 
       - name: Commit and Push.

@@ -90,7 +90,6 @@ def __parse_inputs(metadata: Metadata) -> Inputs:
 def run(metadata: Metadata):
     print()
     try:
-        print("hello!")
         inputs = __parse_inputs(metadata)
         provider = PROVIDERS[inputs.provider]
         provider.setup(inputs)
