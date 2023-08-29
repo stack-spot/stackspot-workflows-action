@@ -25,9 +25,9 @@ on:
         required: true
 
 jobs:
-  validate-inputs:
+  run:
     name: Run workflow ${{ inputs.workflow_name }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJson(inputs.config).runner }}
     steps:
       - name: Running ${{ inputs.workflow_name }}
         run: |
