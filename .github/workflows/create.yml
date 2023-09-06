@@ -68,7 +68,7 @@ jobs:
 
       - name: Create ${{ fromJson(inputs.api_inputs).create_entity_type }}
         env:
-          PYTHONIOENCODING: utf-8
+          PYTHONUTF8: 1
         working-directory: user_repo
         run: |
           create_cmd=$(echo '${{ secrets.secrets }}' | jq -cr '.create_cmd' | base64 --decode)
