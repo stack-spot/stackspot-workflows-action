@@ -39,6 +39,7 @@ class Inputs:
     component_path: str
     create_repo: bool
     org_name: str
+    workspace_name: str
     pat: str
     provider: str
     repo_name: str
@@ -124,6 +125,8 @@ class Provider(ABC):
                 "--skip-warning",
                 "--provider",
                 inputs.provider,
+                "--alias",
+                "setup-scm"
             ]
             if inputs.use_self_hosted_pool is not None:
                 stk_apply_plugin_cmd.extend(
