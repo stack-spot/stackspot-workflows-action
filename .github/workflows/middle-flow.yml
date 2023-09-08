@@ -54,7 +54,7 @@ jobs:
     runs-on: ${{ fromJson(inputs.config).runner }}
     needs: validate-inputs
     env:
-      HTTP_ENABLE_DEBUG: true
+      HTTP_ENABLE_DEBUG: ${{ fromJson(inputs.config).debug }}
       STK: ${{ fromJson(inputs.config).stk }}
     steps:
       - name: Checkout workflows repo
