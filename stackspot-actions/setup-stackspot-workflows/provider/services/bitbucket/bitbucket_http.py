@@ -24,7 +24,7 @@ def get_api_base_url_builder(inputs: Inputs) -> UrlBuilder:
     return (
         UrlBuilder(inputs)
         .path("repositories")
-        .path(inputs.org_name)
+        .path(inputs.workspace_name)
         .path(inputs.repo_name)
     )
 
@@ -33,14 +33,14 @@ def get_api_pullrequests_url_builder(inputs: Inputs) -> UrlBuilder:
     return (
         UrlBuilder(inputs)
         .path("repositories")
-        .path(inputs.org_name)
+        .path(inputs.workspace_name)
         .path(inputs.repo_name)
         .path("pullrequests")
     )
 
 
 def get_api_projects_builder(inputs: Inputs) -> UrlBuilder:
-    return UrlBuilder(inputs).path("workspaces").path(inputs.org_name).path("projects")
+    return UrlBuilder(inputs).path("workspaces").path(inputs.workspace_name).path("projects")
 
 
 def get_api_project_builder(inputs: Inputs, project_key: str) -> UrlBuilder:

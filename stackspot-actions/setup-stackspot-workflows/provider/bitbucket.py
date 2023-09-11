@@ -55,11 +55,11 @@ class BitBucketProvider(Provider):
 
     def get_repository_url(self, inputs: Inputs) -> str:
         return (
-            f"https://bitbucket.org/{inputs.org_name}/{inputs.repo_name}"  # noqa E501
+            f"https://bitbucket.org/{inputs.workspace_name}/{inputs.repo_name}"  # noqa E501
         )
 
     def clone_url(self, inputs: Inputs) -> str:
-        return f"https://x-token-auth:{self.bitbucket_access_token}@bitbucket.org/{inputs.org_name}/{inputs.repo_name}.git"  # noqa E501
+        return f"https://x-token-auth:{self.bitbucket_access_token}@bitbucket.org/{inputs.workspace_name}/{inputs.repo_name}.git"  # noqa E501
 
     def create_pull_request(self, inputs: Inputs) -> str:
         logging.info(f"Creating pull request from {inputs.ref_branch} to main branch.")
