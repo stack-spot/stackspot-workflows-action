@@ -28,8 +28,8 @@ jobs:
   run:
     name: Run workflow ${{ inputs.workflow_name }}
     runs-on: ${{ fromJson(inputs.config).runner }}
-    env:
-      HTTP_ENABLE_DEBUG: ${{ fromJson(inputs.config).debug }}
+    # env:
+    #   HTTP_ENABLE_DEBUG: ${{ fromJson(inputs.config).debug }}
     steps:
       - name: Running ${{ inputs.workflow_name }}
         run: |
