@@ -69,4 +69,4 @@ spec:
       condition:
         variable: provider
         operator: ==
-        value: gitlab
+        value: Gitlab
