@@ -1,0 +1,259 @@
+##
+# Always run pipeline except for push events
+##
+workflow: # https://docs.gitlab.com/ee/ci/yaml/workflow.html#workflow-rules-examples
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      when: never
+    - when: always
+
+stages:          # List of stages for jobs, and their order of execution
+  # - install_stk
+  - execute_stk_actions
+
+variables:
+  debug: "false"
+  workflow_config: "stk"
+  workflow_name: "run-action"
+  # input parameters
+  api_inputs: "{}"
+  secrets: "{}"
+  correlation_id: ""
+  default_branch: "main"
+  
+
+default:
+  before_script:
+    - echo "Installing some necessary tools";
+    - apt-get -qq update;
+    - apt-get install -y jq;
+    # - echo "Updating certificates";
+    #   apt-get update;
+    #   apt-get install apt-transport-https ca-certificates -y;
+    #   update-ca-certificates;
+  after_script:
+    - chmod +x $CI_PROJECT_DIR/scripts/show_stk_logs_file.sh;
+      $CI_PROJECT_DIR/scripts/show_stk_logs_file.sh $CI_JOB_STATUS $workflow_config
+
+##
+# Run action workflow
+##
+stk-run-action-job:
+  stage: execute_stk_actions
+  rules:
+    - if: $workflow_name == "run-action"
+  script:
+    ##
+    # Install stk
+    ##
+    - chmod +x $CI_PROJECT_DIR/scripts/install-stk.sh;
+      source $CI_PROJECT_DIR/scripts/install-stk.sh
+
+    ##
+    # Execute STK's Run action
+    ##
+    - echo "Step [1/1] Run action";
+      run_action_cmd=$(echo $api_inputs | jq -r .run_action_cmd | base64 --decode);
+      echo "$workflow_config $run_action_cmd";
+      eval "$workflow_config $run_action_cmd";
+      exit_code_of_command=$?;
+      if [ "$exit_code_of_command" != "0" ]; then
+        exit $exit_code_of_command;
+      fi
+
+##
+# Create app/infra workflow
+##
+stk-create-app-job:
+  stage: execute_stk_actions
+  rules:
+    - if: $workflow_name == "create-app"
+  script:
+    ##
+    # Install stk
+    ##
+    - chmod +x $CI_PROJECT_DIR/scripts/install-stk.sh;
+      source $CI_PROJECT_DIR/scripts/install-stk.sh
+
+    ##
+    # Execute STK's Create app
+    ##
+    - echo "Step [1/11] Configure pipeline.";
+      source $CI_PROJECT_DIR/scripts/enable_colors.sh
+
+    # ------------------------- CONFIGURE DEBUG -------------------------
+    - echo "Step [2/11] Configure DEBUG MODE.";
+      if [ $debug == "true" ]; then
+        export APPLY_PLUGIN_ENABLE_DEBUG=true;
+        export COMMAND_ARGS_ENABLE_DEBUG=true;
+        export HTTP_ENABLE_DEBUG=true;
+        echo -e "$green DEBUG MODE ENABLED";
+      else
+        echo -e "$green DEBUG MODE DISABLED";
+      fi;
+
+    # ------------------------- PARSE INPUTS -------------------------
+    - echo "Step [3/11] Parse inputs.";
+      workspace_pat=$(echo "$secrets" | jq -cr .secret_git);
+      workspace_name=$CI_PROJECT_NAMESPACE; 
+
+      name=$(echo "$api_inputs" | jq -cr .create_name);
+      repo_url=$(echo "$api_inputs" | jq -cr .create_repo);
+      repo_name="${repo_url##*/}";
+      if [ -z "$repo_name" ] || [ "$repo_name" == "null" ]; then
+        repo_name=$name;
+      fi;
+      
+      email=$(echo "$api_inputs" | jq -cr .cli_login_email);
+      create_type=$(echo "$api_inputs" | jq -cr .create_entity_type);
+
+      run_actions_before_cmd=$(echo "$api_inputs" | jq -cr .run_actions_before_cmd | base64 --decode);
+      run_actions_after_cmd=$(echo "$api_inputs" | jq -cr .run_actions_after_cmd | base64 --decode);
+      create_cmd=$(echo "$api_inputs" | jq -cr .create_cmd | base64 --decode);
+      update_cmd=$(echo "$api_inputs" | jq -cr .update_cmd | base64 --decode);
+
+    # ---------------------- RUN ACTIONS BEFORE ----------------------
+    - echo "Step [4/11] Run actions before.";
+      echo "$workflow_config $run_actions_before_cmd";
+      eval "$workflow_config $run_actions_before_cmd";
+      exit_code_of_command=$?;
+      if [ "$exit_code_of_command" != "0" ]; then
+        exit $exit_code_of_command;
+      fi
+
+    # ----------------------- CLONE REPOSITORY -----------------------
+    - echo "Step [5/11] Clone repository.";
+      chmod +x $CI_PROJECT_DIR/scripts/clone-repository.sh;
+      $CI_PROJECT_DIR/scripts/clone-repository.sh "$repo_name" "$workspace_pat" "$email" "$workspace_name" "project_cloned";
+      exit_code_of_command=$?;
+      if [ "$exit_code_of_command" != "0" ]; then
+        exit $exit_code_of_command;
+      fi;
+      cd project_cloned;
+
+    # ----------------------- CREATE APP/INFRA -----------------------
+    - echo "Step [6/11] Create $create_type";
+      (echo "$api_inputs" | jq -cr .create_file | base64 --decode) > create_file.yml;
+      echo "$workflow_config $create_cmd --spec create_file.yml";
+      $workflow_config $create_cmd --spec create_file.yml;
+      rm -f create_file.yml;
+      exit_code_of_command=$?;
+      if [ "$exit_code_of_command" != "0" ]; then
+        exit $exit_code_of_command;
+      fi
+
+    # ---------------------- UPDATE APP/INFRA ----------------------
+    - echo "Step [7/11] Config update $create_type.";
+      cd $name;
+      echo "$workflow_config $update_cmd";
+      eval "$workflow_config $update_cmd";
+
+      exit_code_of_command=$?;
+      if [ "$exit_code_of_command" != "0" ]; then
+        exit $exit_code_of_command;
+      fi;
+
+     # ------------------------- COMMIT/PUSH --------------------------
+    - echo "Step [8/11] Commit and push.";
+      echo -e "\n$green Commit and push\n";
+      cd ..;
+      rm -rf $name/.git;
+      cp -r $name/. .;
+      rm -fr $name;
+      branch_name=stackspot-$(date +%s);
+      git checkout -b $branch_name;
+      git add -A;
+      git commit -am "stackspot initial commit";
+      git push origin $branch_name;
+
+    # --------------------- CREATE PULL REQUEST ----------------------
+    - echo "Step [9/11] Create pull request.";
+      git commit --amend --no-edit;
+      git push --force 
+               -o merge_request.create
+               -o merge_request.target="$default_branch"
+               -o merge_request.title="Create $name"
+               -o merge_request.description="Stackspot create $create_type $name"
+               origin $branch_name;
+
+      exit_code_of_command=$?;
+      if [ "$exit_code_of_command" != "0" ]; then
+        exit $exit_code_of_command;
+      fi
+
+      echo "Created Pull Request successfully";
+
+##
+# Apply plugin workflow
+##
+stk-apply-plugin-job:
+  stage: execute_stk_actions
+  rules:
+    - if: $workflow_name == "apply-plugin"
+  script:
+    ##
+    # Install stk
+    ##
+    - chmod +x $CI_PROJECT_DIR/scripts/install-stk.sh;
+      source $CI_PROJECT_DIR/scripts/install-stk.sh
+
+    ##
+    # Execute STK's Apply plugin
+    ##
+    - echo "Step [1/11] Configure pipeline.";
+      source $CI_PROJECT_DIR/scripts/enable_colors.sh
+
+    - echo "Step [2/6] Parse inputs.";
+      plugin_name=$(echo $api_inputs | jq -r .plugin_name);
+      repo_url=$(echo $api_inputs | jq -r .repo);
+      repo_name="${repo_url##*/}";
+      email=$(echo $api_inputs | jq -r .cli_login_email);
+      workspace_pat=$(echo $secrets | jq -r .secret_git);
+      workspace_name=$CI_PROJECT_NAMESPACE;
+
+      apply_plugin_cmd=$(echo $api_inputs | jq -r .apply_plugin_cmd | base64 --decode);
+
+    # ----------------------- CLONE REPOSITORY -----------------------
+    - echo "Step [3/6] Clone repository.";
+      chmod +x $CI_PROJECT_DIR/scripts/clone-repository.sh;
+      $CI_PROJECT_DIR/scripts/clone-repository.sh "$repo_name" "$workspace_pat" "$email" "$workspace_name" "project_cloned";
+      exit_code_of_command=$?;
+      if [ "$exit_code_of_command" != "0" ]; then
+        exit $exit_code_of_command;
+      fi;
+      cd project_cloned;
+
+    # ----------------------- APPLY PLUGIN -----------------------
+    - echo "Step [4/6] Apply plugin.";
+      echo "$workflow_config $apply_plugin_cmd";
+      eval "$workflow_config $apply_plugin_cmd";
+      exit_code_of_command=$?;
+      if [ "$exit_code_of_command" != "0" ]; then
+        exit $exit_code_of_command;
+      fi
+
+    # ------------------------- COMMIT/PUSH --------------------------
+    - echo "Step [5/6] Commit and push.";
+      echo -e "\n$green Commit and push\n";
+      branch_name=stackspot-$(date +%s);
+      git checkout -b $branch_name;
+      git add -A;
+      git commit -am "stackspot initial commit";
+      git push origin $branch_name;
+    
+    # --------------------- CREATE PULL REQUEST ----------------------
+    - echo "Step [6/6] Create pull request.";
+      git commit --amend --no-edit;
+      git push --force 
+               -o merge_request.create
+               -o merge_request.target="$default_branch"
+               -o merge_request.title="Apply plugin $plugin_name"
+               -o merge_request.description="Applying the plugin $plugin_name"
+               origin $branch_name;
+
+      exit_code_of_command=$?;
+      if [ "$exit_code_of_command" != "0" ]; then
+        exit $exit_code_of_command;
+      fi
+
+      echo "Created Pull Request successfully";
