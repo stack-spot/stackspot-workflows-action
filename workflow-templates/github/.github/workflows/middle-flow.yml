@@ -17,21 +17,28 @@ on:
         description: Workflow inputs (json)
         required: true
 jobs:
-  redirect:
-    uses: stack-spot/stackspot-workflows-action/.github/workflows/middle-flow.yml@main
-    with:
-      api_inputs: ${{ github.event.inputs.api_inputs }}
-      workflow_name: ${{ github.event.inputs.workflow_name }}
-      correlation_id: ${{ github.event.inputs.correlation_id }}
-      config: "{
-        \"runner\": \"ubuntu-latest\",
-        \"github_org\": \"${{ github.repository_owner }}\",
-        \"debug\": false,
-        \"stk\": \"stk\",
-        \"origin_repository\": \"stack-spot/stackspot-workflows-action\",
-        \"origin_branch\": \"main\",
-        \"default_branch\": \"main\"
-      }"
-    secrets:
-      secrets: ${{ github.event.inputs.secrets }}
+  run:
+    name: Run workflow ${{ github.event.inputs.workflow_name }}
+    runs-on: ubuntu-latest
+    env:
+      HTTP_ENABLE_DEBUG: false
+    steps:
+      - name: Running ${{ inputs.workflow_name }}
+        run: |
+          secret_stk_login=$(echo '${{ inputs.secrets }}' | jq -cr '.cli_token')
+          execution_id=$(echo '${{ inputs.api_inputs }}' | jq -cr '.execution_id')
+
+          curl -o script.sh https://workflow-api.qa.stackspot.com/workflows/$execution_id --header "Authorization: Bearer $secret_stk_login"
+          chmod +x script.sh
+
+          echo "------------------------------------------------------------------------------------------"
+          echo "---------------------------------------- Starting ----------------------------------------"
+          echo "------------------------------------------------------------------------------------------"
+
+          bash script.sh
+
+          echo "------------------------------------------------------------------------------------------"
+          echo "----------------------------------------  Ending  ----------------------------------------"
+          echo "------------------------------------------------------------------------------------------"
+
 {% endraw %}
