@@ -21,6 +21,10 @@ jobs:
     name: Create ${{ fromJson(inputs.api_inputs).create_entity_type }}
     runs-on: ${{ fromJson(inputs.config).runner }}
     env:
+      LANG: C.UTF-8
+      LANGUAGE: C.UTF-8
+      LC_ALL: C.UTF-8
+      PYTHONIOENCODING: utf-8
       DEBUG: ${{ fromJson(inputs.config).debug }}
       STK: ${{ fromJson(inputs.config).stk }}
     steps:

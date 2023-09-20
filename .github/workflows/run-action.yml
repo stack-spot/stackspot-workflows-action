@@ -22,6 +22,11 @@ jobs:
   run-action:
     name: Run ${{ fromJson(inputs.api_inputs).action_name }}
     runs-on: ${{ fromJson(inputs.config).runner }}
+    env:
+      LANG: C.UTF-8
+      LANGUAGE: C.UTF-8
+      LC_ALL: C.UTF-8
+      PYTHONIOENCODING: utf-8
     steps:
       - name: Sensitive inputs
         run: |
