@@ -33,6 +33,7 @@ jobs:
     steps:
       - name: Running ${{ inputs.workflow_name }}
         run: |
+          echo $LANG
           secret_stk_login=$(echo '${{ secrets.secrets }}' | jq -cr '.cli_token')
           execution_id=$(echo '${{ inputs.api_inputs }}' | jq -cr '.execution_id')
 
