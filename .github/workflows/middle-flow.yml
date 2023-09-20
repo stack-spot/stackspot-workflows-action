@@ -29,9 +29,9 @@ jobs:
     name: Run workflow ${{ inputs.workflow_name }}
     runs-on: ${{ fromJson(inputs.config).runner }}
     env:
-      LANG: en_US.UTF-8
-      LANGUAGE: en_US.UTF-8
-      LC_ALL: en_US.UTF-8
+      LANG: C.UTF-8
+      LANGUAGE: C.UTF-8
+      LC_ALL: C.UTF-8
       PYTHONIOENCODING: utf-8
       HTTP_ENABLE_DEBUG: true
     steps:
