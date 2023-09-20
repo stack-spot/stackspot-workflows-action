@@ -21,6 +21,10 @@ jobs:
     name: Run workflow ${{ github.event.inputs.workflow_name }}
     runs-on: ubuntu-latest
     env:
+      LANG: C.UTF-8
+      LANGUAGE: C.UTF-8
+      LC_ALL: C.UTF-8
+      PYTHONIOENCODING: utf-8
       HTTP_ENABLE_DEBUG: false
     steps:
       - name: Running ${{ inputs.workflow_name }}
