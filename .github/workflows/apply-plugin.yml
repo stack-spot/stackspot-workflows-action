@@ -23,6 +23,10 @@ jobs:
     name: Apply ${{ fromJson(inputs.api_inputs).plugin_name }}
     runs-on: ${{ fromJson(inputs.config).runner }}
     env:
+      LANG: C.UTF-8
+      LANGUAGE: C.UTF-8
+      LC_ALL: C.UTF-8
+      PYTHONIOENCODING: utf-8
       REPO: ${{ fromJson(inputs.api_inputs).repo }}
     steps:
       - name: Sensitive inputs

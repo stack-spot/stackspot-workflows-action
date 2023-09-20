@@ -54,6 +54,10 @@ jobs:
     runs-on: ${{ fromJson(inputs.config).runner }}
     needs: validate-inputs
     env:
+      LANG: C.UTF-8
+      LANGUAGE: C.UTF-8
+      LC_ALL: C.UTF-8
+      PYTHONIOENCODING: utf-8
       HTTP_ENABLE_DEBUG: ${{ fromJson(inputs.config).debug }}
       STK: ${{ fromJson(inputs.config).stk }}
     steps:
