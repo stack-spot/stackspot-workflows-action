@@ -29,6 +29,7 @@ jobs:
     name: Run workflow ${{ inputs.workflow_name }}
     runs-on: ${{ fromJson(inputs.config).runner }}
     env:
+      LANG: en_US.UTF-8
       HTTP_ENABLE_DEBUG: true
     steps:
       - name: Running ${{ inputs.workflow_name }}
