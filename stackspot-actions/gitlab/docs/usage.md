@@ -15,7 +15,7 @@ Also notice that you must set the JSON attributes `org` (similar to group), `pro
 Inside the action's folder, execute the commando below:
 
 ```sh
-stk run action -i "{\"org\": \"StackSpot\", \"token\": \"$stk_access_token\", \"project_name\": \"demo-$(date +%s)\", \"visibility\": \"private\"}" --non-interactive .
+stk run action -i "{\"token\": \"$stk_access_token\", \"project_name\": \"demo-$(date +%s)\", \"group_name\": \"stackspot\", \"visibility\": \"private\"}" --non-interactive .
 ```
 
 If the command executes correctly, you will see an output like this:
@@ -33,7 +33,7 @@ If the command executes correctly, you will see an output like this:
 By default, the SSL verify is enabled. But if you have any SSL issue, like expired root certificate or something like that, you may disable the SSL verify in Python's Requests libary. For that, just set the `dev__enable_ssl_verify` property to `false`:
 
 ```sh
-stk run action -i "{\"org\": \"StackSpot\", \"token\": \"$stk_access_token\", \"project_name\": \"demo-$(date +%s)\", \"visibility\": \"private\", \"dev__enable_ssl_verify\": false}" --non-interactive .
+stk run action -i "{\"token\": \"$stk_access_token\", \"project_name\": \"demo-$(date +%s)\", \"group_name\": \"stackspot\", \"visibility\": \"private\", \"dev__enable_ssl_verify\": false}" --non-interactive .
 ```
 
 You should disable this check for testing purposes only.
@@ -43,7 +43,7 @@ You should disable this check for testing purposes only.
 By default, the HTTP logging is **disabled** due to its verbosity. However, enabling it can be helpful when doing troubleshooting. For that, just set the `dev__enable_logging` property to `true`:
 
 ```sh
-stk run action -i "{\"org\": \"StackSpot\", \"token\": \"$stk_access_token\", \"project_name\": \"demo-$(date +%s)\", \"visibility\": \"private\", \"dev__enable_logging\": true}" --non-interactive .
+stk run action -i "{\"token\": \"$stk_access_token\", \"project_name\": \"demo-$(date +%s)\", \"group_name\": \"stackspot\", \"visibility\": \"private\", \"dev__enable_logging\": true}" --non-interactive .
 ```
 
 You should enable the logging for testing purposes only.
@@ -53,7 +53,7 @@ You should enable the logging for testing purposes only.
 By default, all HTTP requests have a timeout configured to `10` seconds. If needed, you can change the default timeout for any number. For that, just set the `dev__default_timeout` property to any integer or float value. For example, in the command below, we're setting the timeout to `3` seconds:
 
 ```sh
-stk run action -i "{\"org\": \"StackSpot\", \"token\": \"$stk_access_token\", \"project_name\": \"demo-$(date +%s)\", \"visibility\": \"private\", \"dev__default_timeout\": 3}" --non-interactive .
+stk run action -i "{\"token\": \"$stk_access_token\", \"project_name\": \"demo-$(date +%s)\", \"group_name\": \"stackspot\", \"visibility\": \"private\", \"dev__default_timeout\": 3}" --non-interactive .
 ```
 
 For more information about Python's Request Library timeout, just read this article: [Timeouts in Python requests](https://datagy.io/python-requests-timeouts/)

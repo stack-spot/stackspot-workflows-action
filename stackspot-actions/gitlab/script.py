@@ -27,10 +27,10 @@ class ProjectAlreadyExistsInTheGroup(GitlabCreateRepoException):
 class Runner:
     def __init__(self, metadata, base_url="https://gitlab.com") -> None:
         self.base_url = base_url
-        self.group_name = metadata.inputs.get("org")
+        self.group_name = metadata.inputs.get("group_name")
         self.project_name = metadata.inputs.get("project_name")
         self.visibility = metadata.inputs.get("visibility", "private")  # default=private
-        self.token = metadata.inputs.get("token")
+        self.token = metadata.inputs.get("token")  # injected by the StackSpot Portal
         self.enable_ssl_verify = metadata.inputs.get("dev__enable_ssl_verify", True)  # default=enabled
         self.enable_logging = metadata.inputs.get("dev__enable_logging", False)  # default=disabled
         self.default_timeout = metadata.inputs.get("dev__default_timeout", 10)  # default=10s
@@ -58,11 +58,11 @@ class Runner:
         """
         Validates all inputs
         """
-        if not self.group_name or not self.group_name.strip():
-            raise InvalidInputException("The group name ('org') must not be blank.")
-
         if not self.token or not self.token.strip():
             raise InvalidInputException("The private token ('token') must not be blank.")
+
+        if not self.group_name or not self.group_name.strip():
+            raise InvalidInputException("The group name ('group_name') must not be blank.")
 
         if not self.project_name or not self.project_name.strip():
             raise InvalidInputException("The project name ('project_name') must not be blank.")

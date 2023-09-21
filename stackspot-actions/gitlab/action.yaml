@@ -4,7 +4,7 @@ metadata:
   name: create-repo-gitlab
   display-name: create-repo-gitlab
   description: Action used to create a Git repository in Gitlab
-  version: 0.0.1
+  version: 1.0.1
 spec:
   type: python
   about: docs/about.md
@@ -18,6 +18,11 @@ spec:
       type: text
       required: true
       help: Input the Gitlab devOps project/repository name, if it does not exist it will be created
+    - label: Gitlab group name
+      name: group_name
+      type: text
+      required: true
+      help: Input the Gitlab group name. It must exist in your Gitlab account as a top-level group
     - label: Repository visibility
       name: visibility
       type: text

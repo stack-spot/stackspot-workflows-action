@@ -14,7 +14,7 @@ class TestRunner(unittest.TestCase):
     def test_create_repository_in_group_success(self, mock_get, mock_post):
         # scenario
         metadata = Metadata({
-            "org": "stackspot_group",
+            "group_name": "stackspot_group",
             "project_name": "My Java App",
             "visibility": "private",
             "token": "valid-token"
@@ -66,30 +66,33 @@ class TestRunner(unittest.TestCase):
 
     def test_group_name_is_not_informed_error(self):
         # scenario
-        metadata = Metadata({})
-
-        # action and validation
-        with self.assertRaises(InvalidInputException) as em:
-            runner = Runner(metadata, "http://localhost:9090")
-            runner()
-        self.assertEqual("The group name ('org') must not be blank.", str(em.exception))
-
-    def test_group_name_is_blank_error(self):
-        # scenario
         metadata = Metadata({
-            "org": (" " * 10),
+            "token": "valid-token-injected-by-portal"
         })
 
         # action and validation
         with self.assertRaises(InvalidInputException) as em:
             runner = Runner(metadata, "http://localhost:9090")
             runner()
-        self.assertEqual("The group name ('org') must not be blank.", str(em.exception))
+        self.assertEqual("The group name ('group_name') must not be blank.", str(em.exception))
+
+    def test_group_name_is_blank_error(self):
+        # scenario
+        metadata = Metadata({
+            "group_name": (" " * 10),
+            "token": "valid-token-injected-by-portal"
+        })
+
+        # action and validation
+        with self.assertRaises(InvalidInputException) as em:
+            runner = Runner(metadata, "http://localhost:9090")
+            runner()
+        self.assertEqual("The group name ('group_name') must not be blank.", str(em.exception))
 
     def test_token_is_not_informed_error(self):
         # scenario
         metadata = Metadata({
-            "org": "valid-group"
+            "group_name": "valid-group"
         })
 
         # action and validation
@@ -101,7 +104,7 @@ class TestRunner(unittest.TestCase):
     def test_token_is_blank_error(self):
         # scenario
         metadata = Metadata({
-            "org": "valid-group",
+            "group_name": "valid-group",
             "token": (" " * 10)
         })
 
@@ -114,7 +117,7 @@ class TestRunner(unittest.TestCase):
     def test_project_name_is_not_informed_error(self):
         # scenario
         metadata = Metadata({
-            "org": "my_group",
+            "group_name": "my_group",
             "token": "valid-token"
         })
 
@@ -127,7 +130,7 @@ class TestRunner(unittest.TestCase):
     def test_project_name_is_blank_error(self):
         # scenario
         metadata = Metadata({
-            "org": "my_group",
+            "group_name": "my_group",
             "project_name": (" " * 10),
             "token": "valid-token"
         })
@@ -141,7 +144,7 @@ class TestRunner(unittest.TestCase):
     def test_project_name_is_too_short_error(self):
         # scenario
         metadata = Metadata({
-            "org": "my_group",
+            "group_name": "my_group",
             "project_name": "p1",
             "token": "valid-token"
         })
@@ -159,7 +162,7 @@ class TestRunner(unittest.TestCase):
         # scenario
         project_name_with_whitespaces = "   p2   "
         metadata = Metadata({
-            "org": "my_group",
+            "group_name": "my_group",
             "project_name": project_name_with_whitespaces,
             "token": "valid-token"
         })
@@ -177,7 +180,7 @@ class TestRunner(unittest.TestCase):
         # scenario
         blank_visibility = (" " * 10)
         metadata = Metadata({
-            "org": "my_group",
+            "group_name": "my_group",
             "project_name": "my-project",
             "visibility": blank_visibility,
             "token": "valid-token"
@@ -193,7 +196,7 @@ class TestRunner(unittest.TestCase):
         # scenario
         invalid_visibility = "internal"
         metadata = Metadata({
-            "org": "my_group",
+            "group_name": "my_group",
             "project_name": "my-project",
             "visibility": invalid_visibility,
             "token": "valid-token"
@@ -212,7 +215,7 @@ class TestRunner(unittest.TestCase):
     def test_group_not_found_error(self, mock_get):
         # scenario
         metadata = Metadata({
-            "org": "invalid-group",
+            "group_name": "invalid-group",
             "project_name": "blank-project",
             "token": "valid-token"
         })
@@ -229,7 +232,7 @@ class TestRunner(unittest.TestCase):
     def test_project_already_exists_in_name_error(self, mock_get):
         # scenario
         metadata = Metadata({
-            "org": "stackspot_group",
+            "group_name": "stackspot_group",
             "project_name": "Existing project",
             "token": "valid-token"
         })
@@ -255,7 +258,7 @@ class TestRunner(unittest.TestCase):
     def test_project_already_exists_in_path_error(self, mock_get):
         # scenario
         metadata = Metadata({
-            "org": "stackspot_group",
+            "group_name": "stackspot_group",
             "project_name": "existing-project",
             "token": "valid-token"
         })
@@ -285,7 +288,7 @@ class TestRunner(unittest.TestCase):
     def test_create_repository_in_group_when_project_already_exists_error(self, mock_get, mock_post):
         # scenario
         metadata = Metadata({
-            "org": "group1",
+            "group_name": "group1",
             "project_name": "my repo",
             "visibility": "public",
             "token": "valid-token"
@@ -322,7 +325,7 @@ class TestRunner(unittest.TestCase):
     def test_group_unexpected_error(self, mock_get):
         # scenario
         metadata = Metadata({
-            "org": "group1",
+            "group_name": "group1",
             "project_name": "blank-project",
             "token": "valid-token"
         })
@@ -338,7 +341,7 @@ class TestRunner(unittest.TestCase):
     def test_project_unexpected_error(self, mock_get):
         # scenario
         metadata = Metadata({
-            "org": "group1",
+            "group_name": "group1",
             "project_name": "my-new-project",
             "token": "valid-token"
         })
