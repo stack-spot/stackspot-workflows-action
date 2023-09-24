@@ -1,10 +1,10 @@
-schema-version: v1
+schema-version: v2
 kind: action
 metadata:
   name: stakspot-gh-mk-repo-with-secrts
   display-name: Stackspot Create GitHub Repo With Secrets
   description: Action to create github repository With Secrets
-  version: 1.0.1
+  version: 2.0.0
 spec:
   type: python
   about: docs/about.md
