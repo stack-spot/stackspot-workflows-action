@@ -1,4 +1,4 @@
-schema-version: v1
+schema-version: v2
 kind: action
 metadata:
   name: stakspot-github-create-repository

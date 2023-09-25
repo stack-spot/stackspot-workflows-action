@@ -3,13 +3,13 @@ import time
 from typing import Protocol
 from azure.azure_provider import AzureProvider
 from github.github_provider import GithubProvider
-from gitlab.gitlab_provider import GitlabInputs
+from gitlab.gitlab_provider import GitlabProvider
 from http_client import HttpClient
 from setup import setup
 
 logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
-PROVIDERS = dict(Azure=AzureProvider, Github=GithubProvider, Gitlab=GitlabInputs)
+PROVIDERS = dict(Azure=AzureProvider, Github=GithubProvider, Gitlab=GitlabProvider)
 
 
 class Metadata(Protocol):

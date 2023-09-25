@@ -10,11 +10,11 @@ class GitlabProvider(Provider):
 
     def __init__(self, http_client: HttpClient, **kwargs):
         super().__init__()
-        self.inputs: GitlabInputs = GitlabInputs(**kwargs)
+        self.inputs: GitlabInputs = GitlabInputs(repo_name=kwargs.get("project_name"), **kwargs)
         self.api = GitlabApiClient(http_client=http_client, pat=self.inputs.pat)
         self.project_id = ""
-        self.web_url = ""
         self.trigger_id = ""
+        self.http_url_to_repo = ""
 
     def execute_pre_setup_provider(self):
         pass
@@ -30,17 +30,26 @@ class GitlabProvider(Provider):
     def execute_repo_creation(self):
         response = self.api.create_project(project_name=self.inputs.project_name)
         if response.ok:
-            self.web_url = response.json()["web_url"]
             self.project_id = response.json()["id"]
+            self.http_url_to_repo = response.json()["http_url_to_repo"]
             return
         logging.info("Failure creating gitlab repository")
         response.raise_for_status()
 
     def repo_exists(self) -> bool:
-        pass
+        response = self.api.get_project(group_name=self.inputs.group_name, project_name=self.inputs.project_name)
+        print(response.json())
+        if response.ok:
+            self.project_id = response.json()["id"]
+            self.http_url_to_repo = response.json()["http_url_to_repo"]
+            return True
+        elif response.status_code == 404:
+            return False
+        logging.info("Failure getting gitlab project")
+        response.raise_for_status()
 
     def clone_url(self) -> str:
-        return f"https://x-token-auth:{self.inputs.pat}@gitlab.com/{self.inputs.group_name}/{self.inputs.repo_name}.git"
+        return self.http_url_to_repo.replace("https://gitlab.com/", f"https://x-token-auth:{self.inputs.pat}@gitlab.com/")
 
     def create_pull_request(self):
         response = self.api.create_merge_request(

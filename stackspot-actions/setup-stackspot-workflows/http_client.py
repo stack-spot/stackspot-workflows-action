@@ -9,8 +9,8 @@ class HttpClient:
         # logging.info(f"Headers: {kwargs.get('headers')}")
         resp = method(url, verify=False, **kwargs)
         logging.info(f"Response status code: {resp.status_code}")
-        logging.info("--------------------------------------------------------------------")
         # logging.info(f"Response body: {resp.text}")
+        logging.info("--------------------------------------------------------------------")
         return resp
 
     def post(self, **kwargs):
