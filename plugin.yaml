@@ -25,19 +25,8 @@ spec:
         - Azure
         - BitBucket
         - Github
-    - label: Do you want to use self-hosted runners to run StackSpot workflows?
-      name: use_self_hosted_pool
-      type: bool
-      default: false
-    - label: Which self-hosted runner group do you want to use?
-      name: self_hosted_pool_name
-      type: text
-      condition:
-        variable: use_self_hosted_pool
-        operator: ==
-        value: true
+        - Gitlab
   hooks:
-    # Render workflows templates
     - type: render-templates
       trigger: after-render
       path: workflow-templates/azure
@@ -61,3 +50,11 @@ spec:
         variable: provider
         operator: ==
         value: BitBucket
+
+    - type: render-templates
+      trigger: after-render
+      path: workflow-templates/gitlab
+      condition:
+        variable: provider
+        operator: ==
+        value: Gitlab

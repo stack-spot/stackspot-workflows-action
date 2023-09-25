@@ -1,3 +1,4 @@
+from messages import GIT_CONFIG
 
 class RepoAlreadyExistsError(Exception):
     pass
@@ -20,7 +21,7 @@ class NotFoundError(Exception):
 
 
 class GitUserSetupError(Exception):
-    pass
+    msg = GIT_CONFIG
 
 
 class WorkspaceShouldNotInUseError(Exception):

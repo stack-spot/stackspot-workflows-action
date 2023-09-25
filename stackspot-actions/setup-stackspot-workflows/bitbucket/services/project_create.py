@@ -1,7 +1,7 @@
 import requests
 
 from provider import Inputs
-from provider.errors import NotFoundError
+from errors import NotFoundError
 from provider.services.bitbucket.bitbucket_http import get, get_api_projects_builder, post, get_api_project_builder
 
 

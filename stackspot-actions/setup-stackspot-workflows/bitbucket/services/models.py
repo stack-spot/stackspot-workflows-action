@@ -1,4 +1,4 @@
-from provider import Inputs
+from ..bibucket_inputs import Bi
 
 
 class UrlBuilder:

@@ -1,7 +1,7 @@
 import logging
 import requests
 
-from provider.errors import NotFoundError, UnauthorizedError
+from errors import NotFoundError, UnauthorizedError
 
 
 def handle_api_response_errors(response: requests.Response, log_error: bool = True) -> bool:

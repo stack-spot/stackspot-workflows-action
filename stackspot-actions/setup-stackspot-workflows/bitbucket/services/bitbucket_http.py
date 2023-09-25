@@ -2,7 +2,7 @@ import requests
 
 from provider import Inputs
 from provider.services.bitbucket.models import UrlBuilder
-from provider.handle_errors import handle_api_response_errors
+from handle_errors import handle_api_response_errors
 
 APPLICATION_JSON = "application/json"
 
