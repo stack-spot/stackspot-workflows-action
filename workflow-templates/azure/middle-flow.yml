@@ -39,5 +39,5 @@ jobs:
       - template: ${{ parameters.job_template }}
         parameters:
           api_inputs: ${{ parameters.api_inputs }}
-          config: "{\"default_branch\": \"main\", \"debug\": true, \"stk\": \"stk-alpha\"}"
+          config: "{\"debug\": true}"
 {% endraw %}

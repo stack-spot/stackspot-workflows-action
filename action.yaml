@@ -1,5 +1,5 @@
 #file: noinspection YAMLSchemaValidation
-schema-version: v1
+schema-version: v2
 kind: action
 metadata:
   name: setup-stackspot-workflows
@@ -16,69 +16,94 @@ spec:
         - Azure
         - BitBucket
         - Github
-    - label: Organization Name
-      name: org_name
-      type: text
-      help: 'Inform your Organization Name (e.g.: StackSpot)'
-      condition:
-        variable: provider
-        operator: "!="
-        value: BitBucket
-    - label: Workspace Name
-      name: workspace_name
-      type: text
-      help: 'Inform your Workspace Name (e.g.: stack-spot)'
-      condition:
-        variable: provider
-        operator: ==
-        value: BitBucket
-    - label: Project Name
-      name: project_name
-      type: text
-      help: 'Inform your Project Name'
-      condition:
-        variable: provider
-        operator: ==
-        value: BitBucket
-    - label: Repository Name
-      name: repo_name
-      type: text
+        - Gitlab
+
+    - label: Create Repository
+      name: create_repo
+      type: bool
+
     - label: Personal Access Token
       name: pat
       type: password
       condition:
         variable: provider
-        operator: "!="
-        value: BitBucket
-    - label: Client Key
-      name: client_key
+        operator: containsAny
+        value:
+          - Azure
+          - Github
+          - Gitlab
+
+    - label: Project Name
+      name: project_name
       type: text
       condition:
         variable: provider
-        operator: "=="
-        value: BitBucket
-    - label: Client Secret
-      name: client_secret
-      type: password
+        operator: containsAny
+        value:
+          - Azure
+          - Gitlab
+
+    - label: Organization Name
+      name: org_name
+      type: text
       condition:
         variable: provider
-        operator: "=="
-        value: BitBucket
+        operator: containsAny
+        value:
+          - Azure
+          - Github
+
     - label: Personal Access Token (Github)
       name: github_pat
       type: password
       condition:
         variable: provider
-        operator: ==
-        value: Azure
-    - label: Do you want to use self-hosted runners to run StackSpot workflows?
-      name: use_self_hosted_pool
-      type: bool
-      default: false
-    # Field self_hosted_pool_name is asked when use_self_hosted_pool is true on setup.py
-    - label: Create Repository
-      name: create_repo
-      type: bool
+        operator: containsAny
+        value:
+          - Azure
+
+    - label: Repository Name
+      name: repo_name
+      type: text
+      condition:
+        variable: provider
+        operator: containsAny
+        value:
+          - Github
+
+    - label: Group Name
+      name: group_name
+      type: text
+      condition:
+        variable: provider
+        operator: containsAny
+        value:
+          - Gitlab
+
+    # - label: Workspace Name
+    #   name: workspace_name
+    #   type: text
+    #   help: 'Inform your Workspace Name (e.g.: stack-spot)'
+    #   condition:
+    #     variable: provider
+    #     operator: ==
+    #     value: BitBucket
+
+    # - label: Client Key
+    #   name: client_key
+    #   type: text
+    #   condition:
+    #     variable: provider
+    #     operator: "=="
+    #     value: BitBucket
+    # - label: Client Secret
+    #   name: client_secret
+    #   type: password
+    #   condition:
+    #     variable: provider
+    #     operator: "=="
+    #     value: BitBucket
+     # Field self_hosted_pool_name is asked when use_self_hosted_pool is true on setup.py
 
   python:
-    script: stackspot-actions/setup-stackspot-workflows/setup.py
+    script: stackspot-actions/setup-stackspot-workflows/main.py

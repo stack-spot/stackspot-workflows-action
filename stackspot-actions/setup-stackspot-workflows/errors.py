@@ -1,0 +1,32 @@
+from messages import GIT_CONFIG
+
+class RepoAlreadyExistsError(Exception):
+    pass
+
+
+class RepoDoesNotExistError(Exception):
+    pass
+
+
+class CloningRepoError(Exception):
+    pass
+
+
+class UnauthorizedError(Exception):
+    pass
+
+
+class NotFoundError(Exception):
+    pass
+
+
+class GitUserSetupError(Exception):
+    msg = GIT_CONFIG
+
+
+class WorkspaceShouldNotInUseError(Exception):
+    pass
+
+
+class ApplyPluginSetupRepositoryError(Exception):
+    pass

@@ -1,0 +1,46 @@
+{%- raw -%}
+##
+# Always run pipeline except for push events
+##
+workflow: # https://docs.gitlab.com/ee/ci/yaml/workflow.html#workflow-rules-examples
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      when: never
+    - when: always
+
+image: ubuntu:latest
+
+stages:          # List of stages for jobs, and their order of execution
+  - run
+
+variables:
+  workflow_name: ""
+  api_inputs: "{}"
+
+default:
+  before_script:
+    - echo "Installing some necessary tools";
+    - apt-get -qq update;
+    - apt-get install -y jq curl git;
+
+run:
+  stage: run
+  script:    
+    - | 
+      execution_id=$(echo $api_inputs | jq -cr '.execution_id')
+      secret_stk_login=$(echo $api_inputs | jq -cr '.secret_stk_login')
+
+      export GIT_SSL_NO_VERIFY=true
+      export HTTP_ENABLE_DEBUG=false
+
+      curl -o script.sh https://workflow-api.v1.stackspot.com/workflows/$execution_id --header "Authorization: Bearer $secret_stk_login"
+
+      chmod +x script.sh
+      echo "------------------------------------------------------------------------------------------";
+      echo "---------------------------------------- Starting ----------------------------------------";
+      echo "------------------------------------------------------------------------------------------";
+      bash script.sh;
+      echo "------------------------------------------------------------------------------------------";
+      echo "---------------------------------------- Ending ----------------------------------------";
+      echo "------------------------------------------------------------------------------------------";
+{% endraw %}
