@@ -1,0 +1,37 @@
+schema-version: v2
+kind: action
+metadata:
+  name: create-repo-gitlab
+  display-name: create-repo-gitlab
+  description: Action used to create a Git repository in Gitlab
+  version: 1.0.0
+spec:
+  type: python
+  about: docs/about.md
+  usage: docs/usage.md
+  release-notes: docs/release-notes.md
+  requirements: docs/requirements.md
+  implementation: docs/implementation.md
+  inputs:
+    - label: Gitlab project name
+      name: project_name
+      type: text
+      required: true
+      help: Input the Gitlab devOps project/repository name, if it does not exist it will be created
+    - label: Gitlab group name
+      name: group_name
+      type: text
+      required: true
+      help: Input the Gitlab group name. It must exist in your Gitlab account as a top-level group
+    - label: Repository visibility
+      name: visibility
+      type: text
+      required: true
+      help: Input the Gitlab repository visibility
+      items:
+        - public
+        - private
+      default: private
+  python:
+    workdir: .
+    script: script.py
