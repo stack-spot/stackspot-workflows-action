@@ -1,6 +1,9 @@
 import logging
 import time
 from typing import Protocol
+
+import requests
+
 from azure.azure_provider import AzureProvider
 from helpers.exceptions import ActionException
 from helpers.git_helper import Git
@@ -44,6 +47,8 @@ def run(metadata: Metadata):
         provider_name = metadata.inputs.get("provider")
         provider: Provider = PROVIDERS[provider_name](**kwargs)
         setup(provider)
+    except requests.HTTPError:
+        logging.error("A failure with a important request happened")
     except ActionException as e:
         logging.error(e.msg)
     except Exception as e:

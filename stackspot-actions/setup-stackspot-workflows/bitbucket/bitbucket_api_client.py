@@ -4,7 +4,7 @@ import logging
 
 AUTH_SERVICE_URL = "https://bitbucket.org/site/oauth2/access_token"
 GET_REPOSITORY_SERVICE_URL = "https://{domain}/2.0/repositories/{workspace_name}/{repository_name}"
-GET_PROJECTS_SERVICE_URL = "https://{domain}/2.0/workspaces/{workspace_name}/projects"
+GET_PROJECTS_SERVICE_URL = "https://{domain}/2.0/workspaces/{workspace_name}/projects/{project_name}"
 CREATE_REPOSITORY_SERVICE_URL = "https://{domain}/2.0/repositories/{workspace_name}/{repository_name}"
 CREATE_PULL_REQUEST_SERVICE_URL = "https://{domain}/2.0/repositories/{workspace_name}/{repository_name}/pullrequests"
 GET_REPOSITORY_VARIABLE_SERVICE_URL = "https://{domain}/2.0/repositories/{workspace_name}/{repository_name}/pipelines_config/variables"
@@ -71,17 +71,9 @@ class BitbucketApiClient:
             raise_for_status=True
         )
 
-    def get_repository_variables(self, workspace_name: str, repository_name: str):
+    def get_projects(self, workspace_name: str, project_name: str):
         return self.http_client.get(
-            url=GET_REPOSITORY_VARIABLE_SERVICE_URL.format(domain=self.domain, workspace_name=workspace_name, repository_name=repository_name),
-            headers=dict(**self.authorization_header),
-            title="bitbucket get repository pipeline variables",
-            raise_for_status=True,
-        )
-
-    def get_projects(self, workspace_name: str):
-        return self.http_client.get(
-            url=GET_PROJECTS_SERVICE_URL.format(domain=self.domain, workspace_name=workspace_name),
+            url=GET_PROJECTS_SERVICE_URL.format(domain=self.domain, workspace_name=workspace_name, project_name=project_name),
             headers=dict(**self.authorization_header),
             title="bitbucket get project",
             raise_for_status=True,
