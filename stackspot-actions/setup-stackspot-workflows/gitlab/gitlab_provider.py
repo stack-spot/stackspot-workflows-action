@@ -12,7 +12,7 @@ class GitlabProvider(Provider):
 
     def __init__(self, stk: Stk, git: Git, http_client: HttpClient, **kwargs):
         super().__init__(stk=stk, git=git)
-        self.inputs: GitlabInputs = GitlabInputs(repo_name=kwargs.get("project_name"), **kwargs)
+        self.inputs: GitlabInputs = GitlabInputs(repo_name=kwargs.get("project_key"), **kwargs)
         self.api = GitlabApiClient(http_client=http_client, pat=self.inputs.pat)
         self.project_id = ""
         self.trigger_id = ""

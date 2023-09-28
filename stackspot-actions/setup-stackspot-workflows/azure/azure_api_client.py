@@ -1,13 +1,13 @@
 import base64
 import requests
 
-CREATE_PROJECT_SERVICE_URL = "https://{domain}/{org_name}/_apis/projects/{project_name}"
-GET_PROJECT_SERVICE_URL = "https://{domain}/{org_name}/_apis/projects/{project_name}"
-CREATE_PULL_REQUEST_SERVICE_URL = "https://{domain}/{org_name}/{project_name}/_apis/git/repositories/{respository_name}/pullrequests"
-CREATE_PIPELINE_SERVICE_URL = "https://{domain}/{org_name}/{project_name}/_apis/pipelines"
-GET_REPOSITORY_ID_SERVICE_URL = "https://{domain}/{org_name}/{project_name}/_apis/git/repositories/{repository_name}"
-CREATE_SERVICE_ENDPOINT_SERVICE_URL = "https://{domain}/{org_name}/{project_name}/_apis/serviceendpoint/endpoints"
-UPDATE_PIPELINE_PERMISSION_ENDPOINT_SERVICE_URL = "https://{domain}/{org_name}/{project_name}/_apis/pipelines/pipelinePermissions/endpoint/{endpoint_id}"
+CREATE_PROJECT_SERVICE_URL = "https://{domain}/{org_name}/_apis/projects/{project_key}"
+GET_PROJECT_SERVICE_URL = "https://{domain}/{org_name}/_apis/projects/{project_key}"
+CREATE_PULL_REQUEST_SERVICE_URL = "https://{domain}/{org_name}/{project_key}/_apis/git/repositories/{respository_name}/pullrequests"
+CREATE_PIPELINE_SERVICE_URL = "https://{domain}/{org_name}/{project_key}/_apis/pipelines"
+GET_REPOSITORY_ID_SERVICE_URL = "https://{domain}/{org_name}/{project_key}/_apis/git/repositories/{repository_name}"
+CREATE_SERVICE_ENDPOINT_SERVICE_URL = "https://{domain}/{org_name}/{project_key}/_apis/serviceendpoint/endpoints"
+UPDATE_PIPELINE_PERMISSION_ENDPOINT_SERVICE_URL = "https://{domain}/{org_name}/{project_key}/_apis/pipelines/pipelinePermissions/endpoint/{endpoint_id}"
 
 
 class AzureApiClient:

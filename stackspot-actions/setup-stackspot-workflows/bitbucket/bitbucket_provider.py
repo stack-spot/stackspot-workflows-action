@@ -23,7 +23,7 @@ class BitbucketProvider(Provider):
     def _project_exists(self):
         response = self.api.get_projects(
             workspace_name=self.inputs.workspace_name,
-            project_name=self.inputs.project_name
+            project_name=self.inputs.project_key
         )
         self.project_key = response.json().get("key")
 
@@ -70,4 +70,4 @@ class BitbucketProvider(Provider):
 
     @property
     def scm_config_url(self) -> str:
-        return f""
+        return f"https://bitbucket.org/{self.inputs.workspace_name}/{self.inputs.repo_name}"

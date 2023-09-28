@@ -7,4 +7,4 @@ class BitbucketInputs(Inputs):
     client_key: str
     client_secret: str
     workspace_name: str
-    project_name: str
+    project_key: str

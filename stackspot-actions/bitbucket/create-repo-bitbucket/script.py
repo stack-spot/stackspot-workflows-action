@@ -75,7 +75,7 @@ class Runner:
         self.post_headers.update(self.get_headers)
 
         self.workspace_name = inputs.get("org")
-        self.project_name = inputs.get("project_name")
+        self.project_name = inputs.get("project_key")
         self.repo_name = inputs.get("name")
         self.is_private = inputs.get("visibility", "PRIVATE") == "PRIVATE"
 

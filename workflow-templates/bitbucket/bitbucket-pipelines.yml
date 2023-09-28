@@ -8,9 +8,10 @@ definitions:
         script:
           - |
 
-            execution_id=$(echo '${{ parameters.api_inputs }}' | jq -cr '.execution_id')
+            execution_id=$(echo $api_inputs | jq -cr '.execution_id')
+            secret_stk_login=$(echo $secrets | jq -cr '.secret_stk_login')
 
-            curl -o script.sh https://workflow-api.v1.stackspot.com/workflows/$execution_id --header 'Authorization: Bearer $(secret_stk_login)'
+            curl -o script.sh https://workflow-api.v1.stackspot.com/workflows/$execution_id --header "Authorization: Bearer $secret_stk_login"
             chmod +x script.sh
 
             echo "------------------------------------------------------------------------------------------"

@@ -14,7 +14,7 @@ spec:
   implementation: docs/implementation.md
   inputs:
     - label: Bitbucket project name
-      name: project_name
+      name: project_key
       type: text
       required: true
       help: Input the Bitbucket devOps project name, if it does not exist it will be created

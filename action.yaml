@@ -38,6 +38,14 @@ spec:
         value:
           - Azure
           - Gitlab
+
+    - label: Project Key
+      name: project_key
+      type: text
+      condition:
+        variable: provider
+        operator: containsAny
+        value:
           - Bitbucket
 
     - label: Organization Name
