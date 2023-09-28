@@ -10,11 +10,11 @@ from helpers.stk import Stk
 
 class AzureProvider(Provider):
     PIPELINE_NAME = "middle-flow"
-    clone_url_mask = "https://{org_name}:{pat}@dev.azure.com/{org_name}/{project_key}/_git/{repository_name}"
+    clone_url_mask = "https://{org_name}:{pat}@dev.azure.com/{org_name}/{project_name}/_git/{repository_name}"
 
     def __init__(self, stk: Stk, git: Git, http_client: HttpClient, **kwargs):
         super().__init__(stk=stk, git=git)
-        self.inputs: AzureInputs = AzureInputs(repo_name=kwargs.get("project_key"), **kwargs)
+        self.inputs: AzureInputs = AzureInputs(repo_name=kwargs.get("project_name"), **kwargs)
         self.api = AzureApiClient(http_client=http_client, pat=self.inputs.pat)
 
     @property
@@ -41,7 +41,7 @@ class AzureProvider(Provider):
             pr_source=self.inputs.ref_branch,
             pr_target="main"
         )
-        pr_mask = "https://dev.azure.com/{org_name}/{project_key}/_git/{repo_name}/pullrequest/{pr_id}"
+        pr_mask = "https://dev.azure.com/{org_name}/{project_name}/_git/{repo_name}/pullrequest/{pr_id}"
         return pr_mask.format(
             org_name=self.inputs.org_name,
             project_name=self.inputs.project_name,
