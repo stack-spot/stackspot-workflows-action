@@ -1,7 +1,7 @@
 import requests
 
 from provider import Inputs
-from errors import NotFoundError
+from helpers.exceptions import NotFoundError
 from provider.services.bitbucket.bitbucket_http import get, get_api_projects_builder, post, get_api_project_builder
 
 
@@ -33,14 +33,6 @@ class CouldNotSetProjectKeyError(BitbucketCreateRepoException):
 class GetProjectKeyGeneralError(BitbucketCreateRepoException):
     def __init__(self, err):
         super().__init__(f"An error occurred while fetching the project keys: {err}")
-
-
-def get_project_key_by_project_name(bitbucket_access_token: str, inputs: Inputs):
-    project_key = __project_exists(bitbucket_access_token, inputs)
-    if project_key:
-        return project_key
-
-    return __create_project(bitbucket_access_token, inputs)
 
 
 def __project_exists(bitbucket_access_token: str, inputs: Inputs):

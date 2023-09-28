@@ -1,89 +1,99 @@
 import logging
-import requests
 
-from .services.bitbucket_http import (
-    get,
-    get_api_pullrequests_url_builder,
-    post,
-)
-from .services.repository_pipeline_settings import (
-    create_or_update_repository_variables,
-    enable_repository_pipelines,
-)
-from .services.bitbucket_http import get_api_base_url_builder
-from errors import NotFoundError
-from handle_errors import handle_api_response_errors
+from helpers.git_helper import Git
+from helpers.http_client import HttpClient
+from helpers.stk import Stk
+from bitbucket.bitbucket_api_client import BitbucketApiClient
+from bitbucket.bitbucket_inputs import BitbucketInputs
 from provider import Provider
-from .services.project_create import get_project_key_by_project_name
 
 
-class BitBucketProvider(Provider):
-    def __init__(self):
-        super().__init__()
+class BitbucketProvider(Provider):
+    def __init__(self, stk: Stk, git: Git, http_client: HttpClient, **kwargs):
+        super().__init__(stk=stk, git=git)
+        self.inputs: BitbucketInputs = BitbucketInputs(**kwargs)
+        self.api = BitbucketApiClient(
+            http_client=http_client,
+            client_key=self.inputs.client_key,
+            client_secret=self.inputs.client_secret
+        )
         self.bitbucket_access_token = None
         self.project_key = None
 
-    def __repo_info(self, inputs: BitbucketInputs) -> dict:
-        return get(get_api_base_url_builder(inputs), self.bitbucket_access_token)
+    def _project_exists(self):
+        response = self.api.get_projects(workspace_name=self.inputs.workspace_name)
+        values = response.json().get("values", [])
+        project_exists = [
+            val
+            for val in values
+            if val.get("key") == self.inputs.project_name or val.get("name") == self.inputs.project_name
+        ]
+        if project_exists:
+            project = project_exists.pop()
+            self.project_key = project.get("key")
 
-    def execute_pre_setup_provider(self, inputs: BitbucketInputs):
-        self.__login_with_client_credentials(inputs)
-        self.project_key = get_project_key_by_project_name(
-            self.bitbucket_access_token, inputs
+    def extra_setup(self):
+        self.api.update_repository_pipeline(
+            workspace_name=self.inputs.workspace_name,
+            repository_name=self.inputs.repo_name
+        )
+        # self.create_or_update_repository_variables()
+
+    # def create_or_update_repository_variables(self):
+    #     repository_variables = self.api.get_repository_variables(
+    #         workspace_name=self.inputs.workspace_name,
+    #         repository_name=self.inputs.repo_name,
+    #     )
+    #
+    #     for pipeline_variable in PIPELINE_VARIABLES:
+    #         existing_pipeline_variable = [x for x in repository_variables["values"]
+    #                                       if pipeline_variable.key == x["key"]]
+    #         if existing_pipeline_variable:
+    #             existing_pipeline_variable = existing_pipeline_variable.pop()
+    #             if pipeline_variable.value != existing_pipeline_variable["value"]:
+    #                 __update_repository_variable(bitbucket_access_token, inputs, pipeline_variable,
+    #                                              existing_pipeline_variable["uuid"])
+    #             else:
+    #                 logging.info(f"Repository Variable Already Updated '{pipeline_variable.key}'")
+    #             continue
+    #
+    #         __create_repository_variable(bitbucket_access_token, inputs, pipeline_variable)
+
+    def execute_repo_creation(self):
+        self._project_exists()
+        self.api.create_repository(
+            workspace_name=self.inputs.workspace_name,
+            repository_name=self.inputs.repo_name,
+            project_key=self.project_key,
         )
 
-    def execute_provider_setup(self, inputs: BitbucketInputs):
-        enable_repository_pipelines(inputs, self.bitbucket_access_token)
-        create_or_update_repository_variables(inputs, self.bitbucket_access_token)
-        print(
-            f"\nSetup configured successfully on repository: {self.get_repository_url(inputs)}"
+    def repo_exists(self) -> bool:
+        response = self.api.get_repository(
+            workspace_name=self.inputs.workspace_name,
+            repository_name=self.inputs.repo_name,
+            raise_for_status=False,
         )
-
-    def execute_repo_creation(self, inputs: BitbucketInputs):
-        body = {
-            "scm": "git",
-            "is_private": True,
-            "project": {"key": self.project_key},
-        }
-        post(get_api_base_url_builder(inputs), self.bitbucket_access_token, body)
-
-    def repo_exists(self, inputs: BitbucketInputs) -> bool:
-        try:
-            self.__repo_info(inputs)
+        if response.ok:
             return True
-        except NotFoundError:
+        elif response.status_code == 404:
             return False
+        logging.info("Failure getting bitbucket repository!")
+        response.raise_for_status()
 
-    def get_repository_url(self, inputs: BitbucketInputs) -> str:
-        return (
-            f"https://bitbucket.org/{inputs.workspace_name}/{inputs.repo_name}"  # noqa E501
+    @property
+    def clone_url(self) -> str:
+        return f"https://x-token-auth:{self.api.authorization}@bitbucket.org/{self.inputs.workspace_name}/{self.inputs.repo_name}.git"  # noqa E501
+
+    def create_pull_request(self):
+        response = self.api.create_pull_request(
+            workspace_name=self.inputs.workspace_name,
+            repository_name=self.inputs.repo_name,
+            pr_title=self.inputs.pr_title,
+            pr_source=self.inputs.ref_branch,
+            pr_destination="main"
         )
+        return response.json()['links']['html']['href']
 
-    def clone_url(self, inputs: BitbucketInputs) -> str:
-        return f"https://x-token-auth:{self.bitbucket_access_token}@bitbucket.org/{inputs.workspace_name}/{inputs.repo_name}.git"  # noqa E501
-
-    def create_pull_request(self, inputs: BitbucketInputs) -> str:
-        logging.info(f"Creating pull request from {inputs.ref_branch} to main branch.")
-        body = {
-            "title": "Stackspot Update workflow configuration.",
-            "source": {"branch": {"name": inputs.ref_branch}},
-            "destination": {"branch": {"name": "main"}},
-        }
-        response = post(
-            get_api_pullrequests_url_builder(inputs), self.bitbucket_access_token, body
-        )
-
-        if response and "links" in response:
-            logging.info(
-                f"Pull request created at: {response['links']['html']['href']}"
-            )
-
-    def __login_with_client_credentials(self, inputs: BitbucketInputs):
-        response = requests.post(
-            url="https://bitbucket.org/site/oauth2/access_token",
-            data={"grant_type": "client_credentials"},
-            auth=(inputs.client_key, inputs.client_secret),
-        )
-        handle_api_response_errors(response)
-        response_json = response.json()
-        self.bitbucket_access_token = response_json["access_token"]
+    @property
+    def scm_config_url(self) -> str:
+        return f""

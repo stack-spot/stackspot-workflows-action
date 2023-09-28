@@ -1,20 +1,14 @@
-{% set runners %}
-{% if use_self_hosted_pool %}
-{% set self_hosted_pool_names = self_hosted_pool_name.split(',') %}
-{{"\n"}}        runs-on:
-{%- for self_hosted_pool_name in self_hosted_pool_names %}
-{{"\n"}}          - {{self_hosted_pool_name}}
-{%- endfor %}
-{% endif %}
-{% endset %}
+{%- raw -%}
 image: atlassian/default-image:3
 
 definitions:
   steps:
     - step: &run
-        name: 'Run workflow api script'{{runners}}
+        name: 'Run workflow api script'
         script:
-          - execution_id=$(echo '${{ parameters.api_inputs }}' | jq -cr '.execution_id')
+          - |
+
+            execution_id=$(echo '${{ parameters.api_inputs }}' | jq -cr '.execution_id')
 
             curl -o script.sh https://workflow-api.v1.stackspot.com/workflows/$execution_id --header 'Authorization: Bearer $(secret_stk_login)'
             chmod +x script.sh
@@ -39,3 +33,5 @@ pipelines:
         - name: default_branch
           default: main
       - step: *run
+
+{% endraw %}

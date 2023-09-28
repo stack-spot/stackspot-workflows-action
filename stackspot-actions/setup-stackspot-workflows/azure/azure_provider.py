@@ -1,17 +1,19 @@
 import logging
 
-from http_client import HttpClient
+from helpers.git_helper import Git
+from helpers.http_client import HttpClient
 from provider import Provider
 from azure.azure_inputs import AzureInputs
 from azure.azure_api_client import AzureApiClient
+from helpers.stk import Stk
 
 
 class AzureProvider(Provider):
     PIPELINE_NAME = "middle-flow"
     clone_url_mask = "https://{org_name}:{pat}@dev.azure.com/{org_name}/{project_name}/_git/{repository_name}"
 
-    def __init__(self, http_client: HttpClient, **kwargs):
-        super().__init__()
+    def __init__(self, stk: Stk, git: Git, http_client: HttpClient, **kwargs):
+        super().__init__(stk=stk, git=git)
         self.inputs: AzureInputs = AzureInputs(repo_name=kwargs.get("project_name"), **kwargs)
         self.api = AzureApiClient(http_client=http_client, pat=self.inputs.pat)
 
@@ -22,44 +24,39 @@ class AzureProvider(Provider):
             project_name=self.inputs.project_name,
             repository_name=self.inputs.project_name,
         )
-        if response.ok:
-            return response.json()["id"]
-        logging.info("Failure getting repository id to refer pipeline yaml")
-        response.raise_for_status()
+        return response.json()["id"]
 
     @property
     def project_id(self) -> str:
         response = self.api.get_project(org_name=self.inputs.org_name, project_name=self.inputs.project_name)
-        if response.ok:
-            return response.json()["id"]
-        logging.info(f"Failure getting project id: {self.inputs.org_name}/{self.inputs.project_name}")
-        response.raise_for_status()
+        return response.json()["id"]
 
-    def create_pull_request(self):
+    def create_pull_request(self) -> str:
         response = self.api.create_pull_request(
-            repository_id=self.repository_id,
+            org_name=self.inputs.org_name,
+            respository_name=self.inputs.repo_name,
+            project_name=self.inputs.project_name,
             pr_title=self.inputs.pr_title,
             pr_description=self.inputs.pr_title,
             pr_source=self.inputs.ref_branch,
             pr_target="main"
         )
-        if response.ok:
-            return
-        logging.info(f"Failure creating pr from: {self.inputs.ref_branch} to: main")
-        response.raise_for_status()
+        pr_mask = "https://dev.azure.com/{org_name}/{project_name}/_git/{repo_name}/pullrequest/{pr_id}"
+        return pr_mask.format(
+            org_name=self.inputs.org_name,
+            project_name=self.inputs.project_name,
+            repo_name=self.inputs.repo_name,
+            pr_id=response.json()["pullRequestId"]
+        )
 
     def execute_repo_creation(self):
-        response = self.api.create_project(
+        self.api.create_project(
             org_name=self.inputs.org_name,
             project_name=self.inputs.project_name,
         )
-        if response.ok:
-            return
-        logging.info(f"Failure creating {self.inputs.project_name} into {self.inputs.org_name} organization!")
-        response.raise_for_status()
 
     def repo_exists(self) -> bool:
-        response = self.api.get_project(org_name=self.inputs.org_name, project_name=self.inputs.project_name)
+        response = self.api.get_project(org_name=self.inputs.org_name, project_name=self.inputs.project_name, raise_for_status=False)
         if response.ok:
             return True
         elif response.status_code == 404:
@@ -67,6 +64,7 @@ class AzureProvider(Provider):
         logging.info(f"Failure getting azure project: {self.inputs.org_name}/{self.inputs.project_name}")
         response.raise_for_status()
 
+    @property
     def clone_url(self) -> str:
         return self.clone_url_mask.format(
             org_name=self.inputs.org_name,
@@ -80,7 +78,8 @@ class AzureProvider(Provider):
             org_name=self.inputs.org_name,
             project_name=self.inputs.project_name,
             repository_id=self.repository_id,
-            pipeline_name=self.PIPELINE_NAME
+            pipeline_name=self.PIPELINE_NAME,
+            raise_for_status=False
         )
         if response.ok:
             return
@@ -94,7 +93,8 @@ class AzureProvider(Provider):
             org_name=self.inputs.org_name,
             project_name=self.inputs.project_name,
             github_pat=self.inputs.github_pat,
-            project_id=self.project_id
+            project_id=self.project_id,
+            raise_for_status=False
         )
         if response.status_code == 500 and "DuplicateServiceConnectionException" in response.json().get("typeName"):
             logging.info("Git connection already exists with name stackspot_github_connection")
@@ -104,23 +104,16 @@ class AzureProvider(Provider):
             response.raise_for_status()
         endpoint_id = response.json()["id"]
 
-        response = self.api.update_pipeline_permission_endpoint(
+        self.api.update_pipeline_permission_endpoint(
             org_name=self.inputs.org_name,
             project_name=self.inputs.project_name,
             endpoint_id=endpoint_id
         )
-        if response.ok:
-            return
-        logging.info("Failure giving permission to pipeline with the new service endpoint connection")
-        response.raise_for_status()
 
-    def execute_provider_setup(self):
+    def extra_setup(self):
         self._create_pipeline()
         self._setup_github_connection()
 
     @property
     def scm_config_url(self) -> str:
         return f"https://dev.azure.com/{self.inputs.org_name}/{self.inputs.project_name}"
-
-    def execute_pre_setup_provider(self):
-        pass

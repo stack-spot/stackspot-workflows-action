@@ -13,31 +13,6 @@ PIPELINE_VARIABLES = [
 ]
 
 
-def enable_repository_pipelines(inputs: Inputs, bitbucket_access_token: str):
-    print()
-    logging.info(f"Enabling pipelines of repository {inputs.repo_name}")
-    body = {"enabled": True}
-    put(get_api_pipeline_config_url_builder(inputs), bitbucket_access_token, body)
-
-
-def create_or_update_repository_variables(inputs: Inputs, bitbucket_access_token: str):
-    repository_variables = __get_repository_variables(bitbucket_access_token, inputs)
-
-    for pipeline_variable in PIPELINE_VARIABLES:
-        existing_pipeline_variable = [x for x in repository_variables["values"]
-                                      if pipeline_variable.key == x["key"]]
-        if existing_pipeline_variable:
-            existing_pipeline_variable = existing_pipeline_variable.pop()
-            if pipeline_variable.value != existing_pipeline_variable["value"]:
-                __update_repository_variable(bitbucket_access_token, inputs, pipeline_variable,
-                                             existing_pipeline_variable["uuid"])
-            else:
-                logging.info(f"Repository Variable Already Updated '{pipeline_variable.key}'")
-            continue
-
-        __create_repository_variable(bitbucket_access_token, inputs, pipeline_variable)
-
-
 def __create_repository_variable(bitbucket_access_token: str, inputs: Inputs, pipeline_variable: PipelineVariable):
     logging.info(f"Creating Repository Variable '{pipeline_variable.key}'")
 
