@@ -123,7 +123,7 @@ def run(metadata):
     base_url = f"https://dev.azure.com/{inputs.get('org')}"
     headers = {"Authorization": f"Basic {auth}"}
 
-    project_name = inputs.get("project_key")
+    project_name = inputs.get("project_name")
     repo_name = inputs.get("name")
 
     if not project_exists(project_name):
