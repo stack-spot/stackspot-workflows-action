@@ -4,7 +4,6 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class Inputs:
     repo_name: str
-    create_repo: str
     provider: str
     ref_branch: str
     target_path: str

@@ -1,6 +1,8 @@
 import logging
 
-from http_client import HttpClient
+from helpers.git_helper import Git
+from helpers.http_client import HttpClient
+from helpers.stk import Stk
 from provider import Provider
 from github.github_api_client import GithubApiClient
 from github.github_inputs import GithubInputs
@@ -9,8 +11,8 @@ from github.github_inputs import GithubInputs
 class GithubProvider(Provider):
     clone_url_mask = "https://git:{pat}@github.com/{org_name}/{repo_name}.git"
 
-    def __init__(self, http_client: HttpClient, **kwargs):
-        super().__init__()
+    def __init__(self, stk: Stk, git: Git, http_client: HttpClient, **kwargs):
+        super().__init__(stk=stk, git=git)
         self.inputs: GithubInputs = GithubInputs(**kwargs)
         self.api = GithubApiClient(http_client=http_client, pat=self.inputs.pat)
         self.callback_url = "https://workflow-api.v1.stackspot.com/workflows/github/callback"
@@ -32,14 +34,10 @@ class GithubProvider(Provider):
         response.raise_for_status()
 
     def execute_repo_creation(self):
-        response = self.api.create_repository(org_name=self.inputs.org_name, repo_name=self.inputs.repo_name)
-        if response.ok:
-            return
-        logging.info("Failure creating github repository!")
-        response.raise_for_status()
+        self.api.create_repository(org_name=self.inputs.org_name, repo_name=self.inputs.repo_name)
 
     def repo_exists(self) -> bool:
-        response = self.api.get_repository(org_name=self.inputs.org_name, repo_name=self.inputs.repo_name)
+        response = self.api.get_repository(org_name=self.inputs.org_name, repo_name=self.inputs.repo_name, raise_for_status=False)
         if response.ok:
             return True
         elif response.status_code == 404:
@@ -47,6 +45,7 @@ class GithubProvider(Provider):
         logging.info("Failure getting github repository!")
         response.raise_for_status()
 
+    @property
     def clone_url(self) -> str:
         return self.clone_url_mask.format(
             pat=self.inputs.pat,
@@ -54,8 +53,7 @@ class GithubProvider(Provider):
             repo_name=self.inputs.repo_name
         )
 
-    def create_pull_request(self):
-        logging.info(f"Creating pull request from {self.inputs.ref_branch} to main brancn.")
+    def create_pull_request(self) -> str:
         response = self.api.create_pull_request(
             org_name=self.inputs.org_name,
             repo_name=self.inputs.repo_name,
@@ -63,13 +61,9 @@ class GithubProvider(Provider):
             head=self.inputs.ref_branch,
             base="main"
         )
-        if response.ok:
-            logging.info(f"Pull request created at: {response.json()['html_url']}")
-            return
-        logging.info("Failure creating github pull request")
-        response.raise_for_status()
+        return response.json()['url']
 
-    def execute_provider_setup(self):
+    def extra_setup(self):
         if not self.hook_exists:
             logging.info("Webhook not found.")
             logging.info("Setting up repository webhook...")
@@ -88,6 +82,3 @@ class GithubProvider(Provider):
     @property
     def scm_config_url(self) -> str:
         return f"https://github.com/{self.inputs.org_name}/{self.inputs.repo_name}"
-
-    def execute_pre_setup_provider(self):
-        pass
