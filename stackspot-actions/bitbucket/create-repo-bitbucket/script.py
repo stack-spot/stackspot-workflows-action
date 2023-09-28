@@ -82,10 +82,10 @@ class Runner:
     def __call__(self) -> Any:
         self.__workspace_exists()
         if not self.__repository_exists():
-            project_name = self.__project_exists()
-            if not project_name:
-                project_name = self.__create_project()
-            self.__create_repository(project_name)
+            project_key = self.__project_exists()
+            if not project_key:
+                project_key = self.__create_project()
+            self.__create_repository(project_key)
 
     def __workspace_exists(self):
         """
@@ -166,7 +166,7 @@ class Runner:
                 return None
             raise GetProjectGeneralError(e)
 
-    def __project_name_exists(self, key: str):
+    def __project_key_exists(self, key: str):
         """
         Checks if the project key exists
         """
@@ -201,10 +201,10 @@ class Runner:
 
         maximum_name_length = len(cleaned_project_name) - 4
         key = cleaned_project_name[:3]
-        if self.__project_name_exists(key):
+        if self.__project_key_exists(key):
             for i in range(maximum_name_length):
                 key = cleaned_project_name[i + 1 : i + 4]
-                if i < maximum_name_length and self.__project_name_exists(key):
+                if i < maximum_name_length and self.__project_key_exists(key):
                     continue
                 elif i > maximum_name_length:
                     raise CouldNotSetProjectKeyError()
@@ -226,18 +226,18 @@ class Runner:
 
         return key
 
-    def __create_repository(self, project_name: str):
+    def __create_repository(self, project_key: str):
         """
         Creates a new repository on bitbucket
         """
-        print(f"> Creating repository '{self.repo_name}' in the project {project_name}.")
+        print(f"> Creating repository '{self.repo_name}' in the project {project_key}.")
 
         url = f"{self.base_url}/repositories/{self.workspace_name}/{self.repo_name}"
 
         payload = json.dumps(
             {
                 "scm": "git",
-                "project": {"key": project_name},
+                "project": {"key": project_key},
                 "is_private": self.is_private,
             }
         )
