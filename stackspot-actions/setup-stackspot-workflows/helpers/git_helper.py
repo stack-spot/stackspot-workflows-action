@@ -63,3 +63,7 @@ class Git:
             text=True,
         )
         return bool(result.stdout)
+
+    @staticmethod
+    def init():
+        subprocess.run(["git", "init"])
