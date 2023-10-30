@@ -86,6 +86,7 @@ class Provider(ABC):
 
     def save_files_repository(self) -> Optional[str]:
         working_branch = "main"
+        self.git.init()
         if self.git.main_exists():
             self.git.checkout(self.inputs.ref_branch)
             working_branch = self.inputs.ref_branch
