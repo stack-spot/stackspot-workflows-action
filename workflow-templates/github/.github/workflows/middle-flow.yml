@@ -1,0 +1,44 @@
+{%- raw -%}
+name: Stackspot workflow dispatch
+run-name: ${{ inputs.correlation_id }}
+on: 
+  workflow_dispatch:
+    inputs:
+      correlation_id:
+        description: Correlation id
+        required: true
+      workflow_name:
+        description: Workflow path
+        required: true
+      secrets:
+        description: Secrets info (json)
+        required: true
+      api_inputs:
+        description: Workflow inputs (json)
+        required: true
+jobs:
+  run:
+    name: Run workflow ${{ github.event.inputs.workflow_name }}
+    runs-on: ubuntu-latest
+    env:
+      HTTP_ENABLE_DEBUG: false
+    steps:
+      - name: Running ${{ inputs.workflow_name }}
+        run: |
+          secret_stk_login=$(echo '${{ inputs.secrets }}' | jq -cr '.cli_token')
+          execution_id=$(echo '${{ inputs.api_inputs }}' | jq -cr '.execution_id')
+
+          curl -o script.sh https://workflow-api.qa.stackspot.com/workflows/$execution_id --header "Authorization: Bearer $secret_stk_login"
+          chmod +x script.sh
+
+          echo "------------------------------------------------------------------------------------------"
+          echo "---------------------------------------- Starting ----------------------------------------"
+          echo "------------------------------------------------------------------------------------------"
+
+          bash script.sh
+
+          echo "------------------------------------------------------------------------------------------"
+          echo "----------------------------------------  Ending  ----------------------------------------"
+          echo "------------------------------------------------------------------------------------------"
+
+{% endraw %}

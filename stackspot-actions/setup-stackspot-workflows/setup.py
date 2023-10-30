@@ -1,5 +1,6 @@
 import logging
 from dataclasses import fields
+import time
 from typing import Protocol, Mapping
 
 import questionary
@@ -7,7 +8,8 @@ from templateframework.prompt.validation import NotEmpty
 
 from provider.bitbucket import BitBucketProvider
 from provider import Inputs, Provider
-from provider.errors import RepoAlreadyExistsError, UnauthorizedError, RepoDoesNotExistError, GitUserSetupError
+from provider.errors import RepoAlreadyExistsError, UnauthorizedError, RepoDoesNotExistError, GitUserSetupError, \
+    WorkspaceShouldNotInUseError, ApplyPluginSetupRepositoryError
 from provider.github import GithubProvider
 from provider.azure import AzureProvider
 
@@ -35,8 +37,8 @@ PROVIDERS: Mapping[str, Provider] = {
 
 
 class NotEmptyStripped(NotEmpty):
-    def valid(self, value: str) -> bool:
-        return super().valid(value.strip())
+    def is_valid(self, value: str) -> bool:
+        return super().is_valid(value.strip())
 
 
 def __ask_self_hosted_pool_names(inputs):
@@ -75,10 +77,12 @@ def __parse_inputs(metadata: Metadata) -> Inputs:
     inputs = metadata.inputs
     inputs = __ask_self_hosted_pool_names(inputs)
     field_values = {field.name: inputs.get(field.name) for field in fields(Inputs)}
+    timestamp = int(time.time())
     kwargs = {
         **field_values,
         "component_path": metadata.component_path,
         "target_path": metadata.target_path,
+        "ref_branch": f"stackspot/setup-scm-{timestamp}"
     }
     return Inputs(**kwargs)
 
@@ -86,6 +90,7 @@ def __parse_inputs(metadata: Metadata) -> Inputs:
 def run(metadata: Metadata):
     print()
     try:
+        print("hello!")
         inputs = __parse_inputs(metadata)
         provider = PROVIDERS[inputs.provider]
         provider.setup(inputs)
@@ -95,6 +100,12 @@ def run(metadata: Metadata):
         logging.error("Repository already exists!")
     except RepoDoesNotExistError:
         logging.error("Repository provided doesn't exist and creation was not requested!")
+    except WorkspaceShouldNotInUseError:
+        logging.error("Workspace should not be in use!")
+    except ApplyPluginSetupRepositoryError:
+        # Exception handling is ignored due to
+        # apply plugin command has already generated an output message
+        pass
     except GitUserSetupError:
         logging.error(GIT_USER_SETUP_ERROR_MESSAGE)
     except:

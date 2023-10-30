@@ -1,0 +1,55 @@
+name: Middle Flow
+run-name: ${{ inputs.workflow_name }}
+on: 
+  workflow_call:
+    inputs:
+      correlation_id:
+        description: Correlation id
+        type: string
+        required: true
+      workflow_name:
+        description: Workflow path
+        type: string
+        required: true
+      api_inputs:
+        description: Workflow inputs (json)
+        type: string
+        required: true
+      config:
+        description: Workflow config
+        type: string
+        required: true
+    secrets:
+      secrets:
+        description: Secrets info (json)
+        required: true
+
+jobs:
+  run:
+    name: Run workflow ${{ inputs.workflow_name }}
+    runs-on: ${{ fromJson(inputs.config).runner }}
+    env:
+      LANG: C.UTF-8
+      LANGUAGE: C.UTF-8
+      LC_ALL: C.UTF-8
+      PYTHONIOENCODING: utf-8
+      HTTP_ENABLE_DEBUG: true
+    steps:
+      - name: Running ${{ inputs.workflow_name }}
+        run: |
+          cat /etc/default/locale
+          secret_stk_login=$(echo '${{ secrets.secrets }}' | jq -cr '.cli_token')
+          execution_id=$(echo '${{ inputs.api_inputs }}' | jq -cr '.execution_id')
+
+          curl -o script.sh https://workflow-api.qa.stackspot.com/workflows/$execution_id --header "Authorization: Bearer $secret_stk_login"
+          chmod +x script.sh
+
+          echo "------------------------------------------------------------------------------------------"
+          echo "---------------------------------------- Starting ----------------------------------------"
+          echo "------------------------------------------------------------------------------------------"
+
+          bash script.sh
+
+          echo "------------------------------------------------------------------------------------------"
+          echo "----------------------------------------  Ending  ----------------------------------------"
+          echo "------------------------------------------------------------------------------------------"

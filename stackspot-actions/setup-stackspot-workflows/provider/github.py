@@ -1,5 +1,8 @@
+from urllib import response
 import requests
 import logging
+
+from .provider import Inputs
 from .errors import NotFoundError
 from .handle_errors import handle_api_response_errors
 from .provider import Provider, Inputs
@@ -35,6 +38,27 @@ class GithubProvider(Provider):
             .path(inputs.repo_name)
         )
         return self.__get(url_builder, inputs)
+
+    def __hook_exists(self, inputs: Inputs, callback_url: str) -> bool:
+        url_builder = (
+            UrlBuilder(inputs)
+            .path("repos")
+            .path(inputs.org_name)
+            .path(inputs.repo_name)
+            .path("hooks")
+        )
+
+        logging.info("Checking if webhook is already configured...")
+
+        webhooks_list_response = self.__get(url_builder, inputs)
+
+        workflow_hook = [
+            hook
+            for hook in webhooks_list_response
+            if "config" in hook and hook["config"]["url"] == callback_url
+        ]
+
+        return bool(workflow_hook)
 
     def __get(self, url_builder: UrlBuilder, inputs: Inputs) -> dict:
         response = requests.get(
@@ -83,24 +107,46 @@ class GithubProvider(Provider):
     def clone_url(self, inputs: Inputs) -> str:
         return f"https://git:{inputs.pat}@github.com/{inputs.org_name}/{inputs.repo_name}.git"
 
-    def execute_provider_setup(self, inputs: Inputs):
-        logging.info("Setting up repository webhook...")
-        callback_url = "https://workflow-api.v1.stackspot.com/workflows/github/callback"
+    def create_pull_request(self, inputs: Inputs) -> str:
+        logging.info(f"Creating pull request from {inputs.ref_branch} to main brancn.")
         url_builder = (
             UrlBuilder(inputs)
             .path("repos")
             .path(inputs.org_name)
             .path(inputs.repo_name)
-            .path("hooks")
+            .path("pulls")
         )
-        body = {
-            "name": "web",
-            "active": True,
-            "events": ["workflow_job", "workflow_run"],
-            "config": {
-                "url": callback_url,
-                "content_type": "json",
-                "insecure_ssl": "0",
-            },
+
+        data = {
+            "title": "Stackspot Update workflow configuration.",
+            "head": inputs.ref_branch,
+            "base": "main",
         }
-        self.__post(url_builder, inputs, body)
+        response = self.__post(url_builder, inputs, data)
+        if response and "html_url" in response:
+            logging.info(f"Pull request created at: {response['html_url']}")
+
+    def execute_provider_setup(self, inputs: Inputs):
+        callback_url = "https://workflow-api.v1.stackspot.com/workflows/github/callback"
+        if not self.__hook_exists(inputs, callback_url):
+            logging.info("Setting up repository webhook...")
+            url_builder = (
+                UrlBuilder(inputs)
+                .path("repos")
+                .path(inputs.org_name)
+                .path(inputs.repo_name)
+                .path("hooks")
+            )
+            body = {
+                "name": "web",
+                "active": True,
+                "events": ["workflow_job", "workflow_run"],
+                "config": {
+                    "url": callback_url,
+                    "content_type": "json",
+                    "insecure_ssl": "0",
+                },
+            }
+            self.__post(url_builder, inputs, body)
+        else:
+            logging.info("Webhook is already configured.")
