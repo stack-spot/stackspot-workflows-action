@@ -1,6 +1,7 @@
 import requests
 import time
 import base64
+import json
 
 def get_projectid_by_name(project_name):
     """
@@ -15,6 +16,7 @@ def get_projectid_by_name(project_name):
     if response.status_code == 404:
         return None
     response.raise_for_status()
+
 
 def project_exists(project_name):
     """
@@ -31,6 +33,7 @@ def project_exists(project_name):
     
     print(f"The project does not exist.")
     return False
+
 
 def create_project(project_name):
     """
@@ -71,6 +74,7 @@ def create_project(project_name):
     else:
         response.raise_for_status()
 
+
 def repository_exists(project_name, repo_name):
     """
     Checks if a repository exists in an Azure DevOps project with the specified name.
@@ -84,12 +88,13 @@ def repository_exists(project_name, repo_name):
         print(f"The repository already exists.")
         repo = response.json().get("remoteUrl")
         print(f"Exporting to pipeline git url variable...")
-        print(f"##vso[task.setvariable variable=create_repo;]{repo}")
+        export_repository_url(repo)
         return True
     elif response.status_code == 404:
         print(f"The repository does not exist.")
         return False
     response.raise_for_status()
+
 
 def create_repository(project_name, repo_name):
     """
@@ -110,11 +115,30 @@ def create_repository(project_name, repo_name):
         repo_url=response.json().get("remoteUrl")
         print(f"The {repo_name} repository successfully created.\n{repo_url}")
         print(f"Exporting to pipeline git url variable...")
-        print(f"##vso[task.setvariable variable=create_repo;]{repo_url}")
+        export_repository_url(repo_url)
         return
     raise Exception(f"Error: Failed to create {repo_name} repository. {response.text}")
 
-def run(metadata):
+
+def export_repository_url(repository_url):
+    output_file_name = "stk-local-context.json"
+    """
+    Exports Azure repository URL to STK local context in the disk
+    """
+    data = {
+        "outputs": {
+            "created_repository": repository_url
+        }
+    }
+    with open(output_file_name, "w") as file:
+        json.dump(data, file, indent=4)
+
+
+def run (metadata):
+    export_repository_url("github.com/fabiano")
+
+
+def run2(metadata):
     global base_url
     global headers
     inputs = metadata.inputs
@@ -124,7 +148,7 @@ def run(metadata):
     headers = {"Authorization": f"Basic {auth}"}
 
     project_name = inputs.get("project_name")
-    repo_name = inputs.get("name")
+    repo_name = inputs.get("repository_name")
 
     if not project_exists(project_name):
         create_project(project_name)
