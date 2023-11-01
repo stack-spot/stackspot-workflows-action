@@ -133,12 +133,7 @@ def export_repository_url(repository_url):
     with open(output_file_name, "w") as file:
         json.dump(data, file, indent=4)
 
-
-def run (metadata):
-    export_repository_url("github.com/fabiano")
-
-
-def run2(metadata):
+def run(metadata):
     global base_url
     global headers
     inputs = metadata.inputs
