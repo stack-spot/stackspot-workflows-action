@@ -15,7 +15,7 @@ class GithubProvider(Provider):
         super().__init__(stk=stk, git=git)
         self.inputs: GithubInputs = GithubInputs(**kwargs)
         self.api = GithubApiClient(http_client=http_client, pat=self.inputs.pat)
-        self.callback_url = "https://workflow-api.v1.stackspot.com/workflows/github/callback"
+        self.callback_url = "https://workflow-workflow-api.dev.stackspot.com/workflows/github/callback"
 
     @property
     def hook_exists(self) -> bool:
