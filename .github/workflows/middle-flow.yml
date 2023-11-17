@@ -40,7 +40,7 @@ jobs:
           secret_stk_login=$(echo '${{ secrets.secrets }}' | jq -cr '.cli_token')
           execution_id=$(echo '${{ inputs.api_inputs }}' | jq -cr '.execution_id')
 
-          http_code=$(curl -s -o script.sh -w '%{http_code}' https://workflow-api.v1.stackspot.com/workflows/$execution_id --header "Authorization: Bearer $secret_stk_login";)
+          http_code=$(curl -s -o script.sh -w '%{http_code}' https://workflow-workflow-api.stg.stackspot.com/workflows/$execution_id --header "Authorization: Bearer $secret_stk_login";)
           if [[ "$http_code" -ne "200" ]]; then
               echo "------------------------------------------------------------------------------------------"
               echo "---------------------------------------- Debug Starting ----------------------------------"
