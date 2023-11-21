@@ -63,6 +63,9 @@ class Provider(ABC):
             self.stk.exit_workspace()
         return True
 
+    def create_project(self):
+        ...
+
     def create_repository(self):
         if self.repo_exists():
             return

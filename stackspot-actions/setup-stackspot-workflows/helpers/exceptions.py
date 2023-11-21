@@ -16,3 +16,8 @@ class ApplyPluginSetupRepositoryException(ActionException):
 class RepositoryNeedsToExists(ActionException):
     def __init__(self):
         super().__init__(msg="Repository needs to exist! Quiting...")
+
+
+class ProjectNeedsToExists(ActionException):
+    def __init__(self):
+        super().__init__(msg="Project needs to exist! Quiting...")

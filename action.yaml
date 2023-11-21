@@ -67,6 +67,7 @@ spec:
         value:
           - Github
           - Bitbucket
+          - Azure
 
     - label: Group Name
       name: group_name
