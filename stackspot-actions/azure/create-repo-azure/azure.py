@@ -19,11 +19,11 @@ class AzureCreateRepository:
         response = requests.get(url, headers=self.api_headers)
 
         if response.status_code == 200:
-            logger.info("The project already exists.")
+            logger.debug("The project already exists.")
             return response.json()
 
         if response.status_code == 404:
-            logger.info("The project does not exist.")
+            logger.debug("The project does not exist.")
             return None
 
         logger.info("Failure getting project.")
@@ -35,11 +35,11 @@ class AzureCreateRepository:
         response = requests.get(url, headers=self.api_headers)
 
         if response.status_code == 200:
-            logger.info("The repository already exists.")
+            logger.debug("The repository already exists.")
             return response.json()
 
         elif response.status_code == 404:
-            logger.info("The repository does not exist.")
+            logger.debug("The repository does not exist.")
             return None
 
         logger.info("Failure getting repository.")
@@ -60,14 +60,14 @@ class AzureCreateRepository:
 
         url = response.json().get("url")
         for i in range(15):
-            logger.info(f"Waiting to finalize the provisioning...")
+            logger.debug(f"Waiting to finalize the provisioning...")
             time.sleep(5)
             response_check = requests.get(url, headers=self.api_headers)
             status = response_check.json().get("status")
             if status in ["provisioning", "inProgress"]:
                 continue
             if status == "succeeded":
-                logger.info(f"The '{project_name}' project successfully created.")
+                logger.debug(f"The '{project_name}' project successfully created.")
                 return response.json()
             else:
                 raise Exception(f"Error: Failed to create '{project_name}' project. Status: {status}")
@@ -78,12 +78,16 @@ class AzureCreateRepository:
         url = f"{self.api_base_url}/_apis/git/repositories?api-version=7.0"
         response = requests.post(url, headers=self.api_headers, json=dict(name=repo_name, project=dict(id=project_id)))
         response.raise_for_status()
-        print(f"The '{repo_name}' repository successfully created.")
+        logger.debug(f"The '{repo_name}' repository successfully created.")
         return response.json()
 
     def __call__(self, project_name: str, repo_name: str) -> str:
-        project = self.get_project(project_name=project_name) or self.create_project(project_name=project_name)
+        project = self.get_project(project_name=project_name)
+        if not project:
+            self.create_project(project_name=project_name)
+            project = self.get_project(project_name=project_name)
         project_id = project.get("id")
+
         repository = (self.get_repository(project_name=project_name, repo_name=repo_name) or
                       self.create_repository(project_id=project_id, repo_name=repo_name))
         return repository.get("remoteUrl")
