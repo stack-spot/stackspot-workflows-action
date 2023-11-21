@@ -7,4 +7,3 @@ class AzureInputs(Inputs):
     pat: str
     org_name: str
     project_name: str
-    github_pat: str

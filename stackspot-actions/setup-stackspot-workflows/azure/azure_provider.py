@@ -88,31 +88,8 @@ class AzureProvider(Provider):
             return
         response.raise_for_status()
 
-    def _setup_github_connection(self):
-        response = self.api.create_service_endpoint(
-            org_name=self.inputs.org_name,
-            project_name=self.inputs.project_name,
-            github_pat=self.inputs.github_pat,
-            project_id=self.project_id,
-            raise_for_status=False
-        )
-        if response.status_code == 500 and "DuplicateServiceConnectionException" in response.json().get("typeName"):
-            logging.info("Git connection already exists with name stackspot_github_connection")
-            return
-        if not response.ok:
-            logging.info("Failure creating service endpoint to git connection")
-            response.raise_for_status()
-        endpoint_id = response.json()["id"]
-
-        self.api.update_pipeline_permission_endpoint(
-            org_name=self.inputs.org_name,
-            project_name=self.inputs.project_name,
-            endpoint_id=endpoint_id
-        )
-
     def extra_setup(self):
         self._create_pipeline()
-        self._setup_github_connection()
 
     @property
     def scm_config_url(self) -> str:
