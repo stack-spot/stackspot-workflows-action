@@ -8,6 +8,7 @@ from provider import Provider
 def setup(provider: Provider):
     provider.validate_environment()
     cwd = os.getcwd()
+    provider.create_project()
     provider.create_repository()
     try:
         provider.clone_repository()

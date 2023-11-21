@@ -5,6 +5,7 @@ CREATE_PROJECT_SERVICE_URL = "https://{domain}/{org_name}/_apis/projects/{projec
 GET_PROJECT_SERVICE_URL = "https://{domain}/{org_name}/_apis/projects/{project_name}"
 CREATE_PULL_REQUEST_SERVICE_URL = "https://{domain}/{org_name}/{project_name}/_apis/git/repositories/{respository_name}/pullrequests"
 CREATE_PIPELINE_SERVICE_URL = "https://{domain}/{org_name}/{project_name}/_apis/pipelines"
+CREATE_REPOSITORY_SERVICE_URL = "https://{domain}/{org_name}/_apis/git/repositories"
 GET_REPOSITORY_ID_SERVICE_URL = "https://{domain}/{org_name}/{project_name}/_apis/git/repositories/{repository_name}"
 CREATE_SERVICE_ENDPOINT_SERVICE_URL = "https://{domain}/{org_name}/{project_name}/_apis/serviceendpoint/endpoints"
 UPDATE_PIPELINE_PERMISSION_ENDPOINT_SERVICE_URL = "https://{domain}/{org_name}/{project_name}/_apis/pipelines/pipelinePermissions/endpoint/{endpoint_id}"
@@ -40,13 +41,13 @@ class AzureApiClient:
             raise_for_status=raise_for_status,
         )
 
-    def get_repository(self, org_name: str, project_name: str, repository_name: str) -> requests.Response:
+    def get_repository(self, org_name: str, project_name: str, repository_name: str, raise_for_status: bool = True) -> requests.Response:
         return self.http_client.get(
             url=GET_REPOSITORY_ID_SERVICE_URL.format(domain=self.domain, org_name=org_name, project_name=project_name, repository_name=repository_name),
             params=self.api_version,
             headers=self.authorization,
             title="azure get repository",
-            raise_for_status=True,
+            raise_for_status=raise_for_status,
         )
 
     def get_project(self, org_name: str, project_name: str, raise_for_status: bool = True) -> requests.Response:
@@ -75,6 +76,21 @@ class AzureApiClient:
                 },
             },
             title="azure create project",
+            raise_for_status=True,
+        )
+
+    def create_repository(self, org_name: str, project_id: str, repository_name: str) -> requests.Response:
+        return self.http_client.post(
+            url=CREATE_REPOSITORY_SERVICE_URL.format(domain=self.domain, org_name=org_name),
+            params=self.api_version,
+            headers=self.authorization,
+            json={
+                "name": repository_name,
+                "project": {
+                    "id": project_id
+                }
+            },
+            title="azure create repository",
             raise_for_status=True,
         )
 

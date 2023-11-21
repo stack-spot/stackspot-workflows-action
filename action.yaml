@@ -58,15 +58,6 @@ spec:
           - Azure
           - Github
 
-    - label: Personal Access Token (Github)
-      name: github_pat
-      type: password
-      condition:
-        variable: provider
-        operator: containsAny
-        value:
-          - Azure
-
     - label: Repository Name
       name: repo_name
       type: text
@@ -76,6 +67,7 @@ spec:
         value:
           - Github
           - Bitbucket
+          - Azure
 
     - label: Group Name
       name: group_name

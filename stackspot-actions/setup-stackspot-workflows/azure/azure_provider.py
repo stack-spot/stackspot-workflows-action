@@ -1,5 +1,9 @@
+import time
 import logging
 
+from questionary import confirm
+
+from helpers.exceptions import ProjectNeedsToExists
 from helpers.git_helper import Git
 from helpers.http_client import HttpClient
 from provider import Provider
@@ -14,7 +18,7 @@ class AzureProvider(Provider):
 
     def __init__(self, stk: Stk, git: Git, http_client: HttpClient, **kwargs):
         super().__init__(stk=stk, git=git)
-        self.inputs: AzureInputs = AzureInputs(repo_name=kwargs.get("project_name"), **kwargs)
+        self.inputs: AzureInputs = AzureInputs(**kwargs)
         self.api = AzureApiClient(http_client=http_client, pat=self.inputs.pat)
 
     @property
@@ -22,7 +26,7 @@ class AzureProvider(Provider):
         response = self.api.get_repository(
             org_name=self.inputs.org_name,
             project_name=self.inputs.project_name,
-            repository_name=self.inputs.project_name,
+            repository_name=self.inputs.repo_name,
         )
         return response.json()["id"]
 
@@ -49,13 +53,46 @@ class AzureProvider(Provider):
             pr_id=response.json()["pullRequestId"]
         )
 
+    def repo_exists(self) -> bool:
+        response = self.api.get_repository(
+            org_name=self.inputs.org_name,
+            project_name=self.inputs.project_name,
+            repository_name=self.inputs.repo_name,
+            raise_for_status=False,
+        )
+        if response.ok:
+            return True
+        elif response.status_code == 404:
+            return False
+        logging.info(f"Failure getting azure repository: {self.inputs.org_name}/{self.inputs.project_name}/{self.inputs.repo_name}")
+        response.raise_for_status()
+
     def execute_repo_creation(self):
+        self.api.create_repository(
+            org_name=self.inputs.org_name,
+            project_id=self.project_id,
+            repository_name=self.inputs.repo_name,
+        )
+
+    def create_project(self):
+        if self.project_exists():
+            return
+        logging.info("Project not found!")
+        create_project = confirm(message="You want to create a new project?").unsafe_ask()
+        if create_project:
+            self.execute_project_creation()
+            self.repo_created = self.inputs.project_name == self.inputs.repo_name
+            time.sleep(5)
+            return
+        raise ProjectNeedsToExists()
+
+    def execute_project_creation(self):
         self.api.create_project(
             org_name=self.inputs.org_name,
             project_name=self.inputs.project_name,
         )
 
-    def repo_exists(self) -> bool:
+    def project_exists(self) -> bool:
         response = self.api.get_project(org_name=self.inputs.org_name, project_name=self.inputs.project_name, raise_for_status=False)
         if response.ok:
             return True
@@ -70,7 +107,7 @@ class AzureProvider(Provider):
             org_name=self.inputs.org_name,
             pat=self.inputs.pat,
             project_name=self.inputs.project_name,
-            repository_name=self.inputs.project_name,
+            repository_name=self.inputs.repo_name,
         )
 
     def _create_pipeline(self):
@@ -88,31 +125,8 @@ class AzureProvider(Provider):
             return
         response.raise_for_status()
 
-    def _setup_github_connection(self):
-        response = self.api.create_service_endpoint(
-            org_name=self.inputs.org_name,
-            project_name=self.inputs.project_name,
-            github_pat=self.inputs.github_pat,
-            project_id=self.project_id,
-            raise_for_status=False
-        )
-        if response.status_code == 500 and "DuplicateServiceConnectionException" in response.json().get("typeName"):
-            logging.info("Git connection already exists with name stackspot_github_connection")
-            return
-        if not response.ok:
-            logging.info("Failure creating service endpoint to git connection")
-            response.raise_for_status()
-        endpoint_id = response.json()["id"]
-
-        self.api.update_pipeline_permission_endpoint(
-            org_name=self.inputs.org_name,
-            project_name=self.inputs.project_name,
-            endpoint_id=endpoint_id
-        )
-
     def extra_setup(self):
         self._create_pipeline()
-        self._setup_github_connection()
 
     @property
     def scm_config_url(self) -> str:
