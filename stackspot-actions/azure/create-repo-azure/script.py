@@ -11,6 +11,7 @@ logger.setLevel(logging.INFO)
 
 
 def export_repository_url(repository_url: str):
+    logger.info("Writing repository url into stk cli context file to be used by pipeline ...")
     with open("stk-local-context.json", "w") as file:
         json.dump(dict(outputs=dict(created_repository=repository_url)), file, indent=4)
 
