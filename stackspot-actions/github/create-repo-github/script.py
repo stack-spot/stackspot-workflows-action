@@ -17,16 +17,6 @@ def export_repository_url(repository_url: str):
 
 
 def run(metadata):
-    inputs = metadata.inputs
-    repository_name = inputs.get("repository_name")
-    repository_description = inputs.get("description")
-    visibility = inputs.get("visibility")
-
-    create_repo = GithubCreateRepository(**inputs)
-    repository_url = create_repo(
-        repository_name=repository_name,
-        repository_description=repository_description,
-        visibility=visibility
-    )
-
+    create_repo = GithubCreateRepository(**metadata.inputs)
+    repository_url = create_repo(**metadata.inputs)
     export_repository_url(repository_url=repository_url)

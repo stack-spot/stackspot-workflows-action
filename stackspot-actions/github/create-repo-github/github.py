@@ -16,11 +16,11 @@ class GithubCreateRepository:
         message="name already exists on this account"
     )
 
-    def __init__(self, **kwargs):
-        self.org = kwargs.get("org")
-        is_jwt = re.search(self.TOKEN_PATTERN, kwargs.get('token'))
+    def __init__(self, org: str, token: str, **_):
+        self.org = org
+        is_jwt = re.search(self.TOKEN_PATTERN, token)
         self.api_headers = {
-            "Authorization": f"{'Bearer' if is_jwt else 'token'} {kwargs.get('token')}",
+            "Authorization": f"{'Bearer' if is_jwt else 'token'} {token}",
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28",
         }
@@ -49,8 +49,8 @@ class GithubCreateRepository:
         logger.info(f"Repository creation failed. Output detail:\n\n{json.dumps(response_json, indent=4)}")
         response.raise_for_status()
 
-    def __call__(self, repository_name: str, repository_description: str, visibility: str) -> str:
+    def __call__(self, name: str, description: str, visibility: str, **_) -> str:
         self.create_repository(
-            repository_name=repository_name, repository_description=repository_description, visibility=visibility
+            repository_name=name, repository_description=description, visibility=visibility
         )
-        return f"https://github.com/{self.org}/{repository_name}"
+        return f"https://github.com/{self.org}/{name}"

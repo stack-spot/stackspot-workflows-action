@@ -8,9 +8,9 @@ logger = logging.getLogger()
 
 
 class AzureCreateRepository:
-    def __init__(self, **kwargs):
-        self.api_base_url = f"https://dev.azure.com/{kwargs.get('org')}"
-        auth = base64.b64encode(f":{kwargs.get('token')}".encode()).decode()
+    def __init__(self, org: str, token: str, **_):
+        self.api_base_url = f"https://dev.azure.com/{org}"
+        auth = base64.b64encode(f":{token}".encode()).decode()
         self.api_headers = {"Authorization": f"Basic {auth}"}
 
     def get_project(self, project_name: str) -> Optional[Dict]:
@@ -81,13 +81,13 @@ class AzureCreateRepository:
         logger.debug(f"The '{repo_name}' repository successfully created.")
         return response.json()
 
-    def __call__(self, project_name: str, repo_name: str) -> str:
+    def __call__(self, project_name: str, name: str, **_) -> str:
         project = self.get_project(project_name=project_name)
         if not project:
             self.create_project(project_name=project_name)
             project = self.get_project(project_name=project_name)
         project_id = project.get("id")
 
-        repository = (self.get_repository(project_name=project_name, repo_name=repo_name) or
-                      self.create_repository(project_id=project_id, repo_name=repo_name))
+        repository = (self.get_repository(project_name=project_name, repo_name=name) or
+                      self.create_repository(project_id=project_id, repo_name=name))
         return repository.get("remoteUrl")

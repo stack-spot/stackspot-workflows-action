@@ -22,7 +22,7 @@ spec:
         - private
       help: "Internal repo can only be created by enterprise accounts."
     - label: Repository name
-      name: repository_name
+      name: name
       type: text
       required: true
       help: Input the repository name, if it does not exist it will be created

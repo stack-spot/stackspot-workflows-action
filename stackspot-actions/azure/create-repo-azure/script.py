@@ -17,11 +17,6 @@ def export_repository_url(repository_url: str):
 
 
 def run(metadata):
-    inputs = metadata.inputs
-    project_name = inputs.get("project_name")
-    repo_name = inputs.get("repository_name")
-
-    create_repo = AzureCreateRepository(**inputs)
-    repository_url = create_repo(project_name=project_name, repo_name=repo_name)
-
+    create_repo = AzureCreateRepository(**metadata.inputs)
+    repository_url = create_repo(**metadata.inputs)
     export_repository_url(repository_url=repository_url)
