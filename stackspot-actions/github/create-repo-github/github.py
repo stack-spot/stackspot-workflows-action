@@ -37,20 +37,10 @@ class GithubCreateRepository:
         }
         response = requests.post(url, headers=self.api_headers, json=data)
         response_json = response.json()
-
-        if response.ok == 201:
-            logger.info(f"Success created repository {response_json.get('html_url')}")
+        if response.ok or (response.status_code == 422 and response_json.get("errors") == [self.CONFLICT_ERROR]):
             return
-
-        elif response.status_code == 422 and response_json.get("errors") == [self.CONFLICT_ERROR]:
-            logger.info("Repository already exists!")
-            return
-
-        logger.info(f"Repository creation failed. Output detail:\n\n{json.dumps(response_json, indent=4)}")
         response.raise_for_status()
 
     def __call__(self, name: str, description: str, visibility: str, **_) -> str:
-        self.create_repository(
-            repository_name=name, repository_description=description, visibility=visibility
-        )
+        self.create_repository(repository_name=name, repository_description=description, visibility=visibility)
         return f"https://github.com/{self.org}/{name}"

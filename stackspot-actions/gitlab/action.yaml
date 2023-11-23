@@ -14,7 +14,7 @@ spec:
   implementation: docs/implementation.md
   inputs:
     - label: Gitlab project name
-      name: project_name
+      name: name
       type: text
       required: true
       help: Input the Gitlab devOps project/repository name, if it does not exist it will be created
