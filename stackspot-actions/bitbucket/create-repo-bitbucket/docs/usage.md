@@ -1,7 +1,19 @@
-This action can be used to create a bitbucket repository.
+# Usage
 
-The workspace must exists before running this action, it's no possible to create an workspace using the REST API.
+To execute it locally, it's needed [stackspot cli](https://docs.stackspot.com/home/stk-cli/install) installed, then execute:
 
-Example:
+```
+stk run action <path> --inputs-json '{
+    "visibility": "[PRIVATE|PUBLIC]", 
+    "project_name": "<project_name>", 
+    "token": "<bitbucket_token>", 
+    "name": "<repository_name>",
+    "org": "<workspace_name>"
+}'
+```
 
-stk run action stackspot-actions/create-repo-bitbucket --token **** --workspace_name <workspace-name> --project_name <project-name> --repo_name <repo-name>
+To execute it with Stackspot workflow, just follow the steps: 
+1. [Publish the action](https://docs.stackspot.com/guides/studio-guides/publish-action/)
+2. [Add it to a stack](https://docs.stackspot.com/guides/studio-guides/create-stack/)
+3. [Add the stack to a workspace](https://docs.stackspot.com/home/workspace/add-stacks/)
+4. [Configure the workspace workflow](https://docs.stackspot.com/home/workspace/configure-workflow/)

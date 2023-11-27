@@ -1,25 +1,5 @@
 ## Implementation
 
-Describe all the steps to use the Action:
-
-- Fill in inputs
-- What methods to use
-- What are the resources?
-- And if necessary, add other resources that depend on your Actions's type.
-
-See an example:
-
-In your application folder, run the **`action-doc-template`** to populate the files below:
-
-1. Execute the command:
-
-```
-stk run action /Users/Home/action-doc-template
-```
-
-2. Fill in your Action information following the file template examples:
-
-- `about.md`
-- `implementation.md`
-- `release-notes@action-version.md`
-- `requirements.md`
+1. Checks if informed group exists, if not, aborts
+2. Try to create the project with the inputted name, if it succeeded or the repository already exists
+3. Writes the repository https clone path into a file which will be used into stackspot workflows
