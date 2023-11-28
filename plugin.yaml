@@ -2,18 +2,17 @@ schema-version: v2
 kind: plugin
 metadata:
   name: setup-runner
-  display-name: setup-runner
+  display-name: Setup Runner
   description: Plugin to setup StackSpot workflows
-  version: 0.0.1
+  version: 1.0.0
   picture: plugin.png
 spec:
   type: app
   compatibility:
     - python
-  about: stackspot-actions/setup-stackspot-workflows/docs/about.md
-  implementation: stackspot-actions/setup-stackspot-workflows/docs/implementation.md
-  release-notes: stackspot-actions/setup-stackspot-workflows/docs/release-notes-0.0.1.md
-  requirements: stackspot-actions/setup-stackspot-workflows/docs/requirements.md
+  docs:
+    pt_br: stackspot-actions/setup-stackspot-workflows/docs/pt_br/doc.md
+    en_us: stackspot-actions/setup-stackspot-workflows/docs/en_us/doc.md
   repository: https://github.com/stack-spot/stackspot-workflows-action
   technologies: # Ref: https://docs.stackspot.com/docs/create-stacks/yaml-files/yaml/#technologies
     - Api

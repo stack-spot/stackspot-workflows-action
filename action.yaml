@@ -5,9 +5,12 @@ metadata:
   name: setup-stackspot-workflows
   display-name: StackSpot Setup Workflows.
   description: Action to configure Stackspot workflows in SCM provider
-  version: 0.0.1
+  version: 1.0.0
 spec: 
   type: python
+  docs:
+    pt_br: stackspot-actions/setup-stackspot-workflows/docs/pt_br/doc.md
+    en_us: stackspot-actions/setup-stackspot-workflows/docs/en_us/doc.md
   inputs:
     - label: SCM provider
       name: provider
