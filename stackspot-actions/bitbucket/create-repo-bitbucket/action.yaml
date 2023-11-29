@@ -27,5 +27,5 @@ spec:
     workdir: .
     script: script.py
   docs:
-    pt_br: docs/pt_br/doc.md
-    en_us: docs/en_us/doc.md
+    pt_br: docs/pt-br/doc.md
+    en_us: docs/en-us/doc.md
