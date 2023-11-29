@@ -1,3 +1,9 @@
+## Before using this Action
+
+- Access to a Gitlab account
+- A group of gitlab where the project will be associated
+-
+---
 ## Gitlab create repository action
 
 Action created by Stackspot to be used into workspace workflows as a before action to create a repository, when the account scm provider is Gitlab.
@@ -25,3 +31,32 @@ These inputs are:
     }
 }
 ```
+---
+## Implementation
+
+1. Checks if informed group exists, if not, aborts
+2. Try to create the project with the inputted name, if it succeeded or the repository already exists
+3. Writes the repository https clone path into a file which will be used into stackspot workflows
+---
+# Release Notes 1.0.0
+
+- Initial implementation
+---
+# Usage
+
+To execute it locally, it's needed [stackspot cli](https://docs.stackspot.com/home/stk-cli/install) installed, then execute:
+
+```
+stk run action <path> --inputs-json '{
+    "visibility": "[private|public]", 
+    "group_name": "<group_name>", 
+    "token": "<gitlab_token>", 
+    "name": "<repository_name>"
+}'
+```
+
+To execute it with Stackspot workflow, just follow the steps: 
+1. [Publish the action](https://docs.stackspot.com/guides/studio-guides/publish-action/)
+2. [Add it to a stack](https://docs.stackspot.com/guides/studio-guides/create-stack/)
+3. [Add the stack to a workspace](https://docs.stackspot.com/home/workspace/add-stacks/)
+4. [Configure the workspace workflow](https://docs.stackspot.com/home/workspace/configure-workflow/)

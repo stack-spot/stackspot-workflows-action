@@ -1,3 +1,14 @@
+## Requirements
+---
+## Bitbucket create repository action
+
+Action created by Stackspot to be used into workspace workflows as a before action to create a repository, when the account scm provider is Bitbucket.
+The action is functional, but it was build to be simple as an example of how actions of create repository should be implemented.
+---
+## Implementation
+---
+## Release notes
+---
 # Usage
 
 To execute it locally, it's needed [stackspot cli](https://docs.stackspot.com/home/stk-cli/install) installed, then execute:
