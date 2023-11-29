@@ -9,8 +9,8 @@ metadata:
 spec:
   type: python
   docs:
-    pt_br: docs/pt_br/doc.md
-    en_us: docs/en_us/doc.md
+    pt_br: docs_action/pt_br/doc.md
+    en_us: docs_action/en_us/doc.md
   inputs:
   - label: SCM provider
     name: provider

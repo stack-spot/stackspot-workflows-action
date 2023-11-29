@@ -11,8 +11,8 @@ spec:
   compatibility:
   - python
   docs:
-    pt_br: docs/pt_br/doc.md
-    en_us: docs/en_us/doc.md
+    pt_br: docs_plugin/pt_br/doc.md
+    en_us: docs_plugin/en_us/doc.md
   repository: https://github.com/stack-spot/stackspot-workflows-action
   technologies:
   - Api
