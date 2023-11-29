@@ -7,22 +7,21 @@ metadata:
   version: 0.0.1
 spec:
   type: python
-  about: docs/about.md
-  usage: docs/usage.md
-  release-notes: docs/release-notes.md
-  requirements: docs/requirements.md
-  implementation: docs/implementation.md
   inputs:
-    - label: Project name
-      name: project_name
-      type: text
-      required: true
-      help: Input the Azure devOps project name, if it does not exist it will be created 
-    - label: Repository name
-      name: name
-      type: text
-      required: true
-      help: Input the Azure devOps repository name, if it does not exist it will be created       
+  - label: Project name
+    name: project_name
+    type: text
+    required: true
+    help: Input the Azure devOps project name, if it does not exist it will be created
+  - label: Repository name
+    name: name
+    type: text
+    required: true
+    help: Input the Azure devOps repository name, if it does not exist it will be
+      created
   python:
     workdir: .
     script: script.py
+  docs:
+    pt_br: docs/pt-br/doc.md
+    en_us: docs/en-us/doc.md

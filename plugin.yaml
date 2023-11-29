@@ -2,59 +2,55 @@ schema-version: v2
 kind: plugin
 metadata:
   name: setup-runner
-  display-name: setup-runner
+  display-name: Setup Runner
   description: Plugin to setup StackSpot workflows
-  version: 0.0.1
+  version: 1.0.0
   picture: plugin.png
 spec:
   type: app
   compatibility:
-    - python
-  about: stackspot-actions/setup-stackspot-workflows/docs/about.md
-  implementation: stackspot-actions/setup-stackspot-workflows/docs/implementation.md
-  release-notes: stackspot-actions/setup-stackspot-workflows/docs/release-notes-0.0.1.md
-  requirements: stackspot-actions/setup-stackspot-workflows/docs/requirements.md
+  - python
+  docs:
+    pt_br: docs_plugin/pt-br/doc.md
+    en_us: docs_plugin/en-us/doc.md
   repository: https://github.com/stack-spot/stackspot-workflows-action
-  technologies: # Ref: https://docs.stackspot.com/docs/create-stacks/yaml-files/yaml/#technologies
-    - Api
+  technologies:
+  - Api
   inputs:
-    - label: SCM provider
-      name: provider
-      type: text
-      items:
-        - Azure
-        - Bitbucket
-        - Github
-        - Gitlab
+  - label: SCM provider
+    name: provider
+    type: text
+    items:
+    - Azure
+    - Bitbucket
+    - Github
+    - Gitlab
   hooks:
-    - type: render-templates
-      trigger: after-render
-      path: workflow-templates/azure
-      condition:
-        variable: provider
-        operator: ==
-        value: Azure
-
-    - type: render-templates
-      trigger: after-render
-      path: workflow-templates/github
-      condition:
-        variable: provider
-        operator: ==
-        value: Github
-
-    - type: render-templates
-      trigger: after-render
-      path: workflow-templates/bitbucket
-      condition:
-        variable: provider
-        operator: ==
-        value: Bitbucket
-
-    - type: render-templates
-      trigger: after-render
-      path: workflow-templates/gitlab
-      condition:
-        variable: provider
-        operator: ==
-        value: Gitlab
+  - type: render-templates
+    trigger: after-render
+    path: workflow-templates/azure
+    condition:
+      variable: provider
+      operator: ==
+      value: Azure
+  - type: render-templates
+    trigger: after-render
+    path: workflow-templates/github
+    condition:
+      variable: provider
+      operator: ==
+      value: Github
+  - type: render-templates
+    trigger: after-render
+    path: workflow-templates/bitbucket
+    condition:
+      variable: provider
+      operator: ==
+      value: Bitbucket
+  - type: render-templates
+    trigger: after-render
+    path: workflow-templates/gitlab
+    condition:
+      variable: provider
+      operator: ==
+      value: Gitlab

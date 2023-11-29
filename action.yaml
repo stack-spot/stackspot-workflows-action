@@ -5,105 +5,98 @@ metadata:
   name: setup-stackspot-workflows
   display-name: StackSpot Setup Workflows.
   description: Action to configure Stackspot workflows in SCM provider
-  version: 0.0.1
-spec: 
+  version: 1.0.0
+spec:
   type: python
+  docs:
+    pt_br: docs_action/pt-br/doc.md
+    en_us: docs_action/en-us/doc.md
   inputs:
-    - label: SCM provider
-      name: provider
-      type: text
-      items:
-        - Azure
-        - Bitbucket
-        - Github
-        - Gitlab
-
-    - label: Personal Access Token
-      name: pat
-      type: password
-      condition:
-        variable: provider
-        operator: containsAny
-        value:
-          - Azure
-          - Github
-          - Gitlab
-
-    - label: Project Name
-      name: project_name
-      type: text
-      condition:
-        variable: provider
-        operator: containsAny
-        value:
-          - Azure
-          - Gitlab
-
-    - label: Project Key
-      name: project_key
-      type: text
-      condition:
-        variable: provider
-        operator: containsAny
-        value:
-          - Bitbucket
-
-    - label: Organization Name
-      name: org_name
-      type: text
-      condition:
-        variable: provider
-        operator: containsAny
-        value:
-          - Azure
-          - Github
-
-    - label: Repository Name
-      name: repo_name
-      type: text
-      condition:
-        variable: provider
-        operator: containsAny
-        value:
-          - Github
-          - Bitbucket
-          - Azure
-
-    - label: Group Name
-      name: group_name
-      type: text
-      condition:
-        variable: provider
-        operator: containsAny
-        value:
-          - Gitlab
-
-    - label: Workspace Name
-      name: workspace_name
-      type: text
-      condition:
-        variable: provider
-        operator: containsAny
-        value:
-          - Bitbucket
-
-    - label: Client Key
-      name: client_key
-      type: text
-      condition:
-        variable: provider
-        operator: containsAny
-        value:
-          - Bitbucket
-
-    - label: Client Secret
-      name: client_secret
-      type: password
-      condition:
-        variable: provider
-        operator: containsAny
-        value:
-          - Bitbucket
-
+  - label: SCM provider
+    name: provider
+    type: text
+    items:
+    - Azure
+    - Bitbucket
+    - Github
+    - Gitlab
+  - label: Personal Access Token
+    name: pat
+    type: password
+    condition:
+      variable: provider
+      operator: containsAny
+      value:
+      - Azure
+      - Github
+      - Gitlab
+  - label: Project Name
+    name: project_name
+    type: text
+    condition:
+      variable: provider
+      operator: containsAny
+      value:
+      - Azure
+      - Gitlab
+  - label: Project Key
+    name: project_key
+    type: text
+    condition:
+      variable: provider
+      operator: containsAny
+      value:
+      - Bitbucket
+  - label: Organization Name
+    name: org_name
+    type: text
+    condition:
+      variable: provider
+      operator: containsAny
+      value:
+      - Azure
+      - Github
+  - label: Repository Name
+    name: repo_name
+    type: text
+    condition:
+      variable: provider
+      operator: containsAny
+      value:
+      - Github
+      - Bitbucket
+      - Azure
+  - label: Group Name
+    name: group_name
+    type: text
+    condition:
+      variable: provider
+      operator: containsAny
+      value:
+      - Gitlab
+  - label: Workspace Name
+    name: workspace_name
+    type: text
+    condition:
+      variable: provider
+      operator: containsAny
+      value:
+      - Bitbucket
+  - label: Client Key
+    name: client_key
+    type: text
+    condition:
+      variable: provider
+      operator: containsAny
+      value:
+      - Bitbucket
+  - label: Client Secret
+    name: client_secret
+    type: password
+    condition:
+      variable: provider
+      operator: containsAny
+      value:
+      - Bitbucket
   python:
     script: stackspot-actions/setup-stackspot-workflows/main.py
