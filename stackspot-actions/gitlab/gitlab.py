@@ -34,7 +34,7 @@ class GitlabCreateRepository:
     def get_group(self, group_name: str) -> Optional[Dict]:
         logger.info(f"Getting group '{group_name}' ...")
         url = f"{self.base_url}/api/v4/groups"
-        response = requests.get(url, headers=self.headers, params=dict(search=group_name), verify=False)
+        response = requests.get(url, headers=self.headers, params=dict(search=group_name))
         response.raise_for_status()
         groups = response.json()
         for group in groups:
@@ -44,7 +44,7 @@ class GitlabCreateRepository:
     def create_project(self, **data) -> Optional[Dict]:
         logger.info(f"Creating project '{data.get('name')}' ...")
         url = f"{self.base_url}/api/v4/projects"
-        response = requests.post(url, json=data, headers=self.headers, verify=False)
+        response = requests.post(url, json=data, headers=self.headers)
         if response.ok:
             return response.json()
         if response.status_code == 400 and response.json() == self.CONFLICT:

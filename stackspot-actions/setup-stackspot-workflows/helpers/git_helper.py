@@ -6,14 +6,6 @@ from helpers.exceptions import CloningRepoException
 
 
 class Git:
-    @property
-    def has_user_name(self):
-        return bool(os.system("git config --global user.name"))
-
-    @property
-    def has_user_email(self):
-        return bool(os.system("git config --global user.email"))
-
     @staticmethod
     def clone(clone_url: str, workdir: str):
         cmd = f"git clone {clone_url} {workdir}"

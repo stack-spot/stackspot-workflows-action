@@ -47,21 +47,14 @@ class Provider(ABC):
     def scm_config_url(self) -> str:
         ...
 
-    def validate_environment(self) -> bool:
-        if not self.git.has_user_name:
-            return False
-
-        if not self.git.has_user_email:
-            return False
-
+    def validate_environment(self):
         if self.stk.is_using_workspace:
             should_exit_workspace = confirm(
                 message="You need to be outside workspace, do you agree to exit current workspace?"
             ).unsafe_ask()
             if not should_exit_workspace:
-                return False
+                raise Exception("Its needed to exit the workspace")
             self.stk.exit_workspace()
-        return True
 
     def create_project(self):
         ...

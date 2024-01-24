@@ -10,6 +10,8 @@ from helpers.exceptions import ApplyPluginSetupRepositoryException
 
 
 stk = sys.argv[0]
+if not stk.endswith("stk") or stk.endswith("stk-stg") or stk.endswith("stk-dev"):
+    raise Exception("Invalid origin cmd")
 
 
 class Stk:
