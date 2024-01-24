@@ -9,18 +9,21 @@ from helpers import util
 from helpers.exceptions import ApplyPluginSetupRepositoryException
 
 
+stk = 'stk'
+
+
 class Stk:
     @property
     def is_using_workspace(self) -> bool:
         home_path = Path.home()
-        stk_binary_name = Path('stk').stem
+        stk_binary_name = Path(stk).stem
         stk_folder = Path(home_path) / f".{stk_binary_name}"
         workspace_config_path = stk_folder / "workspaces" / "workspace-config.json"
         return workspace_config_path.exists()
 
     @staticmethod
     def exit_workspace():
-        exit_workspace_cmd = ['stk', "exit", "workspace"]
+        exit_workspace_cmd = [stk, "exit", "workspace"]
         subprocess.run(exit_workspace_cmd)
 
     @staticmethod
@@ -29,7 +32,7 @@ class Stk:
             logging.info("Creating workflow files...")
             Stk.remove_all_files_generated_on_apply_plugin(component_path, provider)
             stk_apply_plugin_cmd = [
-                'stk',
+                stk,
                 "apply",
                 "plugin",
                 component_path,
