@@ -15,7 +15,7 @@ class HttpClient:
         logging.info(f"{'-'*(28 - int(len(title)/2))}[ {title} ]{'-'*(28 - int(len(title)/2))}")
         logging.info(f"[{method.__name__.upper()}] {url}")
         # logging.info(f"Headers: {kwargs.get('headers')}")
-        resp = method(url, verify=False, **kwargs)
+        resp = method(url, **kwargs)
         logging.info(f"Response status code: {resp.status_code}")
         if raise_for_status and not resp.ok:
             logging.info(f"Request body: {kwargs.get('json')}")
