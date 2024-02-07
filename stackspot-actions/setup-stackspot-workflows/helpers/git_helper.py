@@ -15,7 +15,7 @@ class Git:
 
     @staticmethod
     def commit(msg: str):
-        cmd = f"git commit -m '{msg}'"
+        cmd = f'git commit -m "{msg}"'
         logging.info(cmd)
         os.system(cmd)
 
