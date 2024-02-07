@@ -4,14 +4,11 @@ metadata:
   name: create-repo-gitlab
   display-name: create-repo-gitlab
   description: Action used to create a Git repository in Gitlab
-  version: 1.0.0
+  version: 0.0.1
 spec:
   type: python
-  about: docs/about.md
-  usage: docs/usage.md
-  release-notes: docs/release-notes.md
-  requirements: docs/requirements.md
-  implementation: docs/implementation.md
+  docs:
+    en-us: docs/en-us.md
   inputs:
     - label: Gitlab project name
       name: name
