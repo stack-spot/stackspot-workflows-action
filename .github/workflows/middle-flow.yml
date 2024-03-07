@@ -33,7 +33,7 @@ jobs:
       LANGUAGE: C.UTF-8
       LC_ALL: C.UTF-8
       PYTHONIOENCODING: utf-8
-      HTTP_ENABLE_DEBUG: true
+      HTTP_ENABLE_DEBUG: false
     steps:
       - name: Running ${{ inputs.workflow_name }}
         run: |
