@@ -30,7 +30,7 @@ run:
       execution_id=$(echo $api_inputs | jq -cr '.execution_id')
       secret_stk_login=$(echo $api_inputs | jq -cr '.secret_stk_login')
 
-      export HTTP_ENABLE_DEBUG=false
+      export HTTP_ENABLE_FILE_DEBUG=false
 
       http_code=$(curl -s -o script.sh -w '%{http_code}' https://workflow-api.v1.stackspot.com/workflows/$execution_id --header "Authorization: Bearer $secret_stk_login";)
       if [[ "$http_code" -ne "200" ]]; then
