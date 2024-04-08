@@ -34,10 +34,6 @@ jobs:
       LC_ALL: C.UTF-8
       PYTHONIOENCODING: utf-8
     steps:
-      - name: Show debug
-        run: |
-          cat ~/.stk-stg/debug/*.txt
-      
       - name: Running ${{ inputs.workflow_name }}
         run: |
           sudo apt update && sudo apt install -y jq curl git
@@ -72,3 +68,8 @@ jobs:
               echo "------------------------------------------------------------------------------------------"
 
           fi
+          
+      - name: Show debug
+        run: |
+          cat ~/.stk-stg/debug/*.txt
+      
