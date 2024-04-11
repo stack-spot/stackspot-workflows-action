@@ -12,6 +12,7 @@ class AzureCreateRepository:
         self.api_base_url = f"https://dev.azure.com/{org}"
         auth = base64.b64encode(f":{token}".encode()).decode()
         self.api_headers = {"Authorization": f"Basic {auth}"}
+        self.personal_access_token = token
 
     def get_project(self, project_name: str) -> Optional[Dict]:
         logger.info(f"Getting project '{project_name}' ...")
@@ -81,6 +82,36 @@ class AzureCreateRepository:
         logger.debug(f"The '{repo_name}' repository successfully created.")
         return response.json()
 
+    def create_pipeline(self, project_name: str,repo_name: str, repo_id: str, yaml_path: str = '/azure-pipelines.yml') -> None:
+        logger.info(f"Creating pipeline '{repo_name}' for repository '{repo_name}' ...")
+
+        url = f"{self.api_base_url}/{project_name}/_apis/pipelines?api-version=7.0"
+        payload = {
+            "name": repo_name,
+            "configuration": {
+                "type": "yaml",
+                "path": yaml_path,
+                "repository": {
+                    "id": repo_id,
+                    "type": "azureReposGit",
+                    "name": repo_name,
+                    "defaultBranch": "refs/heads/main",
+                    "authorization": {
+                        "parameters": {
+                            "accessToken": self.personal_access_token
+                        },
+                        "scheme": "PersonalAccessToken"
+                    }
+                }
+            }
+        }
+        response = requests.post(url, headers=self.api_headers, json=payload)
+        if response.status_code == 200:
+            logger.info("Pipeline created successfully.")
+        else:
+            logger.error("Failed to create pipeline.")
+            response.raise_for_status()
+
     def __call__(self, project_name: str, name: str, **_) -> str:
         project = self.get_project(project_name=project_name)
         if not project:
@@ -90,4 +121,7 @@ class AzureCreateRepository:
 
         repository = (self.get_repository(project_name=project_name, repo_name=name) or
                       self.create_repository(project_id=project_id, repo_name=name))
+        if repository:
+            self.create_pipeline(project_name=project_name, repo_name=name, repo_id=repository.get("id"))
+
         return repository.get("remoteUrl")
