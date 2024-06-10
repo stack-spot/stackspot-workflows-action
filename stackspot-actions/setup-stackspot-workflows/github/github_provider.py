@@ -13,7 +13,15 @@ class GithubProvider(Provider):
 
     def __init__(self, stk: Stk, git: Git, http_client: HttpClient, **kwargs):
         super().__init__(stk=stk, git=git)
-        self.inputs: GithubInputs = GithubInputs(**kwargs)
+        self.inputs: GithubInputs = GithubInputs(
+            repo_name=kwargs['repo_name'],
+            provider=kwargs['provider'],
+            ref_branch=kwargs['ref_branch'],
+            target_path=kwargs['target_path'],
+            component_path=kwargs['component_path'],
+            pat=kwargs['pat'],
+            org_name=kwargs['org_name'],
+        )
         self.api = GithubApiClient(http_client=http_client, pat=self.inputs.pat)
         self.callback_url = "https://workflow-api.v1.stackspot.com/workflows/github/callback"
 

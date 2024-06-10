@@ -18,7 +18,16 @@ class AzureProvider(Provider):
 
     def __init__(self, stk: Stk, git: Git, http_client: HttpClient, **kwargs):
         super().__init__(stk=stk, git=git)
-        self.inputs: AzureInputs = AzureInputs(**kwargs)
+        self.inputs: AzureInputs = AzureInputs(
+            repo_name=kwargs['repo_name'],
+            provider=kwargs['provider'],
+            ref_branch=kwargs['ref_branch'],
+            target_path=kwargs['target_path'],
+            component_path=kwargs['component_path'],
+            pat=kwargs['pat'],
+            org_name=kwargs['org_name'],
+            project_name=kwargs['project_name'],
+        )
         self.api = AzureApiClient(http_client=http_client, pat=self.inputs.pat)
 
     @property

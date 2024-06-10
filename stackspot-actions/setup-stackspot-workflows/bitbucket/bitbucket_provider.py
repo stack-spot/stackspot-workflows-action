@@ -11,7 +11,17 @@ from provider import Provider
 class BitbucketProvider(Provider):
     def __init__(self, stk: Stk, git: Git, http_client: HttpClient, **kwargs):
         super().__init__(stk=stk, git=git)
-        self.inputs: BitbucketInputs = BitbucketInputs(**kwargs)
+        self.inputs: BitbucketInputs = BitbucketInputs(
+            repo_name=kwargs['repo_name'],
+            provider=kwargs['provider'],
+            ref_branch=kwargs['ref_branch'],
+            target_path=kwargs['target_path'],
+            component_path=kwargs['component_path'],
+            client_key=kwargs['client_key'],
+            client_secret=kwargs['client_secret'],
+            workspace_name=kwargs['workspace_name'],
+            project_key=kwargs['project_key'],
+        )
         self.api = BitbucketApiClient(
             http_client=http_client,
             client_key=self.inputs.client_key,
