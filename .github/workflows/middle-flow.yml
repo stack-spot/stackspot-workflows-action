@@ -72,4 +72,4 @@ jobs:
       - name: Show debug
         if: always()
         run: |
-          cat ~/.stk-stg/debug/*.txt
+          cat ~/.stk-dev/debug/*.txt
