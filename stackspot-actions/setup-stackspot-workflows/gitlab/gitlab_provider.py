@@ -21,8 +21,9 @@ class GitlabProvider(Provider):
             pat=kwargs['pat'],
             group_name=kwargs['group_name'],
             project_name=kwargs['project_name'],
+            gitlab_api_domain=kwargs.get("gitlab_api_domain") or "gitlab.com"
         )
-        self.api = GitlabApiClient(http_client=http_client, pat=self.inputs.pat)
+        self.api = GitlabApiClient(http_client=http_client, pat=self.inputs.pat, api_domain=self.inputs.gitlab_api_domain)
         self.project_id = ""
         self.trigger_id = ""
         self.http_url_to_repo = ""

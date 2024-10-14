@@ -7,3 +7,4 @@ class GitlabInputs(Inputs):
     pat: str
     group_name: str
     project_name: str
+    gitlab_api_domain: str
