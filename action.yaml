@@ -78,6 +78,16 @@ spec:
         value:
           - Gitlab
 
+    - label: Is on premise?
+      name: is_on_premise
+      type: bool
+      default: false
+      condition:
+        variable: provider
+        operator: containsAny
+        value:
+          - Gitlab
+
     - label: Workspace Name
       name: workspace_name
       type: text
@@ -104,6 +114,15 @@ spec:
         operator: containsAny
         value:
           - Bitbucket
+
+    - label: Gitlab api domain
+      name: gitlab_api_domain
+      type: text
+      default: gitlab.com
+      condition:
+        variable: is_on_premise
+        operator: ==
+        value: true
 
   python:
     script: stackspot-actions/setup-stackspot-workflows/main.py

@@ -11,7 +11,7 @@ class GitlabApiClient:
     def __init__(self, **kwargs):
         self.http_client = kwargs.get("http_client")
         self.pat = kwargs.get("pat")
-        self.domain = "gitlab.com/api"
+        self.domain = f"{kwargs.get('api_domain')}/api"
         self.auth_params = dict(private_token=self.pat)
 
     def create_project(self, project_name: str, namespace_id: str):
