@@ -20,6 +20,11 @@ spec:
       type: text
       required: true
       help: Input the Gitlab group name. It must exist in your Gitlab account as a top-level group
+    - label: Gitlab sub group name
+      name: subgroup
+      type: text
+      required: false
+      help: Input the Gitlab sub group name
     - label: Repository visibility
       name: visibility
       type: text
