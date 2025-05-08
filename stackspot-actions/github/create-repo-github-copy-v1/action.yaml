@@ -4,7 +4,7 @@ metadata:
   name: create-repo-github-copy-v1
   display-name: create-repo-github-copy-v1
   description: Action to create github repository if not exists
-  version: 0.0.2
+  version: 0.0.3
 spec:
   type: python
   docs:

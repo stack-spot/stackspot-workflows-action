@@ -17,7 +17,7 @@ def export_repository_url(repository_url: str):
 
 
 def run(metadata):
-    logger.info(f">>>>>> Metadata <<<<<<<:' ${metadata}")
+    logger.info(f">>>>>> Metadata <<<<<<<: ${metadata}")
 
     create_repo = GithubCreateRepository(**metadata.inputs)
     repository_url = create_repo(**metadata.inputs)

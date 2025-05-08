@@ -19,11 +19,16 @@ class GithubCreateRepository:
     def __init__(self, org: str, token: str, **_):
         self.org = org
         is_jwt = re.search(self.TOKEN_PATTERN, token)
+        logger.info(f">>>>>> is_jwt <<<<<<<: ${is_jwt}")
+        logger.info(f">>>>>> length of token <<<<<<<: ${len(token)}")
+
         self.api_headers = {
             "Authorization": f"{'Bearer' if is_jwt else 'token'} {token}",
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28",
         }
+
+        logger.info(f">>>>>> api_headers <<<<<<<: ${self.api_headers}")
 
     def create_repository(self, repository_name: str, repository_description: str, visibility: str):
         logger.info(f"Creating repository '{repository_name}' ...")
