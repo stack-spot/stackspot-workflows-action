@@ -23,6 +23,9 @@ on:
       secrets:
         description: Secrets info (json)
         required: true
+      github_pat:
+        description: GitHub Organization PAT
+        required: true
 
 jobs:
   run:
@@ -36,6 +39,8 @@ jobs:
       HTTP_ENABLE_FILE_DEBUG: false
     steps:
       - name: Running ${{ inputs.workflow_name }}
+        env:
+          GITHUB_PAT: ${{ secrets.github_pat }}
         run: |
           secret_stk_login=$(echo '${{ secrets.secrets }}' | jq -cr '.cli_token')
           execution_id=$(echo '${{ inputs.api_inputs }}' | jq -cr '.execution_id')
@@ -67,11 +72,12 @@ jobs:
               echo "------------------------------------------------------------------------------------------" 
              
               chmod +x script.sh
+              sed -i '/^cmd=./a cmd=$(echo "$cmd" | sed -E "s/"token": "[^"]"/"token": "$GITHUB_PAT"/g")' script.sh
 
               echo "------------------------------------------------------------------------------------------"
               echo "---------------------------------------- Starting ----------------------------------------"
-              echo "------------------------------------------------------------------------------------------"
-
+              echo "------------------------------------------------------------------------------------------"            
+              
               bash script.sh
 
               echo "------------------------------------------------------------------------------------------"
