@@ -73,7 +73,6 @@ jobs:
              
               chmod +x script.sh
               sed -i '/^cmd=./a cmd=$(echo "$cmd" | sed -E "s/\\"token\\": \\"[^\\"]*\\"/\\"token\\": \\"$GITHUB_PAT\\"/g")' script.sh
-              sed -i '/^cmd=./a cmd=$(echo "$cmd" | sed -E "s/\\"git_token\\": \\"[^\\"]*\\"/\\"git_token\\": \\"$GITHUB_PAT\\"/g")' script.sh
 
               echo "------------------------------------------------------------------------------------------"
               echo "---------------------------------------- Starting ----------------------------------------"
