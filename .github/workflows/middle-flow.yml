@@ -73,7 +73,7 @@ jobs:
              
               chmod +x script.sh
               sed -i '/^cmd=./a cmd=$(echo "$cmd" | sed -E "s/\\"token\\": \\"[^\\"]*\\"/\\"token\\": \\"$GITHUB_PAT\\"/g")' script.sh
-              sed -i '/^repo_name=/a export REPO_NAME=$repo_name' script_test.sh
+              sed -i '/^repo_name=/a export REPO_NAME=$repo_name' script.sh
 
 
               echo "------------------------------------------------------------------------------------------"
