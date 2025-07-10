@@ -47,5 +47,3 @@ $RECYCLE.BIN/
 /.idea/
 .vscode
 *__pycache__
-
-temp/**
